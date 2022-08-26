@@ -15,10 +15,9 @@ export default defineConfig({
       },
       async load (id) {
         if (id.startsWith('\0meteor/')) {
-          const file = path.join('.meteor', 'local', 'build', 'programs', 'web.browser','packages', `${id.replace('\0meteor/', '')}.js`)
+          const file = path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages', `${id.replace('\0meteor/', '')}.js`)
           const content = await fs.readFile(file, 'utf8')
-          const [,packageName, exported] = /Package\._define\("(.*?)"(?:,\s*exports)?,\s*{\n((?:\s*(?:\w+):\s*\w+,?\n)+)}\)/.exec(content) ?? []
-          console.log(packageName, exported)
+          const [, packageName, exported] = /Package\._define\("(.*?)"(?:,\s*exports)?,\s*{\n((?:\s*(?:\w+):\s*\w+,?\n)+)}\)/.exec(content) ?? []
           if (packageName) {
             const generated: string[] = exported.split('\n').map(line => {
               const [,key] = /(\w+):\s*(?:\w+)/.exec(line) ?? []
@@ -36,4 +35,7 @@ ${generated.join('\n')}`
       }
     },
   ],
+  server: {
+    port: 3002,
+  },
 })
