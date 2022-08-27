@@ -28,8 +28,8 @@ process.on('message', async message => {
                   return ''
                 }).filter(Boolean)
                 return `const g = typeof window !== 'undefined' ? window : global
-    const m = g.Package.${packageName}
-    ${generated.join('\n')}`
+const m = g.Package.${packageName}
+${generated.join('\n')}`
               }
               return ''
             }
