@@ -44,7 +44,7 @@ if (Meteor.isDevelopment) {
   })
   child.send('start')
   ;['exit', 'SIGINT', 'SIGHUP', 'SIGTERM'].forEach(event => {
-    process.on(event, () => {
+    process.once(event, () => {
       child.kill()
     })
   })
