@@ -20,3 +20,9 @@ const links = autorun(() => LinksCollection.find({}).fetch()).result
     </ul>
   </div>
 </template>
+
+<style scoped>
+h2 {
+  color: #42b883;
+}
+</style>
