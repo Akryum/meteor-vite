@@ -35,18 +35,31 @@ ${generated.join('\n')}`
             }
           },
         },
+        {
+          name: 'meteor-handle-restart',
+          buildStart () {
+            if (listening) {
+              sendViteSetup()
+            }
+          },
+        },
       ],
     })
-    await server.listen()
     
-    process.send({
-      kind: 'viteSetup',
-      data: {
-        host: server.config.server?.host,
-        port: server.config.server?.port,
-        entryFile: server.config.meteor?.clientEntry,
-      },
-    })
-    // @TODO handler server auto-restart when config changes
+    let listening = false
+    await server.listen()
+    sendViteSetup()
+    listening = true
+    
+    function sendViteSetup () {
+      process.send({
+        kind: 'viteSetup',
+        data: {
+          host: server.config.server?.host,
+          port: server.config.server?.port,
+          entryFile: server.config.meteor?.clientEntry,
+        },
+      })
+    }
   }
 })

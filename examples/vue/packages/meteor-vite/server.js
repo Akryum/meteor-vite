@@ -32,10 +32,7 @@ if (Meteor.isDevelopment) {
       case 'viteSetup':
         Object.assign(viteSetup, data)
         if (!viteSetup.entryFile) {
-          console.error('[meteor-vite] Missing `meteor.clientEntry` with path to entry file in your vite config.')
-          // @TODO handle auto-restart of vite server
-          viteSetup.entryFile = 'imports/ui/main.js'
-          console.warn('Please add `meteor.clientEntry` into your vite config and restart meteor.')
+          throw new Meteor.Error(500, 'Missing `meteor.clientEntry` with path to entry file in your vite config.')
         }
       break
       default:
