@@ -2,8 +2,8 @@
   "name": "meteor-vite",
   "private": true,
   "scripts": {
-    "dev": "meteor",
-    "start": "meteor run",
+    "dev": "meteor run",
+    "build": "meteor build ./.dist --directory",
     "test": "meteor test --once --driver-package meteortesting:mocha",
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
     "visualize": "meteor --production --extra-packages bundle-visualizer"
