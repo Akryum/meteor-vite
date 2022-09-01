@@ -6,7 +6,7 @@ Package.describe({
 })
 
 Package.registerBuildPlugin({
-  name: 'meteor-vite',
+  name: 'vite',
   use: [
     'ecmascript@0.16.2',
     'caching-compiler@1.2.2',
