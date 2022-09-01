@@ -9,6 +9,9 @@ if (process.env.NODE_ENV !== 'production') return
 
 const cwd = process.env.PWD
 
+// Not in a project (publishing the package)
+if (!fs.existsSync(path.join(cwd, 'package.json'))) return
+
 // Temporary Meteor build
 
 const filesToCopy = [
