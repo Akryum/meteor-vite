@@ -1,6 +1,6 @@
 Package.describe({
   name: 'vite:bundler',
-  version: '0.1.0',
+  version: '0.1.1',
   summary: 'Integrate the Vite.js bundler with Meteor',
   documentation: 'README.md',
 })
@@ -25,10 +25,8 @@ Package.onUse(function(api) {
   api.use('isobuild:compiler-plugin@1.0.0')
   api.use('ecmascript')
   api.use('webapp@1.13.1')
-  if (process.env.NODE_ENV !== 'production') {
-    api.mainModule('server.js', 'server')
-    api.addAssets([
-      'worker-dev.mjs',
-    ], 'server')
-  }
+  api.mainModule('server.js', 'server')
+  api.addAssets([
+    'worker-dev.mjs',
+  ], 'server')
 })
