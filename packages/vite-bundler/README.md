@@ -2,6 +2,14 @@
 
 Use [Vite](https://vitejs.dev) in your Meteor app! ⚡️
 
+## Roadmap
+
+- [x] Development mode
+- [x] Build
+- [x] Code-splitting/Dynamic imports
+- [ ] SSR (not tested)
+- [ ] Galaxy deployment (not tested)
+
 ## Installation
 
 ```sh
