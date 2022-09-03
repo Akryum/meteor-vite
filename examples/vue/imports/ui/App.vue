@@ -1,28 +1,7 @@
-<script setup lang="ts">
-import { autorun } from './v-meteor'
-import { LinksCollection } from '../api/links'
-
-const links = autorun(() => LinksCollection.find({}).fetch()).result
-</script>
-
 <template>
-  <div>
-    <h2>Learn Meteor!</h2>
-    <ul>
-      <li
-        v-for="link of links"
-        :key="link._id"
-      >
-        <a :href="link.url" target="_blank">
-          {{ link.title }}
-        </a>
-      </li>
-    </ul>
-  </div>
+  <nav class="flex gap-4">
+    <router-link :to="{ name: 'home' }">Home</router-link>
+    <router-link :to="{ name: 'async' }">Async</router-link>
+  </nav>
+  <router-view />
 </template>
-
-<style scoped>
-h2 {
-  color: #42b883;
-}
-</style>

@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "meteor run",
     "build": "meteor build ../output/vue --directory",
+    "start": "(cd ../output/vue/bundle && (cd programs/server && meteor npm install) && PORT=4040 ROOT_URL=http://localhost:4040 MONGO_URL=mongodb://127.0.0.1:3001/meteor meteor node main.js)",
     "test": "meteor test --once --driver-package meteortesting:mocha",
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
     "visualize": "meteor --production --extra-packages bundle-visualizer"
@@ -11,11 +12,14 @@
   "dependencies": {
     "@babel/runtime": "^7.17.9",
     "meteor-node-stubs": "^1.2.1",
-    "vue": "^3.2.37"
+    "vue": "^3.2.37",
+    "vue-router": "^4.1.5"
   },
   "devDependencies": {
     "@types/meteor": "^1.4.87",
     "@vitejs/plugin-vue": "^3.0.3",
+    "autoprefixer": "^10.4.8",
+    "tailwindcss": "^3.1.8",
     "typescript": "^4.6.3",
     "vite": "^3.0.9"
   },

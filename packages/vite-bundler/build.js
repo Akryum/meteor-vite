@@ -23,7 +23,7 @@ const filesToCopy = [
   'versions',
 ]
 
-const tempMeteorProject = path.resolve(cwd, '.temp')
+const tempMeteorProject = path.resolve(cwd, 'node_modules', '.temp')
 
 // Vite worker
 
@@ -39,7 +39,7 @@ const meteorPackageExportedReg = /(\\w+):\\s*(?:\\w+)/
 
 const viteConfig = await resolveConfig({})
 
-const result = await build({
+const results = await build({
   build: {
     outDir: ${JSON.stringify(viteOutDir)},
     assetsDir: 'assets',
@@ -81,6 +81,8 @@ const m = g.Package.\${packageName}
     },
   ],
 })
+
+const result = Array.isArray(results) ? results[0] : results
 
 // Result payload
 process.stdout.write('${payloadMarker}')
@@ -188,7 +190,22 @@ try {
         const from = path.join(viteOutDir, file)
         const to = path.join(viteOutSrcDir, file)
         fs.ensureDirSync(path.dirname(to))
-        fs.copyFileSync(from, to)
+
+        if (path.extname(from) === '.js') {
+          // Transpile to Meteor target (Dynamic import support)
+          // @TODO don't use Babel
+          const source = fs.readFileSync(from, 'utf8')
+          const babelOptions = Babel.getDefaultOptions()
+          babelOptions.babelrc = true
+          babelOptions.sourceMaps = true
+          babelOptions.filename = babelOptions.sourceFileName = from
+          const transpiled = Babel.compile(source, babelOptions, {
+            cacheDirectory: path.join(cwd, 'node_modules', '.babel-cache'),
+          })
+          fs.writeFileSync(to, transpiled.code, 'utf8')
+        } else {
+          fs.copyFileSync(from, to)
+        }
       }
 
       // Patch meteor entry
@@ -242,5 +259,4 @@ try {
   throw e
 } finally {
   fs.removeSync(workerFile)
-  fs.removeSync(tempMeteorProject)
 }
