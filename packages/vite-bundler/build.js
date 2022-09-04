@@ -12,15 +12,23 @@ const cwd = process.env.PWD
 // Not in a project (publishing the package)
 if (!fs.existsSync(path.join(cwd, 'package.json'))) return
 
+const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'))
+const meteorMainModule = pkg.meteor?.mainModule?.client
+if (!meteorMainModule) {
+  throw new Error('No meteor main module found, please add meteor.mainModule.client to your package.json')
+}
+
 // Temporary Meteor build
 
 const filesToCopy = [
-  '.finished-upgraders',
-  '.id',
-  'packages',
-  'platforms',
-  'release',
-  'versions',
+  path.join('.meteor', '.finished-upgraders'),
+  path.join('.meteor', '.id'),
+  path.join('.meteor', 'packages'),
+  path.join('.meteor', 'platforms'),
+  path.join('.meteor', 'release'),
+  path.join('.meteor', 'versions'),
+  'package.json',
+  meteorMainModule,
 ]
 
 const tempMeteorProject = path.resolve(cwd, 'node_modules', '.temp')
@@ -82,7 +90,22 @@ const results = await build({
           }
 
           // Module exports
-          const [, moduleExports] = /module\\.export\\({\\n(.*\\n)+?}\\);/.exec(content) ?? []
+          const [, moduleExports] = /module\\.export\\({\\n((?:.*\\n)+?)}\\);/.exec(content) ?? []
+          const hasModuleDefaultExport = content.includes('module.exportDefault(')
+          if (moduleExports || hasModuleDefaultExport) {
+            const sid = stubUid++
+            code += \`let m2
+const require = Package.modules.meteorInstall({
+  '__vite_stub\${sid}.js': (require, exports, module) => {
+    m2 = require('\${id}')
+  },
+}, {
+  "extensions": [
+    ".js",
+  ]
+})
+require('/__vite_stub\${sid}.js')\\n\`
+          }
           if (moduleExports) {
             const generated = moduleExports.split('\\n').map(line => {
               const [,key] = /(\\w+?):\\s*/.exec(line) ?? []
@@ -91,20 +114,38 @@ const results = await build({
               }
               return ''
             }).filter(Boolean)
-            const sid = stubUid++
-            code += \`let m2
-const require = Package.modules.meteorInstall({
-  '__vite_stub\${sid}.js': (require, exports, module) => {
-    m2 = require('\${id.replace('\\0', '')}')
-  },
-}, {
-  "extensions": [
-    ".js",
-  ]
-})
-require('/__vite_stub\${sid}.js')
-\${generated.join('\\n')}
-export default m2.default ?? m2\\n\`
+            console.log(id, moduleExports, generated)
+            code += \`\${generated.join('\\n')}\\n\`
+          }
+          if (hasModuleDefaultExport) {
+            code += 'export default m2.default ?? m2\\n'
+          }
+
+          // Modules re-exports
+          let linkExports = []
+          let linkResult
+          const linkReg = /module\\.link\\("(.*?)", {\\n((?:\\s*.+:\\s*.*\\n)+?)}, \\d+\\);/gm
+          while (linkResult = linkReg.exec(content)) {
+            linkExports.push([linkResult[1], linkResult[2]])
+          }
+          if (linkExports.length) {
+            for (const linkExport of linkExports) {
+              let wildcard = ''
+              const generated = linkExport[1].split('\\n').map(line => {
+                const [,source,target] = /\\s*"?(.*?)"?:\\s*"(.*)"/.exec(line) ?? []
+                if (source && target) {
+                  if (source === '*' && target === '*') {
+                    wildcard = '*'
+                  } else if (source === target) {
+                    return source
+                  } else {
+                    return \`\${source} as \${target}\`
+                  }
+                }
+              }).filter(Boolean)
+              const named = generated.length ? \`{\${generated.join(', ')}}\` : ''
+              code += \`export \${[wildcard, named].filter(Boolean).join(', ')} from '\${linkExport[0]}'\\n\`
+            }
           }
 
           return code
@@ -131,21 +172,15 @@ process.stdout.write(JSON.stringify({
 const workerFile = path.join(cwd, 'node_modules', '.meteor-vite-build-worker.mjs')
 
 try {
-  const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'))
-  const meteorMainModule = pkg.meteor?.mainModule?.client
-  if (!meteorMainModule) {
-    throw new Error('No meteor main module found, please add meteor.mainModule.client to your package.json')
-  }
-
   // Temporary Meteor build
 
   console.log(pc.blue('⚡️ Building packages to make them available to export analyzer...'))
   let startTime = performance.now()
-  fs.ensureDirSync(path.join(tempMeteorProject, '.meteor'))
   // Copy files from `.meteor`
   for (const file of filesToCopy) {
-    const from = path.join(cwd, '.meteor', file)
-    const to = path.join(tempMeteorProject, '.meteor', file)
+    const from = path.join(cwd, file)
+    const to = path.join(tempMeteorProject, file)
+    fs.ensureDirSync(path.dirname(to))
     fs.copyFileSync(from, to)
   }
   // Symblink to `packages` folder
@@ -159,6 +194,24 @@ try {
     const lines = content.split('\n')
     content = lines.filter(line => !line.startsWith('standard-minifier')).join('\n')
     fs.writeFileSync(file, content)
+  }
+  // Remove server entry
+  {
+    const file = path.join(tempMeteorProject, 'package.json')
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'))
+    data.meteor = {
+      mainModule: {
+        client: data.meteor.mainModule.client,
+      },
+    }
+    fs.writeFileSync(file, JSON.stringify(data, null, 2))
+  }
+  // Only keep meteor package imports to enable lazy packages
+  {
+    const file = path.join(tempMeteorProject, meteorMainModule)
+    const lines = fs.readFileSync(file, 'utf8').split('\n')
+    const imports = lines.filter(line => line.startsWith('import') && line.includes('meteor/'))
+    fs.writeFileSync(file, imports.join('\n'))
   }
   execaSync('meteor', [
     'build',

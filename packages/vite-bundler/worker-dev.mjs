@@ -41,7 +41,22 @@ ${generated.join('\n')}\n`
               }
 
               // Module exports
-              const [, moduleExports] = /module\.export\({\n(.*\n)+?}\);/.exec(content) ?? []
+              const [, moduleExports] = /module\.export\({\n((?:.*\n)+?)}\);/.exec(content) ?? []
+              const hasModuleDefaultExport = content.includes('module.exportDefault(')
+              if (moduleExports || hasModuleDefaultExport) {
+                const sid = stubUid++
+                code += `let m2
+const require = Package.modules.meteorInstall({
+  '__vite_stub${sid}.js': (require, exports, module) => {
+    m2 = require('${id}')
+  },
+}, {
+  "extensions": [
+    ".js",
+  ]
+})
+require('/__vite_stub${sid}.js')\n`
+              }
               if (moduleExports) {
                 const generated = moduleExports.split('\n').map(line => {
                   const [,key] = /(\w+?):\s*/.exec(line) ?? []
@@ -50,20 +65,37 @@ ${generated.join('\n')}\n`
                   }
                   return ''
                 }).filter(Boolean)
-                const sid = stubUid++
-                code += `let m2
-const require = Package.modules.meteorInstall({
-  '__vite_stub${sid}.js': (require, exports, module) => {
-    m2 = require('${id.replace('\0', '')}')
-  },
-}, {
-  "extensions": [
-    ".js",
-  ]
-})
-require('/__vite_stub${sid}.js')
-${generated.join('\n')}
-export default m2.default ?? m2\n`
+                code += `${generated.join('\n')}\n`
+              }
+              if (hasModuleDefaultExport) {
+                code += 'export default m2.default ?? m2\n'
+              }
+
+              // Modules re-exports
+              let linkExports = []
+              let linkResult
+              const linkReg = /module\.link\("(.*?)", {\n((?:\s*.+:\s*.*\n)+?)}, \d+\);/gm
+              while (linkResult = linkReg.exec(content)) {
+                linkExports.push([linkResult[1], linkResult[2]])
+              }
+              if (linkExports.length) {
+                for (const linkExport of linkExports) {
+                  let wildcard = ''
+                  const generated = linkExport[1].split('\n').map(line => {
+                    const [,source,target] = /\s*"?(.*?)"?:\s*"(.*)"/.exec(line) ?? []
+                    if (source && target) {
+                      if (source === '*' && target === '*') {
+                        wildcard = '*'
+                      } else if (source === target) {
+                        return source
+                      } else {
+                        return `${source} as ${target}`
+                      }
+                    }
+                  }).filter(Boolean)
+                  const named = generated.length ? `{${generated.join(', ')}}` : ''
+                  code += `export ${[wildcard, named].filter(Boolean).join(', ')} from '${linkExport[0]}'\n`
+                }
               }
 
               // Lazy (Isopack)
