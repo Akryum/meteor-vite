@@ -35,7 +35,6 @@ import fs from 'node:fs/promises'
 import { build, resolveConfig } from 'vite'
 
 const meteorPackageReg = /Package\\._define\\("(.*?)"(?:,\\s*exports)?,\\s*{\\n((?:\\s*(?:\\w+):\\s*\\w+,?\\n)+)}\\)/
-const meteorPackageExportedReg = /(\\w+):\\s*(?:\\w+)/
 
 const viteConfig = await resolveConfig({})
 
@@ -62,7 +61,8 @@ const results = await build({
       },
       async load (id) {
         if (id.startsWith('\\0meteor/')) {
-          const file = path.join(${JSON.stringify(tempMeteorProject)}, '.dist', 'bundle', 'programs', 'web.browser', 'packages', \`\${id.replace('\\0meteor/', '').replace(/:/g, '_')}.js\`)
+          id = id.slice(1)
+          const file = path.join(${JSON.stringify(tempMeteorProject)}, '.dist', 'bundle', 'programs', 'web.browser', 'packages', \`\${id.replace(\/^meteor\\/\/, '').replace(/:/g, '_')}.js\`)
           const content = await fs.readFile(file, 'utf8')
 
           let code = \`const g = typeof window !== 'undefined' ? window : global\\n\`

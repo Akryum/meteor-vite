@@ -1,3 +1,4 @@
+import 'meteor/test:lazy'
 import { Cookies } from 'meteor/ostrio:cookies'
 
 const cookies = new Cookies()

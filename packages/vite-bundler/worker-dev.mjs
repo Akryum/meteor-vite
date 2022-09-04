@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { existsSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import { createServer } from 'vite'
 
@@ -6,6 +7,8 @@ let stubUid = 0
 
 process.on('message', async message => {
   if (message === 'start') {
+    const pkg = JSON.parse(await fs.readFile('package.json', 'utf-8'))
+
     // Start server
     const server = await createServer({
       plugins: [
@@ -18,7 +21,8 @@ process.on('message', async message => {
           },
           async load (id) {
             if (id.startsWith('\0meteor/')) {
-              const file = path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages', `${id.replace('\0meteor/', '').replace(/:/g, '_')}.js`)
+              id = id.slice(1)
+              const file = path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages', `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
               const content = await fs.readFile(file, 'utf8')
               let code = `const g = typeof window !== 'undefined' ? window : global\n`
               
@@ -59,6 +63,28 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub${sid}.js')
 ${generated.join('\n')}\n`
+              }
+
+              // Lazy (Isopack)
+              const manifestFile = path.join('.meteor', 'local', 'isopacks', `${id.replace(/^meteor\//, '').replace(/:/g, '_')}`, 'web.browser.json')
+              if (existsSync(manifestFile)) {
+                const manifest = JSON.parse(await fs.readFile(manifestFile, 'utf8'))
+                const resource = manifest.resources.find(r => r.fileOptions.mainModule)
+                if (resource?.fileOptions.lazy) {
+                  // Auto-import the package to make it available
+                  if (!pkg.meteor?.mainModule?.client) {
+                    throw new Error(`No meteor.mainModule.client found in package.json`)
+                  }
+                  const meteorClientEntryFile = path.resolve(process.cwd(), pkg.meteor.mainModule.client)
+                  if (!existsSync(meteorClientEntryFile)) {
+                    throw new Error(`meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
+                  }
+                  const content = await fs.readFile(meteorClientEntryFile, 'utf8')
+                  if (!content.includes(`'${id}'`)) {
+                    await fs.writeFile(meteorClientEntryFile, `import '${id}'\n${content}`)
+                    throw new Error(`Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
+                  }
+                }
               }
 
               return code
