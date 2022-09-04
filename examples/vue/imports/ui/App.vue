@@ -1,7 +1,8 @@
+<script setup lang="ts">
+import AppMenu from './AppMenu.vue'
+</script>
+
 <template>
-  <nav class="flex gap-4">
-    <router-link :to="{ name: 'home' }">Home</router-link>
-    <router-link :to="{ name: 'async' }">Async</router-link>
-  </nav>
+  <AppMenu />
   <router-view />
 </template>
