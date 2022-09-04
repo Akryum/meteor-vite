@@ -31,7 +31,7 @@ const filesToCopy = [
   meteorMainModule,
 ]
 
-const tempMeteorProject = path.resolve(cwd, 'node_modules', '.temp')
+const tempMeteorProject = path.resolve(cwd, 'node_modules', '.vite-meteor-temp')
 
 // Vite worker
 
