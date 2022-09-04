@@ -2,6 +2,8 @@ import path from 'node:path'
 import fs from 'node:fs/promises'
 import { createServer } from 'vite'
 
+let stubUid = 0
+
 process.on('message', async message => {
   if (message === 'start') {
     // Start server
@@ -16,8 +18,11 @@ process.on('message', async message => {
           },
           async load (id) {
             if (id.startsWith('\0meteor/')) {
-              const file = path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages', `${id.replace('\0meteor/', '')}.js`)
+              const file = path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages', `${id.replace('\0meteor/', '').replace(/:/g, '_')}.js`)
               const content = await fs.readFile(file, 'utf8')
+              let code = `const g = typeof window !== 'undefined' ? window : global\n`
+              
+              // Meteor exports
               const [, packageName, exported] = /Package\._define\("(.*?)"(?:,\s*exports)?,\s*{\n((?:\s*(?:\w+):\s*\w+,?\n)+)}\)/.exec(content) ?? []
               if (packageName) {
                 const generated = exported.split('\n').map(line => {
@@ -27,11 +32,36 @@ process.on('message', async message => {
                   }
                   return ''
                 }).filter(Boolean)
-                return `const g = typeof window !== 'undefined' ? window : global
-const m = g.Package.${packageName}
-${generated.join('\n')}`
+                code += `const m = g.Package.${packageName}
+${generated.join('\n')}\n`
               }
-              return ''
+
+              // Module exports
+              const [, moduleExports] = /module\.export\({\n(.*\n)+?}\);/.exec(content) ?? []
+              if (moduleExports) {
+                const generated = moduleExports.split('\n').map(line => {
+                  const [,key] = /(\w+?):\s*/.exec(line) ?? []
+                  if (key) {
+                    return `export const ${key} = m2.${key}`
+                  }
+                  return ''
+                }).filter(Boolean)
+                const sid = stubUid++
+                code += `let m2
+const require = Package.modules.meteorInstall({
+  '__vite_stub${sid}.js': (require, exports, module) => {
+    m2 = require('${id.replace('\0', '')}')
+  },
+}, {
+  "extensions": [
+    ".js",
+  ]
+})
+require('/__vite_stub${sid}.js')
+${generated.join('\n')}\n`
+              }
+
+              return code
             }
           },
         },
