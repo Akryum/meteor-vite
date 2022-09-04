@@ -10,9 +10,14 @@ export const router = createRouter({
       component: Home,
     },
     {
-      path: '/async',
-      name: 'async',
-      component: () => import('./AsyncComp.vue'),
+      path: '/links-composition',
+      name: 'links-composition',
+      component: () => import('./LinksComposition.vue'),
+    },
+    {
+      path: '/links-option',
+      name: 'links-option',
+      component: () => import('./LinksOption.vue'),
     },
   ],
 })

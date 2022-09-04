@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor'
 import { LinksCollection } from '/imports/api/links'
+import '/imports/api/linksPub'
 
 function insertLink({ title, url }: { title: string, url: string }) {
   LinksCollection.insert({title, url, createdAt: new Date()})
