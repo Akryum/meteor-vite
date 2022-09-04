@@ -103,7 +103,8 @@ const require = Package.modules.meteorInstall({
   ]
 })
 require('/__vite_stub\${sid}.js')
-\${generated.join('\\n')}\\n\`
+\${generated.join('\\n')}
+export default m2.default ?? m2\\n\`
           }
 
           return code
