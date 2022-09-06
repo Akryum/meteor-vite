@@ -36,7 +36,7 @@ process.on('message', async message => {
                   }
                   return ''
                 }).filter(Boolean)
-                code += `const m = g.Package.${packageName}
+                code += `const m = g.Package['${packageName}']
 ${generated.join('\n')}\n`
               }
 
