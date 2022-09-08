@@ -3,7 +3,7 @@ import { WebAppInternals } from 'meteor/webapp'
 import { fork } from 'node:child_process'
 
 if (Meteor.isDevelopment) {
-  const cwd = process.env.PWD
+  const cwd = guessCwd()
 
   const viteSetup = {
     host: 'localhost',
@@ -47,4 +47,13 @@ if (Meteor.isDevelopment) {
       child.kill()
     })
   })
+}
+
+function guessCwd () {
+  let cwd = process.env.PWD ?? process.cwd()
+  const index = cwd.indexOf('.meteor')
+  if (index !== -1) {
+    cwd = cwd.substring(0, index)
+  }
+  return cwd
 }
