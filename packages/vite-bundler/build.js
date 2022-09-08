@@ -7,7 +7,7 @@ import pc from 'picocolors'
 if (process.env.VITE_METEOR_DISABLED) return
 if (process.env.NODE_ENV !== 'production') return
 
-const cwd = process.env.PWD
+const cwd = guessCwd()
 
 // Not in a project (publishing the package)
 if (!fs.existsSync(path.join(cwd, 'package.json'))) return
@@ -344,4 +344,13 @@ try {
   throw e
 } finally {
   fs.removeSync(workerFile)
+}
+
+function guessCwd () {
+  let cwd = process.env.PWD ?? process.cwd()
+  const index = cwd.indexOf('.meteor')
+  if (index !== -1) {
+    cwd = cwd.substring(0, index)
+  }
+  return cwd
 }
