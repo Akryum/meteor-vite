@@ -50,14 +50,18 @@ let stubUid = 0
 
 const results = await build({
   build: {
-    outDir: ${JSON.stringify(viteOutDir)},
-    assetsDir: 'assets',
-    minify: false,
+    lib: {
+      entry: viteConfig.meteor.clientEntry,
+      formats: ['es'],
+    },
     rollupOptions: {
-      input: {
-        'meteor-entry': viteConfig.meteor.clientEntry,
+      output: {
+        entryFileNames: 'meteor-entry.js',
+        chunkFileNames: '[name].js',
       },
     },
+    outDir: ${JSON.stringify(viteOutDir)},
+    minify: false,
   },
   plugins: [
     {
@@ -259,7 +263,7 @@ try {
       endTime = performance.now()
       console.log(pc.green(`⚡️ Build successful (${Math.round((endTime - startTime) * 100) / 100}ms)`))
 
-      const entryAsset = payload.output.find(o => o.name === 'meteor-entry' && o.type === 'chunk')
+      const entryAsset = payload.output.find(o => o.fileName === 'meteor-entry.js' && o.type === 'chunk')
       if (!entryAsset) {
         throw new Error('No meteor-entry chunk found')
       }
