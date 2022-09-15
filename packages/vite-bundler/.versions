@@ -22,6 +22,6 @@ random@1.2.0
 react-fast-refresh@0.2.3
 routepolicy@1.1.1
 underscore@1.0.10
-vite:bundler@0.1.7
+vite:bundler@0.1.8
 webapp@1.13.1
 webapp-hashing@1.1.0
