@@ -78,27 +78,29 @@ const results = await build({
           const content = await fs.readFile(file, 'utf8')
 
           let code = \`const g = typeof window !== 'undefined' ? window : global\\n\`
-              
+
+          const exportedKeys = []
+
           // Meteor exports
           const [, packageName, exported] = /Package\\._define\\("(.*?)"(?:,\\s*exports)?,\\s*{\\n((?:\\s*(?:\\w+):\\s*\\w+,?\\n)+)}\\)/.exec(content) ?? []
           if (packageName) {
-            const generated = exported.split('\\n').map(line => {
+            const keys = exported.split('\\n').map(line => {
               const [,key] = /(\\w+):\\s*(?:\\w+)/.exec(line) ?? []
-              if (key) {
-                return \`export const \${key} = m.\${key}\`
-              }
-              return ''
+              return key
             }).filter(Boolean)
+            exportedKeys.push(...keys)
+            const generated = keys.map(key => \`export const \${key} = m.\${key}\`)
             code += \`const m = g.Package['\${packageName}']
 \${generated.join('\\n')}\\n\`
           }
 
           // Module exports
+          let moduleExportsCode = ''
           const [, moduleExports] = /module\\.export\\({\\n((?:.*\\n)+?)}\\);/.exec(content) ?? []
           const hasModuleDefaultExport = content.includes('module.exportDefault(')
           if (moduleExports || hasModuleDefaultExport) {
             const sid = stubUid++
-            code += \`let m2
+            moduleExportsCode += \`let m2
 const require = Package.modules.meteorInstall({
   '__vite_stub\${sid}.js': (require, exports, module) => {
     m2 = require('\${id}')
@@ -110,19 +112,22 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub\${sid}.js')\\n\`
           }
+          let hasModuleExports = false
           if (moduleExports) {
-            const generated = moduleExports.split('\\n').map(line => {
+            const keys = moduleExports.split('\\n').map(line => {
               const [,key] = /(\\w+?):\\s*/.exec(line) ?? []
-              if (key) {
-                return \`export const \${key} = m2.\${key}\`
-              }
-              return ''
-            }).filter(Boolean)
-            console.log(id, moduleExports, generated)
-            code += \`\${generated.join('\\n')}\\n\`
+              return key
+            }).filter(key => key && !exportedKeys.includes(key))
+            exportedKeys.push(...keys)
+            hasModuleExports = keys.length > 0
+            const generated = keys.map(key => \`export const \${key} = m2.\${key}\`)
+            moduleExportsCode += \`\${generated.join('\\n')}\\n\`
           }
           if (hasModuleDefaultExport) {
-            code += 'export default m2.default ?? m2\\n'
+            moduleExportsCode += 'export default m2.default ?? m2\\n'
+          }
+          if (hasModuleExports || hasModuleDefaultExport) {
+            code += moduleExportsCode
           }
 
           // Modules re-exports

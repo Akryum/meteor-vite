@@ -6,8 +6,10 @@ import { router } from './router'
 import { VueMeteor } from './v-meteor'
 import App from './App.vue'
 import { MEOWMEOW } from 'meteor/test:lazy'
+import { check } from 'meteor/check'
 
 console.log('lazy meteor package:', MEOWMEOW)
+console.log(check)
 
 Meteor.startup(() => {
   const app = createApp(App)
