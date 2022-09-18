@@ -24,6 +24,9 @@ process.on('message', async message => {
               id = id.slice(1)
               const file = path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages', `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
               const content = await fs.readFile(file, 'utf8')
+              const moduleStartIndex = content.indexOf('function module(require,exports,module')
+              const moduleContent = content.slice(moduleStartIndex, content.indexOf('function module(require,exports,module', moduleStartIndex + 1))
+
               let code = `const g = typeof window !== 'undefined' ? window : global\n`
 
               const exportedKeys = []
@@ -41,11 +44,46 @@ process.on('message', async message => {
 ${generated.join('\n')}\n`
               }
 
+              // Modules re-exports
+              let linkExports = []
+              let linkResult
+              const relativeExportKeys = []
+              const linkReg = /module\.link\("(.*?)", {\n((?:\s*.+:\s*.*\n)+?)}, \d+\);/gm
+              while (linkResult = linkReg.exec(moduleContent)) {
+                linkExports.push([linkResult[1], linkResult[2]])
+              }
+              if (linkExports.length) {
+                for (const linkExport of linkExports) {
+                  const isRelativeExport = linkExport[0].startsWith('.')
+                  let wildcard = ''
+                  const generated = linkExport[1].split('\n').map(line => {
+                    const [,source,target] = /\s*"?(.*?)"?:\s*"(.*)"/.exec(line) ?? []
+                    if (source && target) {
+                      if (isRelativeExport) {
+                        relativeExportKeys.push(target)
+                        return
+                      } else if (source === '*' && target === '*') {
+                        wildcard = '*'
+                      } else if (source === target) {
+                        return source
+                      } else {
+                        return `${source} as ${target}`
+                      }
+                    }
+                  }).filter(Boolean)
+                  const named = generated.length ? `{${generated.join(', ')}}` : ''
+                  if (!isRelativeExport) {
+                    code += `export ${[wildcard, named].filter(Boolean).join(', ')} from '${linkExport[0]}'\n`
+                  }
+                }
+              }
+
               // Module exports
               let moduleExportsCode = ''
-              const [, moduleExports] = /module\.export\({\n((?:.*\n)+?)}\);/.exec(content) ?? []
-              const hasModuleDefaultExport = content.includes('module.exportDefault(')
-              if (moduleExports || hasModuleDefaultExport) {
+              const [, moduleExports] = /module\.export\({\n((?:.*\n)+?)}\);/.exec(moduleContent) ?? []
+              const hasModuleExports = !!moduleExports || !!relativeExportKeys.length
+              const hasModuleDefaultExport = moduleContent.includes('module.exportDefault(')
+              if (hasModuleExports || hasModuleDefaultExport) {
                 const sid = stubUid++
                 moduleExportsCode += `let m2
 const require = Package.modules.meteorInstall({
@@ -59,49 +97,22 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub${sid}.js')\n`
               }
-              let hasModuleExports = false
-              if (moduleExports) {
+              let finalHasModuleExports = false
+              if (hasModuleExports) {
                 const keys = moduleExports.split('\n').map(line => {
                   const [,key] = /(\w+?):\s*/.exec(line) ?? []
                   return key
-                }).filter(key => key && !exportedKeys.includes(key))
+                }).concat(relativeExportKeys).filter(key => key && !exportedKeys.includes(key))
                 exportedKeys.push(...keys)
-                hasModuleExports = keys.length > 0
+                finalHasModuleExports = keys.length > 0
                 const generated = keys.map(key => `export const ${key} = m2.${key}`)
                 moduleExportsCode += `${generated.join('\n')}\n`
               }
               if (hasModuleDefaultExport) {
                 moduleExportsCode += 'export default m2.default ?? m2\n'
               }
-              if (hasModuleExports || hasModuleDefaultExport) {
+              if (finalHasModuleExports || hasModuleDefaultExport) {
                 code += moduleExportsCode
-              }
-
-              // Modules re-exports
-              let linkExports = []
-              let linkResult
-              const linkReg = /module\.link\("(.*?)", {\n((?:\s*.+:\s*.*\n)+?)}, \d+\);/gm
-              while (linkResult = linkReg.exec(content)) {
-                linkExports.push([linkResult[1], linkResult[2]])
-              }
-              if (linkExports.length) {
-                for (const linkExport of linkExports) {
-                  let wildcard = ''
-                  const generated = linkExport[1].split('\n').map(line => {
-                    const [,source,target] = /\s*"?(.*?)"?:\s*"(.*)"/.exec(line) ?? []
-                    if (source && target) {
-                      if (source === '*' && target === '*') {
-                        wildcard = '*'
-                      } else if (source === target) {
-                        return source
-                      } else {
-                        return `${source} as ${target}`
-                      }
-                    }
-                  }).filter(Boolean)
-                  const named = generated.length ? `{${generated.join(', ')}}` : ''
-                  code += `export ${[wildcard, named].filter(Boolean).join(', ')} from '${linkExport[0]}'\n`
-                }
               }
 
               // Lazy (Isopack)
