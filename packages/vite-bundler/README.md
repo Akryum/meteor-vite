@@ -6,9 +6,16 @@ Use [Vite](https://vitejs.dev) in your Meteor app! ⚡️
 
 - [x] Development mode
 - [x] Build
+- [x] Importing non-core Meteor packages
+- [x] Lazy meteor packages
+- [ ] Reify support
+  - [x] Named exports
+  - [x] Default exports
+  - [x] Re-exports (named + wildcard)
+  - [ ] Re-exports via intermediary variable (not tested)
 - [x] Code-splitting/Dynamic imports
 - [ ] SSR (not tested)
-- [ ] Galaxy deployment (not tested)
+- [x] Galaxy deployment [link](https://vite-and-vue3.meteorapp.com/)
 
 ## Installation
 

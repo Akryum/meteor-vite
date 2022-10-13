@@ -16,7 +16,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
+  <div class="flex flex-col gap-4">
     <h1 class="text-2xl">Learn Meteor!</h1>
     <ul>
       <li
@@ -28,6 +28,7 @@ export default defineComponent({
         </a>
       </li>
     </ul>
+    <pre class="bg-gray-100 rounded p-4">{{ { $subReady } }}</pre>
   </div>
 </template>
 

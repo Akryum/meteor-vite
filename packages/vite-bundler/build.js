@@ -7,23 +7,31 @@ import pc from 'picocolors'
 if (process.env.VITE_METEOR_DISABLED) return
 if (process.env.NODE_ENV !== 'production') return
 
-const cwd = process.env.PWD
+const cwd = guessCwd()
 
 // Not in a project (publishing the package)
 if (!fs.existsSync(path.join(cwd, 'package.json'))) return
 
+const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'))
+const meteorMainModule = pkg.meteor?.mainModule?.client
+if (!meteorMainModule) {
+  throw new Error('No meteor main module found, please add meteor.mainModule.client to your package.json')
+}
+
 // Temporary Meteor build
 
 const filesToCopy = [
-  '.finished-upgraders',
-  '.id',
-  'packages',
-  'platforms',
-  'release',
-  'versions',
+  path.join('.meteor', '.finished-upgraders'),
+  path.join('.meteor', '.id'),
+  path.join('.meteor', 'packages'),
+  path.join('.meteor', 'platforms'),
+  path.join('.meteor', 'release'),
+  path.join('.meteor', 'versions'),
+  'package.json',
+  meteorMainModule,
 ]
 
-const tempMeteorProject = path.resolve(cwd, 'node_modules', '.temp')
+const tempMeteorProject = path.resolve(cwd, 'node_modules', '.vite-meteor-temp')
 
 // Vite worker
 
@@ -35,7 +43,6 @@ import fs from 'node:fs/promises'
 import { build, resolveConfig } from 'vite'
 
 const meteorPackageReg = /Package\\._define\\("(.*?)"(?:,\\s*exports)?,\\s*{\\n((?:\\s*(?:\\w+):\\s*\\w+,?\\n)+)}\\)/
-const meteorPackageExportedReg = /(\\w+):\\s*(?:\\w+)/
 
 const viteConfig = await resolveConfig({})
 
@@ -43,14 +50,18 @@ let stubUid = 0
 
 const results = await build({
   build: {
-    outDir: ${JSON.stringify(viteOutDir)},
-    assetsDir: 'assets',
-    minify: false,
+    lib: {
+      entry: viteConfig.meteor.clientEntry,
+      formats: ['es'],
+    },
     rollupOptions: {
-      input: {
-        'meteor-entry': viteConfig.meteor.clientEntry,
+      output: {
+        entryFileNames: 'meteor-entry.js',
+        chunkFileNames: '[name].js',
       },
     },
+    outDir: ${JSON.stringify(viteOutDir)},
+    minify: false,
   },
   plugins: [
     {
@@ -62,48 +73,98 @@ const results = await build({
       },
       async load (id) {
         if (id.startsWith('\\0meteor/')) {
-          const file = path.join(${JSON.stringify(tempMeteorProject)}, '.dist', 'bundle', 'programs', 'web.browser', 'packages', \`\${id.replace('\\0meteor/', '').replace(/:/g, '_')}.js\`)
+          id = id.slice(1)
+          const file = path.join(${JSON.stringify(tempMeteorProject)}, '.dist', 'bundle', 'programs', 'web.browser', 'packages', \`\${id.replace(\/^meteor\\/\/, '').replace(/:/g, '_')}.js\`)
           const content = await fs.readFile(file, 'utf8')
+          const moduleStartIndex = content.indexOf('function module(require,exports,module')
+          const moduleContent = content.slice(moduleStartIndex, content.indexOf('function module(require,exports,module', moduleStartIndex + 1))
 
           let code = \`const g = typeof window !== 'undefined' ? window : global\\n\`
-              
+
+          const exportedKeys = []
+
           // Meteor exports
           const [, packageName, exported] = /Package\\._define\\("(.*?)"(?:,\\s*exports)?,\\s*{\\n((?:\\s*(?:\\w+):\\s*\\w+,?\\n)+)}\\)/.exec(content) ?? []
           if (packageName) {
-            const generated = exported.split('\\n').map(line => {
+            const keys = exported.split('\\n').map(line => {
               const [,key] = /(\\w+):\\s*(?:\\w+)/.exec(line) ?? []
-              if (key) {
-                return \`export const \${key} = m.\${key}\`
-              }
-              return ''
+              return key
             }).filter(Boolean)
-            code += \`const m = g.Package.\${packageName}
+            exportedKeys.push(...keys)
+            const generated = keys.map(key => \`export const \${key} = m.\${key}\`)
+            code += \`const m = g.Package['\${packageName}']
 \${generated.join('\\n')}\\n\`
           }
 
-          // Module exports
-          const [, moduleExports] = /module\\.export\\({\\n(.*\\n)+?}\\);/.exec(content) ?? []
-          if (moduleExports) {
-            const generated = moduleExports.split('\\n').map(line => {
-              const [,key] = /(\\w+?):\\s*/.exec(line) ?? []
-              if (key) {
-                return \`export const \${key} = m2.\${key}\`
+          // Modules re-exports
+          let linkExports = []
+          let linkResult
+          const relativeExportKeys = []
+          const linkReg = /module\\.link\\("(.*?)", {\\n((?:\\s*.+:\\s*.*\\n)+?)}, \\d+\\);/gm
+          while (linkResult = linkReg.exec(moduleContent)) {
+            linkExports.push([linkResult[1], linkResult[2]])
+          }
+          if (linkExports.length) {
+            for (const linkExport of linkExports) {
+              const isRelativeExport = linkExport[0].startsWith('.')
+              let wildcard = ''
+              const generated = linkExport[1].split('\\n').map(line => {
+                const [,source,target] = /\\s*"?(.*?)"?:\\s*"(.*)"/.exec(line) ?? []
+                if (source && target) {
+                  if (isRelativeExport) {
+                    relativeExportKeys.push(target)
+                    return
+                  } else if (source === '*' && target === '*') {
+                    wildcard = '*'
+                  } else if (source === target) {
+                    return source
+                  } else {
+                    return \`\${source} as \${target}\`
+                  }
+                }
+              }).filter(Boolean)
+              const named = generated.length ? \`{\${generated.join(', ')}}\` : ''
+              if (!isRelativeExport) {
+                code += \`export \${[wildcard, named].filter(Boolean).join(', ')} from '\${linkExport[0]}'\\n\`
               }
-              return ''
-            }).filter(Boolean)
+            }
+          }
+
+          // Module exports
+          let moduleExportsCode = ''
+          const [, moduleExports] = /module\\.export\\({\\n((?:.*\\n)+?)}\\);/.exec(moduleContent) ?? []
+          const hasModuleExports = !!moduleExports || !!relativeExportKeys.length
+          const hasModuleDefaultExport = moduleContent.includes('module.exportDefault(')
+          if (hasModuleExports || hasModuleDefaultExport) {
             const sid = stubUid++
-            code += \`let m2
+            moduleExportsCode += \`let m2
 const require = Package.modules.meteorInstall({
   '__vite_stub\${sid}.js': (require, exports, module) => {
-    m2 = require('\${id.replace('\\0', '')}')
+    m2 = require('\${id}')
   },
 }, {
   "extensions": [
     ".js",
   ]
 })
-require('/__vite_stub\${sid}.js')
-\${generated.join('\\n')}\\n\`
+require('/__vite_stub\${sid}.js')\\n\`
+          }
+          let finalHasModuleExports = false
+          if (hasModuleExports) {
+            const keys = moduleExports.split('\\n').map(line => {
+              const [,key] = /(\\w+?):\\s*/.exec(line) ?? []
+              return key
+            }).concat(relativeExportKeys).filter(key => key && !exportedKeys.includes(key))
+            exportedKeys.push(...keys)
+            finalHasModuleExports = keys.length > 0
+            const generated = keys.map(key => \`export const \${key} = m2.\${key}\`)
+            moduleExportsCode += \`\${generated.join('\\n')}\\n\`
+          }
+          if (hasModuleDefaultExport) {
+            moduleExportsCode += 'export default m2.default ?? m2\\n'
+          }
+          if (finalHasModuleExports || hasModuleDefaultExport) {
+            code += moduleExportsCode
           }
 
           return code
@@ -130,21 +191,15 @@ process.stdout.write(JSON.stringify({
 const workerFile = path.join(cwd, 'node_modules', '.meteor-vite-build-worker.mjs')
 
 try {
-  const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'))
-  const meteorMainModule = pkg.meteor?.mainModule?.client
-  if (!meteorMainModule) {
-    throw new Error('No meteor main module found, please add meteor.mainModule.client to your package.json')
-  }
-
   // Temporary Meteor build
 
   console.log(pc.blue('⚡️ Building packages to make them available to export analyzer...'))
   let startTime = performance.now()
-  fs.ensureDirSync(path.join(tempMeteorProject, '.meteor'))
   // Copy files from `.meteor`
   for (const file of filesToCopy) {
-    const from = path.join(cwd, '.meteor', file)
-    const to = path.join(tempMeteorProject, '.meteor', file)
+    const from = path.join(cwd, file)
+    const to = path.join(tempMeteorProject, file)
+    fs.ensureDirSync(path.dirname(to))
     fs.copyFileSync(from, to)
   }
   // Symblink to `packages` folder
@@ -158,6 +213,24 @@ try {
     const lines = content.split('\n')
     content = lines.filter(line => !line.startsWith('standard-minifier')).join('\n')
     fs.writeFileSync(file, content)
+  }
+  // Remove server entry
+  {
+    const file = path.join(tempMeteorProject, 'package.json')
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'))
+    data.meteor = {
+      mainModule: {
+        client: data.meteor.mainModule.client,
+      },
+    }
+    fs.writeFileSync(file, JSON.stringify(data, null, 2))
+  }
+  // Only keep meteor package imports to enable lazy packages
+  {
+    const file = path.join(tempMeteorProject, meteorMainModule)
+    const lines = fs.readFileSync(file, 'utf8').split('\n')
+    const imports = lines.filter(line => line.startsWith('import') && line.includes('meteor/'))
+    fs.writeFileSync(file, imports.join('\n'))
   }
   execaSync('meteor', [
     'build',
@@ -205,7 +278,7 @@ try {
       endTime = performance.now()
       console.log(pc.green(`⚡️ Build successful (${Math.round((endTime - startTime) * 100) / 100}ms)`))
 
-      const entryAsset = payload.output.find(o => o.name === 'meteor-entry' && o.type === 'chunk')
+      const entryAsset = payload.output.find(o => o.fileName === 'meteor-entry.js' && o.type === 'chunk')
       if (!entryAsset) {
         throw new Error('No meteor-entry chunk found')
       }
@@ -290,4 +363,13 @@ try {
   throw e
 } finally {
   fs.removeSync(workerFile)
+}
+
+function guessCwd () {
+  let cwd = process.env.PWD ?? process.cwd()
+  const index = cwd.indexOf('.meteor')
+  if (index !== -1) {
+    cwd = cwd.substring(0, index)
+  }
+  return cwd
 }

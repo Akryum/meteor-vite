@@ -1,6 +1,6 @@
 Package.describe({
   name: 'vite:bundler',
-  version: '0.1.4',
+  version: '0.1.9',
   summary: 'Integrate the Vite.js bundler with Meteor',
   git: 'https://github.com/Akryum/meteor-vite',
   documentation: 'README.md',

@@ -21,3 +21,6 @@ static-html@1.3.2             # Define static page content in .html files
 
 vite:bundler
 ostrio:cookies
+
+test:lazy
+test:modules
