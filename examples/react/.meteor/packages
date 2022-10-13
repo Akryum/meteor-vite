@@ -25,3 +25,8 @@ ostrio:flow-router-extra
 react-meteor-data
 
 vite:bundler
+
+ostrio:cookies
+
+test:lazy
+test:modules

@@ -99,6 +99,7 @@ require('/__vite_stub${sid}.js')\n`
               }
               let finalHasModuleExports = false
               if (hasModuleExports) {
+                console.log({packageName,hasModuleExports,moduleExports,relativeExportKeys,id})
                 const keys = moduleExports.split('\n').map(line => {
                   const [,key] = /(\w+?):\s*/.exec(line) ?? []
                   return key
