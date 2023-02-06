@@ -259,7 +259,8 @@ try {
   fs.ensureDirSync(path.dirname(viteOutDir))
 
   // Build with vite
-  const result = execaSync('node', [
+  const result = execaSync('meteor', [
+    'node',
     workerFile,
   ], {
     cwd,
