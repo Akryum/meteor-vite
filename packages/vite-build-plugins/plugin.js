@@ -6,6 +6,6 @@ const paths = {
 ViteBuildPlugins = {
     paths,
     sources: Object.fromEntries(
-      Object.entries(paths).map(([key, relativePath]) => [key, Assets.getText(relativePath)])
+      Object.entries(paths).map(([moduleName, relativePath]) => [moduleName, Assets.getText(relativePath)])
     ),
 }
