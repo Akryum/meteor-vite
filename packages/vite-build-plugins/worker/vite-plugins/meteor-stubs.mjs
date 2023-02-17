@@ -84,25 +84,19 @@ ${generated.join('\n')}\n`
         let moduleExportsCode = ''
         const [, moduleExports] = /module\.export\({\n((?:.*\n)+?)}\);/.exec(moduleContent) ?? []
         const hasModuleExports = !!moduleExports || !!relativeExportKeys.length
-        const hasModuleDefaultExport = moduleContent.includes('module.exportDefault(')
+        let hasModuleDefaultExport = moduleContent.includes('module.exportDefault(')
         if (hasModuleExports || hasModuleDefaultExport) {
             const sid = stubUid++
-            moduleExportsCode += `let m2
-const require = Package.modules.meteorInstall({
-  '__vite_stub${sid}.js': (require, exports, module) => {
-    m2 = require('${id}')
-  },
-}, {
-  "extensions": [
-    ".js",
-  ]
-})
-require('/__vite_stub${sid}.js')\n`
+            moduleExportsCode += `${moduleTemplate(id, sid)}\n`
         }
         let finalHasModuleExports = false
         if (hasModuleExports) {
             const keys = moduleExports.split('\n').map(line => {
                 const [,key] = /(\w+?):\s*/.exec(line) ?? []
+                if (key === 'default') {
+                    hasModuleDefaultExport = true;
+                    return undefined;
+                }
                 return key
             }).concat(relativeExportKeys).filter(key => key && !exportedKeys.includes(key))
             exportedKeys.push(...keys)
@@ -146,4 +140,20 @@ require('/__vite_stub${sid}.js')\n`
 
         return code
     }
+}
+
+function moduleTemplate(id, sid) {
+    return`
+let m2
+const require = Package.modules.meteorInstall({
+  '__vite_stub${sid}.js': (require, exports, module) => {
+    m2 = require('${id}')
+  },
+}, {
+  "extensions": [
+    ".js",
+  ]
+})
+require('/__vite_stub${sid}.js')
+`
 }
