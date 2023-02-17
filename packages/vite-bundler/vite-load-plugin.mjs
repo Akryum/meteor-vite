@@ -4,14 +4,18 @@ import { existsSync } from 'node:fs';
 
 let stubUid = 0;
 
-export async function viteLoadPlugin(meteorPackagePath) {
-    return (id) => load(id, meteorPackagePath);
+export async function viteLoadPlugin({ meteorPackagePath, projectJson }) {
+    return (id) => load({
+        id,
+        meteorPackagePath,
+        projectJson,
+    });
 }
 
-async function load(id, meteorPackages) {
+async function load({ id, meteorPackagePath, projectJson }) {
     if (id.startsWith('\0meteor/')) {
         id = id.slice(1)
-        const file = path.join(meteorPackages, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
+        const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
         const content = await fs.readFile(file, 'utf8')
         const moduleStartIndex = content.indexOf('function module(require,exports,module')
         const moduleContent = content.slice(moduleStartIndex, content.indexOf('function module(require,exports,module', moduleStartIndex + 1))
@@ -111,10 +115,10 @@ require('/__vite_stub${sid}.js')\n`
             const resource = manifest.resources.find(r => r.fileOptions.mainModule)
             if (resource?.fileOptions.lazy) {
                 // Auto-import the package to make it available
-                if (!pkg.meteor?.mainModule?.client) {
+                if (!projectJson.meteor?.mainModule?.client) {
                     throw new Error(`No meteor.mainModule.client found in package.json`)
                 }
-                const meteorClientEntryFile = path.resolve(process.cwd(), pkg.meteor.mainModule.client)
+                const meteorClientEntryFile = path.resolve(process.cwd(), projectJson.meteor.mainModule.client)
                 if (!existsSync(meteorClientEntryFile)) {
                     throw new Error(`meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
                 }
