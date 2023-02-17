@@ -9,10 +9,10 @@ Package.describe({
 Package.onUse(function(api) {
     api.use('isobuild:compiler-plugin@1.0.0')
     api.use('ecmascript')
+    api.addFiles(['plugin.js'], 'server')
+    api.export(['ViteBuildPlugins'], 'server')
     api.addAssets([
         'vite-load-plugin.mjs',
         'worker-dev.mjs',
     ], 'server')
-    api.addFiles(['plugin.js'], 'server')
-    api.export(['ViteBuildPlugins'], 'server')
 })
