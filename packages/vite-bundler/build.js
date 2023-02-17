@@ -37,10 +37,9 @@ const meteorPackagePath = path.join(tempMeteorProject, '.dist', 'bundle', 'progr
 // Vite worker
 
 const viteOutDir = path.join(cwd, 'node_modules', '.vite-meteor', 'dist')
+const buildPluginDir = path.join(cwd, 'node_modules', '.meteor-vite-build')
 const payloadMarker = '_vite_result_payload_'
-const workerAssetsDir = path.join(cwd, 'node_modules', '.meteor-vite-build');
-const workerFile = path.join(workerAssetsDir, 'worker.mjs');
-const meteorStubs = path.join(workerAssetsDir, 'vite-plugins', 'meteor-stubs.mjs');
+const sourcePaths = ViteBuildPlugins.createSources(buildPluginDir);
 
 try {
   // Temporary Meteor build
@@ -104,18 +103,13 @@ try {
 
   console.log(pc.blue('⚡️ Building with Vite...'))
   startTime = performance.now()
-  // Prepare worker
-  fs.ensureDirSync(path.dirname(workerFile));
-  fs.ensureDirSync(path.dirname(meteorStubs));
-  fs.writeFileSync(workerFile, ViteBuildPlugins.source.worker, 'utf8');
-  fs.writeFileSync(meteorStubs, ViteBuildPlugins.source.vitePlugins.meteorStubs, 'utf8');
 
   fs.ensureDirSync(path.dirname(viteOutDir))
 
   // Build with vite
   const result = execaSync('meteor', [
     'node',
-    workerFile,
+    sourcePaths.workerProd,
     viteOutDir,
     meteorPackagePath,
     payloadMarker,
@@ -220,7 +214,7 @@ try {
 } catch (e) {
   throw e
 } finally {
-  fs.removeSync(workerAssetsDir)
+  fs.removeSync(buildPluginDir)
 }
 
 function guessCwd () {
