@@ -1,13 +1,9 @@
 import { build, resolveConfig } from 'vite';
 import { viteLoadPlugin } from './vite-load-plugin.mjs';
 
-const meteorPackageReg = /Package\._define\("(.*?)"(?:,\s*exports)?,\s*{\n((?:\s*(?:\w+):\s*\w+,?\n)+)}\)/;
-
 const [viteOutDir, meteorPackagePath, payloadMarker] = process.argv.slice(2);
 
 const viteConfig = await resolveConfig({});
-
-let stubUid = 0;
 
 const results = await build({
     build: {
