@@ -42,8 +42,4 @@
     /* Vite setup */
     "isolatedModules": true,
   },
-  "exclude": [
-    "./.meteor/**",
-    "./packages/**",
-  ],
 }
