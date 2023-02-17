@@ -42,7 +42,7 @@ const workerAssetsDir = path.join(cwd, 'node_modules', '.meteor-vite-build');
 const workerFile = path.join(workerAssetsDir, 'worker.mjs');
 const loadPlugin = path.join(workerAssetsDir, 'vite-load-plugin.mjs');
 
-const loadPluginSource = Assets.getText(loadPlugin);
+const loadPluginSource = ViteBuildPlugins.loadPluginSource;
 const workerSource = `import path from 'node:path'
 import fs from 'node:fs/promises'
 import { build, resolveConfig } from 'vite'
@@ -163,7 +163,7 @@ try {
   console.log(pc.blue('⚡️ Building with Vite...'))
   startTime = performance.now()
   // Prepare worker
-  fs.ensureDirSync(path.dirname(workerAssetsDir))
+  fs.ensureDirSync(workerAssetsDir);
   fs.writeFileSync(workerFile, workerSource, 'utf8');
   fs.writeFileSync(loadPlugin, loadPluginSource, 'utf8');
 
