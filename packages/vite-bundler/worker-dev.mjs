@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import { createServer } from 'vite'
 import { viteLoadPlugin } from './vite-load-plugin.mjs';
+import Path from 'path';
 
 process.on('message', async message => {
   if (message === 'start') {
@@ -16,7 +17,7 @@ process.on('message', async message => {
               return `\0${id}`
             }
           },
-          load: (id) => viteLoadPlugin(id),
+          load: viteLoadPlugin(Path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages')),
         },
         {
           name: 'meteor-handle-restart',

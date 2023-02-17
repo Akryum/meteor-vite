@@ -4,10 +4,14 @@ import { existsSync } from 'node:fs';
 
 let stubUid = 0;
 
-export async function viteLoadPlugin(id) {
+export async function viteLoadPlugin(meteorPackagePath) {
+    return (id) => load(id, meteorPackagePath);
+}
+
+async function load(id, meteorPackages) {
     if (id.startsWith('\0meteor/')) {
         id = id.slice(1)
-        const file = path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages', `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
+        const file = path.join(meteorPackages, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
         const content = await fs.readFile(file, 'utf8')
         const moduleStartIndex = content.indexOf('function module(require,exports,module')
         const moduleContent = content.slice(moduleStartIndex, content.indexOf('function module(require,exports,module', moduleStartIndex + 1))
