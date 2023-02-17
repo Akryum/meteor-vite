@@ -25,19 +25,24 @@
     "baseUrl": ".",
     "paths": {
       /* Support absolute /imports/* with a leading '/' */
-      "/*": ["*"]
+      "/*": ["*"],
+      "meteor/*": [
+        "node_modules/@types/meteor/*",
+        ".meteor/local/types/packages.d.ts"
+      ],
+      "meteor/vite:bundler": [
+        "packages/vite-bundler/index.d.ts"
+      ]
     },
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "types": ["node", "mocha"],
     "esModuleInterop": true,
     "preserveSymlinks": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
 
     /* Vite setup */
     "isolatedModules": true,
   },
-  "exclude": [
-    "./.meteor/**",
-    "./packages/**",
-  ],
 }
