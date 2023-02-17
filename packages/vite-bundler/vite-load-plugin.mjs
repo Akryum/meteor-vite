@@ -2,6 +2,8 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
+let stubUid = 0;
+
 export async function viteLoadPlugin(id) {
     if (id.startsWith('\0meteor/')) {
         id = id.slice(1)

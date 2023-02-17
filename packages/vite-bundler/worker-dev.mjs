@@ -2,8 +2,6 @@ import fs from 'node:fs/promises'
 import { createServer } from 'vite'
 import { viteLoadPlugin } from './vite-load-plugin.mjs';
 
-let stubUid = 0
-
 process.on('message', async message => {
   if (message === 'start') {
     const pkg = JSON.parse(await fs.readFile('package.json', 'utf-8'))
