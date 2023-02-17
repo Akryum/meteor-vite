@@ -37,6 +37,7 @@
     "esModuleInterop": true,
     "preserveSymlinks": true,
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
 
     /* Vite setup */
     "isolatedModules": true,
