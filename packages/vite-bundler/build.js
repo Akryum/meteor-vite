@@ -31,16 +31,22 @@ const filesToCopy = [
   meteorMainModule,
 ]
 
-const tempMeteorProject = path.resolve(cwd, 'node_modules', '.vite-meteor-temp')
+const tempMeteorProject = path.resolve(cwd, 'node_modules', '.vite-meteor-temp');
+const meteorPackagePath = path.join(tempMeteorProject, '.dist', 'bundle', 'programs', 'web.browser', 'packages')
 
 // Vite worker
 
 const viteOutDir = path.join(cwd, 'node_modules', '.vite-meteor', 'dist')
 const payloadMarker = '_vite_result_payload_'
+const workerAssetsDir = path.join(cwd, 'node_modules', '.meteor-vite-build');
+const workerFile = path.join(workerAssetsDir, 'worker.mjs');
+const loadPlugin = path.join(workerAssetsDir, 'vite-load-plugin.mjs');
 
+const loadPluginSource = Assets.getText(loadPlugin);
 const workerSource = `import path from 'node:path'
 import fs from 'node:fs/promises'
 import { build, resolveConfig } from 'vite'
+import { viteLoadPlugin } from '${loadPlugin}'
 
 const meteorPackageReg = /Package\\._define\\("(.*?)"(?:,\\s*exports)?,\\s*{\\n((?:\\s*(?:\\w+):\\s*\\w+,?\\n)+)}\\)/
 
@@ -71,105 +77,10 @@ const results = await build({
           return \`\\0\${id}\`
         }
       },
-      async load (id) {
-        if (id.startsWith('\\0meteor/')) {
-          id = id.slice(1)
-          const file = path.join(${JSON.stringify(tempMeteorProject)}, '.dist', 'bundle', 'programs', 'web.browser', 'packages', \`\${id.replace(\/^meteor\\/\/, '').replace(/:/g, '_')}.js\`)
-          const content = await fs.readFile(file, 'utf8')
-          const moduleStartIndex = content.indexOf('function module(require,exports,module')
-          const moduleContent = content.slice(moduleStartIndex, content.indexOf('function module(require,exports,module', moduleStartIndex + 1))
-
-          let code = \`const g = typeof window !== 'undefined' ? window : global\\n\`
-
-          const exportedKeys = []
-
-          // Meteor exports
-          const [, packageName, exported] = /Package\\._define\\("(.*?)"(?:,\\s*exports)?,\\s*{\\n((?:\\s*(?:\\w+):\\s*\\w+,?\\n)+)}\\)/.exec(content) ?? []
-          if (packageName) {
-            const keys = exported.split('\\n').map(line => {
-              const [,key] = /(\\w+):\\s*(?:\\w+)/.exec(line) ?? []
-              return key
-            }).filter(Boolean)
-            exportedKeys.push(...keys)
-            const generated = keys.map(key => \`export const \${key} = m.\${key}\`)
-            code += \`const m = g.Package['\${packageName}']
-\${generated.join('\\n')}\\n\`
-          }
-
-          // Modules re-exports
-          let linkExports = []
-          let linkResult
-          const relativeExportKeys = []
-          const linkReg = /module\\.link\\("(.*?)", {\\n((?:\\s*.+:\\s*.*\\n)+?)}, \\d+\\);/gm
-          while (linkResult = linkReg.exec(moduleContent)) {
-            linkExports.push([linkResult[1], linkResult[2]])
-          }
-          if (linkExports.length) {
-            for (const linkExport of linkExports) {
-              const isRelativeExport = linkExport[0].startsWith('.')
-              let wildcard = ''
-              const generated = linkExport[1].split('\\n').map(line => {
-                const [,source,target] = /\\s*"?(.*?)"?:\\s*"(.*)"/.exec(line) ?? []
-                if (source && target) {
-                  if (isRelativeExport) {
-                    relativeExportKeys.push(target)
-                    return
-                  } else if (source === '*' && target === '*') {
-                    wildcard = '*'
-                  } else if (source === target) {
-                    return source
-                  } else {
-                    return \`\${source} as \${target}\`
-                  }
-                }
-              }).filter(Boolean)
-              const named = generated.length ? \`{\${generated.join(', ')}}\` : ''
-              if (!isRelativeExport) {
-                code += \`export \${[wildcard, named].filter(Boolean).join(', ')} from '\${linkExport[0]}'\\n\`
-              }
-            }
-          }
-
-          // Module exports
-          let moduleExportsCode = ''
-          const [, moduleExports] = /module\\.export\\({\\n((?:.*\\n)+?)}\\);/.exec(moduleContent) ?? []
-          const hasModuleExports = !!moduleExports || !!relativeExportKeys.length
-          const hasModuleDefaultExport = moduleContent.includes('module.exportDefault(')
-          if (hasModuleExports || hasModuleDefaultExport) {
-            const sid = stubUid++
-            moduleExportsCode += \`let m2
-const require = Package.modules.meteorInstall({
-  '__vite_stub\${sid}.js': (require, exports, module) => {
-    m2 = require('\${id}')
-  },
-}, {
-  "extensions": [
-    ".js",
-  ]
-})
-require('/__vite_stub\${sid}.js')\\n\`
-          }
-          let finalHasModuleExports = false
-          if (hasModuleExports) {
-            const keys = moduleExports.split('\\n').map(line => {
-              const [,key] = /(\\w+?):\\s*/.exec(line) ?? []
-              return key
-            }).concat(relativeExportKeys).filter(key => key && !exportedKeys.includes(key))
-            exportedKeys.push(...keys)
-            finalHasModuleExports = keys.length > 0
-            const generated = keys.map(key => \`export const \${key} = m2.\${key}\`)
-            moduleExportsCode += \`\${generated.join('\\n')}\\n\`
-          }
-          if (hasModuleDefaultExport) {
-            moduleExportsCode += 'export default m2.default ?? m2\\n'
-          }
-          if (finalHasModuleExports || hasModuleDefaultExport) {
-            code += moduleExportsCode
-          }
-
-          return code
-        }
-      },
+      load: viteLoadPlugin({ 
+        isForProduction: true,
+        meteorPackagePath: ${JSON.stringify(meteorPackagePath)},
+       })
     },
   ],
 })
@@ -188,7 +99,6 @@ process.stdout.write(JSON.stringify({
   })),
 }))
 `
-const workerFile = path.join(cwd, 'node_modules', '.meteor-vite-build-worker.mjs')
 
 try {
   // Temporary Meteor build
@@ -253,8 +163,9 @@ try {
   console.log(pc.blue('⚡️ Building with Vite...'))
   startTime = performance.now()
   // Prepare worker
-  fs.ensureDirSync(path.dirname(workerFile))
-  fs.writeFileSync(workerFile, workerSource, 'utf8')
+  fs.ensureDirSync(path.dirname(workerAssetsDir))
+  fs.writeFileSync(workerFile, workerSource, 'utf8');
+  fs.writeFileSync(loadPlugin, loadPluginSource, 'utf8');
 
   fs.ensureDirSync(path.dirname(viteOutDir))
 
@@ -363,7 +274,7 @@ try {
 } catch (e) {
   throw e
 } finally {
-  fs.removeSync(workerFile)
+  fs.removeSync(workerAssetsDir)
 }
 
 function guessCwd () {
