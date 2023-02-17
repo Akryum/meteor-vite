@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 
 let stubUid = 0;
 
-export async function viteLoadPlugin({ meteorPackagePath, projectJson, isForProduction = false }) {
+export function viteLoadPlugin({ meteorPackagePath, projectJson, isForProduction = false }) {
     return (id) => load({
         id,
         meteorPackagePath,
