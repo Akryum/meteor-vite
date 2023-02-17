@@ -12,6 +12,10 @@ ViteBuildPluginBase = class ViteBuildPluginBase {
             this.sources = Object.fromEntries(
               Object.entries(this.paths).map(([moduleName, relativePath]) => [moduleName, Assets.getText(relativePath)])
             )
+        } else {
+            this.paths = Object.fromEntries(
+              Object.entries(this.paths).map(([moduleName, relativePath]) => [moduleName, Assets.absoluteFilePath?.(relativePath)])
+            )
         }
     }
 }
