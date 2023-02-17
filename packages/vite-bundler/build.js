@@ -43,62 +43,7 @@ const workerFile = path.join(workerAssetsDir, 'worker.mjs');
 const loadPlugin = path.join(workerAssetsDir, 'vite-load-plugin.mjs');
 
 const loadPluginSource = ViteBuildPlugins.loadPluginSource;
-const workerSource = `import path from 'node:path'
-import fs from 'node:fs/promises'
-import { build, resolveConfig } from 'vite'
-import { viteLoadPlugin } from '${loadPlugin}'
-
-const meteorPackageReg = /Package\\._define\\("(.*?)"(?:,\\s*exports)?,\\s*{\\n((?:\\s*(?:\\w+):\\s*\\w+,?\\n)+)}\\)/
-
-const viteConfig = await resolveConfig({})
-
-let stubUid = 0
-
-const results = await build({
-  build: {
-    lib: {
-      entry: viteConfig.meteor.clientEntry,
-      formats: ['es'],
-    },
-    rollupOptions: {
-      output: {
-        entryFileNames: 'meteor-entry.js',
-        chunkFileNames: '[name].js',
-      },
-    },
-    outDir: ${JSON.stringify(viteOutDir)},
-    minify: false,
-  },
-  plugins: [
-    {
-      name: 'meteor-stubs',
-      resolveId (id) {
-        if (id.startsWith('meteor/')) {
-          return \`\\0\${id}\`
-        }
-      },
-      load: viteLoadPlugin({ 
-        isForProduction: true,
-        meteorPackagePath: ${JSON.stringify(meteorPackagePath)},
-       })
-    },
-  ],
-})
-
-const result = Array.isArray(results) ? results[0] : results
-
-// Result payload
-process.stdout.write('${payloadMarker}')
-process.stdout.write(JSON.stringify({
-  success: true,
-  meteorViteConfig: viteConfig.meteor,
-  output: result.output.map(o => ({
-    name: o.name,
-    type: o.type,
-    fileName: o.fileName,
-  })),
-}))
-`
+const workerSource = ViteBuildPlugins.workerSource;
 
 try {
   // Temporary Meteor build
@@ -173,6 +118,9 @@ try {
   const result = execaSync('meteor', [
     'node',
     workerFile,
+    viteOutDir,
+    meteorPackagePath,
+    payloadMarker,
   ], {
     cwd,
     stdio: ['inherit', 'pipe', 'inherit'],
