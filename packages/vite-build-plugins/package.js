@@ -12,7 +12,7 @@ Package.onUse(function(api) {
     api.addFiles(['plugin.js'], 'server')
     api.export(['ViteBuildPlugins'], 'server')
     api.addAssets([
-        'vite-load-plugin.mjs',
+        'vite-meteor-stubs.mjs',
         'worker-dev.mjs',
         'worker.mjs',
     ], 'server')

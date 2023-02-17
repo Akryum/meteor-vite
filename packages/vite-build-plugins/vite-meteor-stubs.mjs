@@ -4,13 +4,21 @@ import { existsSync } from 'node:fs';
 
 let stubUid = 0;
 
-export function viteLoadPlugin({ meteorPackagePath, projectJson, isForProduction = false }) {
-    return (id) => load({
-        id,
-        meteorPackagePath,
-        projectJson,
-        isForProduction,
-    });
+export function ViteMeteorStubs({ meteorPackagePath, projectJson, isForProduction = false }) {
+    return {
+        name: 'meteor-stubs',
+        resolveId (id) {
+            if (id.startsWith('meteor/')) {
+                return `\0${id}`
+            }
+        },
+        load: (id) => load({
+            id,
+            meteorPackagePath,
+            projectJson,
+            isForProduction,
+        }),
+    }
 }
 
 async function load({ id, meteorPackagePath, projectJson, isForProduction }) {

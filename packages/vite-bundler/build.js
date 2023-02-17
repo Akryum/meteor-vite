@@ -40,10 +40,7 @@ const viteOutDir = path.join(cwd, 'node_modules', '.vite-meteor', 'dist')
 const payloadMarker = '_vite_result_payload_'
 const workerAssetsDir = path.join(cwd, 'node_modules', '.meteor-vite-build');
 const workerFile = path.join(workerAssetsDir, 'worker.mjs');
-const loadPlugin = path.join(workerAssetsDir, 'vite-load-plugin.mjs');
-
-const loadPluginSource = ViteBuildPlugins.loadPluginSource;
-const workerSource = ViteBuildPlugins.workerSource;
+const meteorStubs = path.join(workerAssetsDir, 'vite-meteor-stubs.mjs');
 
 try {
   // Temporary Meteor build
@@ -109,8 +106,8 @@ try {
   startTime = performance.now()
   // Prepare worker
   fs.ensureDirSync(workerAssetsDir);
-  fs.writeFileSync(workerFile, workerSource, 'utf8');
-  fs.writeFileSync(loadPlugin, loadPluginSource, 'utf8');
+  fs.writeFileSync(workerFile, ViteBuildPlugins.workerSource, 'utf8');
+  fs.writeFileSync(meteorStubs, ViteBuildPlugins.viteMeteorStubs, 'utf8');
 
   fs.ensureDirSync(path.dirname(viteOutDir))
 

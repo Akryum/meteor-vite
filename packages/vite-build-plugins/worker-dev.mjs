@@ -1,25 +1,17 @@
 import fs from 'node:fs/promises'
 import { createServer } from 'vite'
-import { viteLoadPlugin } from './vite-load-plugin.mjs';
 import Path from 'path';
+import { ViteMeteorStubs } from './vite-meteor-stubs.mjs';
 
 process.on('message', async message => {
   if (message === 'start') {
     // Start server
     const server = await createServer({
       plugins: [
-        {
-          name: 'meteor-stubs',
-          resolveId (id) {
-            if (id.startsWith('meteor/')) {
-              return `\0${id}`
-            }
-          },
-          load: viteLoadPlugin({
-            meteorPackagePath: Path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages'),
-            projectJson: JSON.parse(await fs.readFile('package.json', 'utf-8')),
-          }),
-        },
+        ViteMeteorStubs({
+           meteorPackagePath: Path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages'),
+           projectJson: JSON.parse(await fs.readFile('package.json', 'utf-8')),
+        }),
         {
           name: 'meteor-handle-restart',
           buildStart () {
