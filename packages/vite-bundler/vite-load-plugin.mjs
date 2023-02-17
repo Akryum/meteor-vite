@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
-export async function load(id) {
+export async function viteLoadPlugin(id) {
     if (id.startsWith('\0meteor/')) {
         id = id.slice(1)
         const file = path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages', `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
