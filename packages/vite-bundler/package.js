@@ -30,5 +30,6 @@ Package.onUse(function(api) {
   api.mainModule('server.js', 'server')
   api.addAssets([
     'worker-dev.mjs',
+    'vite-load-plugin.mjs',
   ], 'server')
 })
