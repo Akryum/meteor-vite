@@ -15,7 +15,6 @@ Package.registerBuildPlugin({
   ],
   sources: [
     'build.js',
-    './vite-load-plugin.mjs',
   ],
   npmDependencies: {
     execa: '6.1.0',
