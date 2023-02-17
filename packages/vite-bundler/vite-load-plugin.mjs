@@ -4,15 +4,16 @@ import { existsSync } from 'node:fs';
 
 let stubUid = 0;
 
-export async function viteLoadPlugin({ meteorPackagePath, projectJson }) {
+export async function viteLoadPlugin({ meteorPackagePath, projectJson, isForProduction = false }) {
     return (id) => load({
         id,
         meteorPackagePath,
         projectJson,
+        isForProduction,
     });
 }
 
-async function load({ id, meteorPackagePath, projectJson }) {
+async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
     if (id.startsWith('\0meteor/')) {
         id = id.slice(1)
         const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
@@ -109,6 +110,11 @@ require('/__vite_stub${sid}.js')\n`
         }
 
         // Lazy (Isopack)
+        // When bundling for production we can omit this build step.
+        if (isForProduction) {
+            return code;
+        }
+
         const manifestFile = path.join('.meteor', 'local', 'isopacks', `${id.replace(/^meteor\//, '').replace(/:/g, '_')}`, 'web.browser.json')
         if (existsSync(manifestFile)) {
             const manifest = JSON.parse(await fs.readFile(manifestFile, 'utf8'))
