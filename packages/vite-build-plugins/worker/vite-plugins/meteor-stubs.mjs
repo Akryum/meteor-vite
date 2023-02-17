@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 
 let stubUid = 0;
 
-export function ViteMeteorStubs({ meteorPackagePath, projectJson, isForProduction = false }) {
+export function MeteorStubs({ meteorPackagePath, projectJson, isForProduction = false }) {
     return {
         name: 'meteor-stubs',
         resolveId (id) {

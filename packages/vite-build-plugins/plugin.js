@@ -1,5 +1,11 @@
 ViteBuildPlugins = {
-    devWorkerPath: Assets.absoluteFilePath?.('worker-dev.mjs'),
-    viteMeteorStubs: Assets.getText?.('vite-meteor-stubs.mjs'),
-    workerSource: Assets.getText?.('worker.mjs'),
+    dev: {
+        workerPath: Assets.absoluteFilePath?.('worker/worker-dev.mjs'),
+    },
+    source: {
+        vitePlugins: {
+            meteorStubs: Assets.getText?.('worker/vite-plugins/meteor-stubs.mjs'),
+        },
+        worker: Assets.getText?.('worker/worker-prod.mjs')
+    },
 }

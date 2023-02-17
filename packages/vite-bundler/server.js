@@ -24,7 +24,7 @@ if (Meteor.isDevelopment) {
 
   // Use a worker to skip reify and Fibers
   // Use a child process instead of worker to avoid WASM/archived threads error
-  const child = fork(ViteBuildPlugins.devWorkerPath, {
+  const child = fork(ViteBuildPlugins.dev.workerPath, {
     stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
     cwd,
     detached: false,

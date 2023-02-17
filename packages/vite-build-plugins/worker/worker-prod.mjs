@@ -1,5 +1,5 @@
 import { build, resolveConfig } from 'vite';
-import { ViteMeteorStubs } from './vite-meteor-stubs.mjs';
+import { MeteorStubs } from './vite-plugins/meteor-stubs.mjs';
 
 const [viteOutDir, meteorPackagePath, payloadMarker] = process.argv.slice(2);
 
@@ -21,7 +21,7 @@ const results = await build({
         minify: false,
     },
     plugins: [
-        ViteMeteorStubs({
+        MeteorStubs({
             isForProduction: true,
             meteorPackagePath,
         }),

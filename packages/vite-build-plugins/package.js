@@ -6,14 +6,15 @@ Package.describe({
     documentation: 'README.md',
 })
 
+
 Package.onUse(function(api) {
     api.use('isobuild:compiler-plugin@1.0.0')
     api.use('ecmascript')
     api.addFiles(['plugin.js'], 'server')
     api.export(['ViteBuildPlugins'], 'server')
     api.addAssets([
-        'vite-meteor-stubs.mjs',
-        'worker-dev.mjs',
-        'worker.mjs',
+      'worker/worker-dev.mjs',
+      'worker/worker-prod.mjs',
+      './worker/vite-plugins/meteor-stubs.mjs',
     ], 'server')
 })

@@ -1,14 +1,14 @@
 import fs from 'node:fs/promises'
 import { createServer } from 'vite'
 import Path from 'path';
-import { ViteMeteorStubs } from './vite-meteor-stubs.mjs';
+import { MeteorStubs } from './vite-plugins/meteor-stubs.mjs';
 
 process.on('message', async message => {
   if (message === 'start') {
     // Start server
     const server = await createServer({
       plugins: [
-        ViteMeteorStubs({
+        MeteorStubs({
            meteorPackagePath: Path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages'),
            projectJson: JSON.parse(await fs.readFile('package.json', 'utf-8')),
         }),
