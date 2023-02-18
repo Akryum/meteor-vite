@@ -2,6 +2,7 @@ import './main.pcss'
 
 import { Meteor } from 'meteor/meteor'
 import { createApp } from 'vue'
+import { Logger, WrapConsole } from '../api/logger';
 import { router } from './router'
 import { VueMeteor } from './v-meteor'
 import App from './App.vue'
@@ -13,8 +14,14 @@ console.log('lazy meteor package:', MEOWMEOW)
 console.log(check)
 
 Meteor.startup(() => {
-  const app = createApp(App)
+  const app = createApp(App);
   app.use(router)
   app.use(VueMeteor)
-  app.mount('#app')
+  app.mount('#app');
+  
+  WrapConsole();
+  
+  import('./tests/ts-modules.test').catch((error) => {
+    console.error('Error importing test module!', error);
+  });
 })
