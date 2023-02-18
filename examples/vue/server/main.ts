@@ -1,6 +1,6 @@
 import { Meteor } from 'meteor/meteor'
 import { LinksCollection } from '/imports/api/links'
-import '/imports/api/logs';
+import '/imports/api/logger';
 import '/imports/api/linksPub'
 
 function insertLink({ title, url }: { title: string, url: string }) {
