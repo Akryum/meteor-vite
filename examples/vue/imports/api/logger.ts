@@ -1,5 +1,6 @@
 import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
+import safeJson from 'safe-json-stringify';
 import Chalk from 'chalk';
 const chalk = new Chalk.Instance({ level: 3 });
 
@@ -26,26 +27,38 @@ if (Meteor.isServer) {
 }
 
 export const Logger: typeof console = new Proxy(console, {
-    get(target, prop) {
-        const value = target[prop as keyof typeof console];
+    get(target, level: LogLevel) {
+        const value = target[level as keyof typeof console];
         
-        if (!isLogLevel(prop as string, value)) {
+        if (!isLogMethod(level, value)) {
             return value;
         }
         
         return (...args: any[]) => {
             LogsCollection.insert({
                 createdAt: new Date(),
-                level: prop as LogLevel,
-                args,
+                level,
+                args: args.map(arg => safeJson(arg)),
             });
             value(...args);
         }
     }
-})
+});
+
+export function WrapConsole() {
+    if (!Meteor.isClient) {
+        throw new Error('wrapConsole() can only be called on the client');
+    }
+    
+    for (const level of loggableLevels) {
+        Object.defineProperty(window.console, level, {
+            value: Logger[level],
+        })
+    }
+}
 
 type LogLevel = typeof loggableLevels[number];
 const loggableLevels = [ 'log', 'info', 'warn', 'error'] as const;
-function isLogLevel(level: LogLevel | string, value: any): value is typeof console[LogLevel]  {
+function isLogMethod(level: LogLevel | string, value: any): value is typeof console[LogLevel]  {
     return loggableLevels.includes(level as LogLevel);
 }
