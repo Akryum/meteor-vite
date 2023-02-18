@@ -1,21 +1,26 @@
 import { b, c, FIRST, first, namedFunction } from 'meteor/test:ts-modules';
-import { assert, describe, it, testSuite } from './lib';
+import { describe, it, expect } from 'ts-minitest';
 
-testSuite('Meteor modules', () => {
+Meteor.startup(() => {
+    setTimeout(() => runTests(), 500)
+})
+
+function runTests() {
     describe('named exports', () => {
         
         it('does not collide with uppercase and lowercase exports', () => {
-            assert.equal(FIRST, 'UPPERCASE');
-            assert.equal(first, 'lowercase');
+            expect(FIRST).toBe('UPPERCASE');
+            expect(first).toBe('lowercase');
         });
         
         it('can parse export { foo, bar } syntax', () => {
-            assert.equal(b, 2);
-            assert.equal(c, 3);
+            expect(b).toBe(2);
+            expect(c).toBe(3);
         });
         
         it('can parse named functions', () => {
-            assert.equal(typeof namedFunction, 'function');
+            expect(typeof namedFunction).toBe('function');
         });
     })
-})
+}
+
