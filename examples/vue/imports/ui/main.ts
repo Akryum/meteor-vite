@@ -7,7 +7,7 @@ import { VueMeteor } from './v-meteor'
 import App from './App.vue'
 import { MEOWMEOW } from 'meteor/test:lazy'
 import { check } from 'meteor/check'
-import './tests/modules.test';
+import './tests/ts-modules.test';
 
 console.log('lazy meteor package:', MEOWMEOW)
 console.log(check)
