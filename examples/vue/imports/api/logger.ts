@@ -2,6 +2,7 @@ import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
 import safeJson from 'safe-json-stringify';
 import Chalk from 'chalk';
+import util from 'util';
 const chalk = new Chalk.Instance({ level: 3 });
 
 interface LogEntry {
@@ -16,11 +17,15 @@ if (Meteor.isServer) {
     LogsCollection.allow({
         insert(userId, entry: LogEntry) {
             const logFunction = console[entry.level];
-            if (!isLogLevel(entry.level, logFunction)) {
-                console.warn('Unknown "%s" log level from client', entry.level, { args: entry.args })
+            const message = util.format(...entry.args.map(arg => JSON.parse(arg)));
+            if (!isLogMethod(entry.level, logFunction)) {
+                console.warn('Unknown "%s" log level from client', entry.level, message)
                 return false;
             }
-            logFunction(chalk.bold.cyan('Log from client:'), ...entry.args);
+            const labelledMessage = message.split(/[\n\r]+/)
+                .map((line) => `[${chalk.bold.cyan('Client')}] ${line}`)
+                .join('\n');
+            process.stdout.write(labelledMessage + '\n');
             return true;
         }
     })
