@@ -14,18 +14,27 @@ interface LogEntry {
 export const LogsCollection = new Mongo.Collection<LogEntry>('log-entries');
 
 if (Meteor.isServer) {
+    function printEntry(entry: LogEntry) {
+        const rawMessage = util.formatWithOptions(
+            { colors: true },
+            ...entry.args.map(arg => JSON.parse(arg))
+        );
+        const message = rawMessage.split(/[\n\r]+/)
+            .map((line) => `[${chalk.bold.cyan('Client')}] ${line}`)
+            .join('\n');
+        process.stdout.write(message + '\n');
+    }
+    
     LogsCollection.allow({
         insert(userId, entry: LogEntry) {
             const logFunction = console[entry.level];
-            const message = util.format(...entry.args.map(arg => JSON.parse(arg)));
+            
             if (!isLogMethod(entry.level, logFunction)) {
-                console.warn('Unknown "%s" log level from client', entry.level, message)
+                console.warn('Unknown "%s" log level from client', entry.level, entry.args)
                 return false;
             }
-            const labelledMessage = message.split(/[\n\r]+/)
-                .map((line) => `[${chalk.bold.cyan('Client')}] ${line}`)
-                .join('\n');
-            process.stdout.write(labelledMessage + '\n');
+            
+            printEntry(entry);
             return true;
         }
     })
