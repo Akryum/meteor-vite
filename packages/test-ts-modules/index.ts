@@ -26,4 +26,6 @@ export { default as ReExportedDefault, other, subOther } from './other'
 
 import { Meteor } from 'meteor/meteor'
 
+export * from './export-star-from';
+
 Meteor.version

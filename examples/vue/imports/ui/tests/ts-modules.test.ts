@@ -1,4 +1,15 @@
-import { b, c, FIRST, first, namedFunction, MyMeteor, ReExportedMeteor } from 'meteor/test:ts-modules';
+import {
+    b,
+    c,
+    FIRST,
+    first,
+    namedFunction,
+    MyMeteor,
+    ReExportedMeteor,
+    ExportXInteger,
+    ExportXString,
+    ExportXObject,
+} from 'meteor/test:ts-modules';
 import { describe, it, expect } from 'ts-minitest';
 
 Meteor.startup(() => {
@@ -32,6 +43,12 @@ function runTests() {
             expect(ReExportedMeteor.isServer).toBe(false);
             expect(ReExportedMeteor.isClient).toBe(true);
             expect(typeof ReExportedMeteor.subscribe).toBe('function');
+        });
+        
+        it('can export * from "export-star-from"', () => {
+            expect(ExportXInteger).toBe(1);
+            expect(ExportXString).toBe('foo');
+            expect(ExportXObject.key).toBe('value');
         });
     })
 }
