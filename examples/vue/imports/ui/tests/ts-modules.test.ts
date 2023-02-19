@@ -1,4 +1,4 @@
-import { b, c, FIRST, first, namedFunction } from 'meteor/test:ts-modules';
+import { b, c, FIRST, first, namedFunction, MyMeteor } from 'meteor/test:ts-modules';
 import { describe, it, expect } from 'ts-minitest';
 
 Meteor.startup(() => {
@@ -6,7 +6,7 @@ Meteor.startup(() => {
 })
 
 function runTests() {
-    describe('named exports', () => {
+    describe('TypeScript Atmosphere package exports', () => {
         
         it('does not collide with uppercase and lowercase exports', () => {
             expect(FIRST).toBe('UPPERCASE');
@@ -20,6 +20,12 @@ function runTests() {
         
         it('can parse named functions', () => {
             expect(typeof namedFunction).toBe('function');
+        });
+        
+        it('can export Meteor, retaining known properties', () => {
+            expect(MyMeteor.isServer).toBe(false);
+            expect(MyMeteor.isClient).toBe(true);
+            expect(typeof MyMeteor.subscribe).toBe('function');
         });
     })
 }
