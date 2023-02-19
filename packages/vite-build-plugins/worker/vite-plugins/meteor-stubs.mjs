@@ -163,14 +163,15 @@ function readModuleContent(content) {
     const moduleStartIndex = content.search(contentRegex)
     const moduleEndIndex = content.slice(moduleStartIndex + 1).search(contentRegex) + moduleStartIndex;
     const moduleContent = content.slice(moduleStartIndex, moduleEndIndex);
+    const lines = moduleContent.split(/[\n\r]+/);
 
-    return moduleContent;
+    return moduleContent.replace(lines[lines.length - 1], '');
 }
 
 function parseModules(content) {
     const moduleRegex = /^},"(?<moduleName>\S+)":function module\(require,exports,module\)/im;
     const baseModule = readModuleContent(content);
-    let remainingContent = content;
+    let remainingContent = content.replace(baseModule, '');
     const namedModules = {};
     let match = '';
 
@@ -180,7 +181,7 @@ function parseModules(content) {
             break;
         }
         namedModules[moduleName] = readModuleContent(remainingContent);
-        remainingContent = remainingContent.replace(content, '');
+        remainingContent = remainingContent.replace(namedModules[moduleName], '');
     }
 
     return {
