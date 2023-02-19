@@ -60,16 +60,19 @@ ${generated.join('\n')}\n`
                 const generated = linkExport[1].split('\n').map(line => {
                     const [,source,target] = /\s*"?(.*?)"?:\s*"(.*)"/.exec(line) ?? []
                     if (source && target) {
+                        if (source === '*' && target === '*') {
+                            wildcard = '*'
+                        }
                         if (isRelativeExport) {
                             relativeExportKeys.push(target)
-                            return
-                        } else if (source === '*' && target === '*') {
-                            wildcard = '*'
-                        } else if (source === target) {
-                            return source
-                        } else {
-                            return `${source} as ${target}`
                         }
+                        if (wildcard || isRelativeExport) {
+                            return;
+                        }
+                        if (source === target) {
+                            return source
+                        }
+                        return `${source} as ${target}`
                     }
                 }).filter(Boolean)
                 const named = generated.length ? `{${generated.join(', ')}}` : ''
