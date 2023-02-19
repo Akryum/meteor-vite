@@ -25,31 +25,17 @@ async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
     if (id.startsWith('\0meteor/')) {
         id = id.slice(1);
         const {
-            /**
-             * Name of the package. E.g. `ostrio:cookies`
-             * This is usually where we find the full package content, even for packages that have multiple
-             * entry points.
-             */
-            packageId,
-            /**
-             * Requested file path inside the package. E.g. `/lib/index.js`.
-             * Used for packages that have multiple entry points or no mainModule specified in package.js.
-             * E.g. `import { Something } from `ostrio:cookies/some-module`
-             */
-            importPath
-        } = id.match(/(?<packageId>[\w\-. ]+:[\w\-. ]+)(?<importPath>\/.+)?/)?.groups || {};
-        const packagePath = path.join(meteorPackagePath, `${packageId.replace(':', '_')}.js`);
-        const content = await fs.readFile(packagePath, 'utf8')
-        const { mainModule, namedModules } = parseModules(content);
-        const moduleList = [mainModule];
-        let moduleContent = mainModule;
-
+            mainModule,
+            namedModules,
+            fileContent
+        } = await getSourceText({ id, meteorPackagePath });
         let code = `const g = typeof window !== 'undefined' ? window : global\n`
+        const moduleList = [mainModule];
 
         const exportedKeys = []
 
         // Meteor exports
-        const [, packageName, exported] = /Package\._define\("(.*?)"(?:,\s*exports)?,\s*{\n((?:\s*(?:\w+):\s*\w+,?\n)+)}\)/.exec(content) ?? []
+        const [, packageName, exported] = /Package\._define\("(.*?)"(?:,\s*exports)?,\s*{\n((?:\s*(?:\w+):\s*\w+,?\n)+)}\)/.exec(fileContent) ?? []
         if (packageName) {
             const keys = exported.split('\n').map(line => {
                 const [,key] = /(\w+):\s*(?:\w+)/.exec(line) ?? []
@@ -66,7 +52,7 @@ ${generated.join('\n')}\n`
         let linkResult
         const relativeExportKeys = []
         const linkReg = /module\d*\.link\("(.*?)", {\n((?:\s*.+:\s*.*\n)+?)\s*}, \d+\);/gm
-        while (linkResult = linkReg.exec(moduleContent)) {
+        while (linkResult = linkReg.exec(mainModule)) {
             linkExports.push([linkResult[1], linkResult[2]])
         }
         if (linkExports.length) {
@@ -217,4 +203,34 @@ function createDebugLogger(packageName, currentFile) {
         return (...args) => console.info(`[${packageName}]`, ...args);
     }
     return (...args) => null;
+}
+
+async function getSourceText({ meteorPackagePath, id }) {
+    const {
+        /**
+         * Name of the package. E.g. `ostrio:cookies`
+         * This is usually where we find the full package content, even for packages that have multiple
+         * entry points.
+         * @type {string}
+         */
+        packageId,
+
+        /**
+         * Requested file path inside the package. E.g. `/lib/index.js`.
+         * Used for packages that have multiple entry points or no mainModule specified in package.js.
+         * E.g. `import { Something } from `ostrio:cookies/some-module`
+         * @type {string | undefined}
+         */
+        importPath
+    } = id.match(/(?<packageId>[\w\-. ]+:[\w\-. ]+)(?<importPath>\/.+)?/)?.groups || {};
+
+    const sourcePath = path.join(meteorPackagePath, packageId.replace(':', '_'), importPath);
+    const fileContent = await fs.readFile(sourcePath, 'utf8')
+    const { mainModule, namedModules } = parseModules(fileContent);
+
+    return {
+        mainModule,
+        namedModules,
+        fileContent,
+    }
 }
