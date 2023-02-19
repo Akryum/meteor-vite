@@ -22,8 +22,6 @@ export * from 'meteor/tracker'
 
 export { Meteor as ReExportedMeteor } from 'meteor/meteor'
 
-export { default as ReExportedDefault, other, subOther } from './other'
-
 import { Meteor } from 'meteor/meteor'
 
 export { NamedRelativeInteger } from './relative-module';
