@@ -51,7 +51,7 @@ ${generated.join('\n')}\n`
         let linkExports = []
         let linkResult
         const relativeExportKeys = []
-        const linkReg = /module\d*\.link\("(.*?)", {\n((?:\s*.+:\s*.*\n)+?)}, \d+\);/gm
+        const linkReg = /module\d*\.link\("(.*?)", {\n((?:\s*.+:\s*.*\n)+?)\s*}, \d+\);/gm
         while (linkResult = linkReg.exec(moduleContent)) {
             linkExports.push([linkResult[1], linkResult[2]])
         }
