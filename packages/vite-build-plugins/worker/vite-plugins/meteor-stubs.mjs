@@ -27,6 +27,7 @@ async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
         const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
         const content = await fs.readFile(file, 'utf8')
         const { mainModule, namedModules } = parseModules(content);
+        const moduleList = [mainModule];
         let moduleContent = mainModule;
 
         let code = `const g = typeof window !== 'undefined' ? window : global\n`
@@ -79,15 +80,24 @@ ${generated.join('\n')}\n`
                 const named = generated.length ? `{${generated.join(', ')}}` : ''
                 if (!isRelativeExport) {
                     code += `export ${[wildcard, named].filter(Boolean).join(', ')} from '${linkExport[0]}'\n`
+                } else if (wildcard) {
+                    const key = Object.keys(namedModules).find(key => key ?? key.startsWith(`${linkExport[0]}.`))
+                    moduleList.push(namedModules[key]);
                 }
             }
         }
 
         // Module exports
         let moduleExportsCode = ''
-        const [, moduleExports] = /module\d*\.export\({\n((?:.*\n)+?)}\);/.exec(moduleContent) ?? []
+        let moduleExports = '';
+        let hasModuleDefaultExport = false;
+        for (const content of moduleList) {
+            const [, exports] = /module\d*\.export\({\n((?:.*\n)+?)}\);/.exec(content) ?? []
+            moduleExports += `${exports}\n`;
+            hasModuleDefaultExport = content.includes('module.exportDefault(') || hasModuleDefaultExport;
+
+        }
         const hasModuleExports = !!moduleExports || !!relativeExportKeys.length
-        let hasModuleDefaultExport = moduleContent.includes('module.exportDefault(')
         if (hasModuleExports || hasModuleDefaultExport) {
             const sid = stubUid++
             moduleExportsCode += `${moduleTemplate(id, sid)}\n`
@@ -101,7 +111,7 @@ ${generated.join('\n')}\n`
                     return undefined;
                 }
                 return key
-            }).concat(relativeExportKeys).filter(key => key && !exportedKeys.includes(key))
+            }).concat(relativeExportKeys).filter(key => key && !exportedKeys.includes(key) && key !== '*')
             exportedKeys.push(...keys)
             finalHasModuleExports = keys.length > 0
             const generated = keys.map(key => `export const ${key} = m2.${key}`)
