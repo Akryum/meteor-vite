@@ -26,8 +26,7 @@ async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
         id = id.slice(1)
         const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
         const content = await fs.readFile(file, 'utf8')
-        const moduleStartIndex = content.indexOf('function module(require,exports,module')
-        const moduleContent = content.slice(moduleStartIndex, content.indexOf('function module(require,exports,module', moduleStartIndex + 1))
+        const moduleContent = readModuleContent(content);
 
         let code = `const g = typeof window !== 'undefined' ? window : global\n`
 
@@ -156,4 +155,11 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub${sid}.js')
 `
+}
+
+function readModuleContent(content) {
+    const moduleStartIndex = content.indexOf('function module(require,exports,module')
+    const moduleContent = content.slice(moduleStartIndex, content.indexOf('function module(require,exports,module', moduleStartIndex + 1));
+
+    return moduleContent;
 }
