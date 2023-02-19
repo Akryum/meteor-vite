@@ -26,7 +26,7 @@ async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
         id = id.slice(1)
         const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
         const content = await fs.readFile(file, 'utf8')
-        const moduleContent = readModuleContent(content);
+        const { baseModule: moduleContent, namedModules } = parseModules(content);
 
         let code = `const g = typeof window !== 'undefined' ? window : global\n`
 
@@ -165,6 +165,28 @@ function readModuleContent(content) {
     const moduleContent = content.slice(moduleStartIndex, moduleEndIndex);
 
     return moduleContent;
+}
+
+function parseModules(content) {
+    const moduleRegex = /^},"(?<moduleName>\S+)":function module\(require,exports,module\)/im;
+    const baseModule = readModuleContent(content);
+    let remainingContent = content;
+    const namedModules = {};
+    let match = '';
+
+    while (match = remainingContent.match(moduleRegex)) {
+        const { moduleName } = match?.groups || {};
+        if (!moduleName) {
+            break;
+        }
+        namedModules[moduleName] = readModuleContent(remainingContent);
+        remainingContent = remainingContent.replace(content, '');
+    }
+
+    return {
+        baseModule,
+        namedModules,
+    }
 }
 
 function createDebugLogger(packageName, currentFile) {
