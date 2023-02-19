@@ -49,7 +49,7 @@ ${generated.join('\n')}\n`
         let linkExports = []
         let linkResult
         const relativeExportKeys = []
-        const linkReg = /module\.link\("(.*?)", {\n((?:\s*.+:\s*.*\n)+?)}, \d+\);/gm
+        const linkReg = /module\d*\.link\("(.*?)", {\n((?:\s*.+:\s*.*\n)+?)}, \d+\);/gm
         while (linkResult = linkReg.exec(moduleContent)) {
             linkExports.push([linkResult[1], linkResult[2]])
         }
@@ -81,7 +81,7 @@ ${generated.join('\n')}\n`
 
         // Module exports
         let moduleExportsCode = ''
-        const [, moduleExports] = /module\.export\({\n((?:.*\n)+?)}\);/.exec(moduleContent) ?? []
+        const [, moduleExports] = /module\d*\.export\({\n((?:.*\n)+?)}\);/.exec(moduleContent) ?? []
         const hasModuleExports = !!moduleExports || !!relativeExportKeys.length
         let hasModuleDefaultExport = moduleContent.includes('module.exportDefault(')
         if (hasModuleExports || hasModuleDefaultExport) {
