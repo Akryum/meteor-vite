@@ -45,4 +45,12 @@
     /* Vite setup */
     "isolatedModules": true,
   },
+  "include": [
+    "imports/**/*",
+    "tests/**/*",
+    "vite.config.ts",
+    "client/**/*",
+    ".meteor/local/types/packages.d.ts",
+    "node_modules/@types/meteor/**/*",
+  ],
 }
