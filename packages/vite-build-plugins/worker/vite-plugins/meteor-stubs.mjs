@@ -26,7 +26,7 @@ async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
        return;
     }
     id = id.slice(1);
-    const { mainModule, namedModules, fileContent } = await getSourceText({ id, meteorPackagePath });
+    const { mainModule, namedModules, fileContent, packageId } = await getSourceText({ id, meteorPackagePath });
     const moduleList = [mainModule];
     const exportedKeys = []
     let code = `const g = typeof window !== 'undefined' ? window : global\n`
@@ -78,12 +78,7 @@ ${generated.join('\n')}\n`
             if (!isRelativeExport) {
                 code += `export ${[wildcard, named].filter(Boolean).join(', ')} from '${linkExport[0]}'\n`
             } else if (wildcard) {
-                const moduleName = linkExport[0].replace(/^(\.\/)|(\.\w+$)/g, '');
-                Object.entries(namedModules).forEach(([key, value]) => {
-                    if (key.startsWith(moduleName)) {
-                        moduleList.push(value);
-                    }
-                })
+                moduleList.push(namedModules.get(linkExport[0]))
             }
         }
     }
@@ -100,7 +95,7 @@ ${generated.join('\n')}\n`
     const hasModuleExports = !!moduleExports || !!relativeExportKeys.length
     if (hasModuleExports || hasModuleDefaultExport) {
         const sid = stubUid++
-        moduleExportsCode += `${moduleTemplate(id, sid)}\n`
+        moduleExportsCode += `${moduleTemplate(packageId, sid)}\n`
     }
     let finalHasModuleExports = false
     if (hasModuleExports) {
@@ -154,12 +149,12 @@ ${generated.join('\n')}\n`
     return code
 }
 
-function moduleTemplate(id, sid) {
+function moduleTemplate(packageId, sid) {
     return`
 let m2
 const require = Package.modules.meteorInstall({
   '__vite_stub${sid}.js': (require, exports, module) => {
-    m2 = require('${id}')
+    m2 = require('${packageId}')
   },
 }, {
   "extensions": [
@@ -172,7 +167,21 @@ require('/__vite_stub${sid}.js')
 
 function parseModules(content) {
     const regex = /(^(},)"(?<moduleName>\S+)"|\{"(?<mainModule>\S+)"):function module\(require,exports,module\)/img;
-    const namedModules = {};
+    const namedModules = {
+        get(path) {
+            const moduleName = path.replace(/^([.\/]{1,2})?|(\.\w+$)?/g, '');
+            const module = Object.entries(this).find(([key]) => {
+                return key.startsWith(moduleName)
+            })
+            if (!module) {
+                throw new MeteorViteError(
+                    `Could not locate module: "${moduleName}" ` +
+                    `Using path: "${path}" ` +
+                    `Indexed modules: ${Object.keys(this).join(', ')}`);
+            }
+            return module[1];
+        }
+    };
     let mainModule = '';
 
     function getModuleSnippet(fromIndex) {
@@ -197,6 +206,8 @@ function parseModules(content) {
     }
 }
 
+class MeteorViteError extends Error {}
+
 function createDebugLogger(packageName, currentFile) {
     if (currentFile.includes(packageName)) {
         return (...args) => console.info(`[${packageName}]`, ...args);
@@ -207,30 +218,36 @@ function createDebugLogger(packageName, currentFile) {
 async function getSourceText({ meteorPackagePath, id }) {
     const {
         /**
-         * Name of the package. E.g. `ostrio:cookies`
-         * This is usually where we find the full package content, even for packages that have multiple
-         * entry points.
+         * Base Atmosphere package import This is usually where we find the full package content, even for packages
+         * that have multiple entry points.
+         * E.g. `meteor/ostrio:cookies`
          * @type {string}
          */
         packageId,
 
         /**
-         * Requested file path inside the package. E.g. `/lib/index.js`.
+         * Requested file path inside the package. (/some-module)
          * Used for packages that have multiple entry points or no mainModule specified in package.js.
-         * E.g. `import { Something } from `ostrio:cookies/some-module`
+         * E.g. `import { Something } from `meteor/ostrio:cookies/some-module`
          * @type {string | undefined}
          */
         importPath
-    } = id.match(/(meteor\/)(?<packageId>[\w\-. ]+(:[\w\-. ]+)?)(?<importPath>\/.+)?/)?.groups || {};
+    } = id.match(/(?<packageId>(meteor\/)[\w\-. ]+(:[\w\-. ]+)?)(?<importPath>\/.+)?/)?.groups || {};
 
-    const sourceFile = `${packageId.replace(':', '_')}.js`;
+    const packageName = packageId.replace(/^meteor\//, '');
+    const sourceFile = `${packageName.replace(':', '_')}.js`;
     const sourcePath = path.join(meteorPackagePath, sourceFile);
     const fileContent = await fs.readFile(sourcePath, 'utf8')
-    const { mainModule, namedModules } = parseModules(fileContent);
+    let { mainModule, namedModules } = parseModules(fileContent);
+
+    if (importPath) {
+        mainModule = namedModules.get(importPath);
+    }
 
     return {
         mainModule,
         namedModules,
         fileContent,
+        packageId,
     }
 }
