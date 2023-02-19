@@ -5,6 +5,11 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  optimizeDeps: {
+    exclude: [
+        'ts-minitest',
+    ]
+  },
 
   meteor: {
     clientEntry: 'imports/ui/main.ts',
