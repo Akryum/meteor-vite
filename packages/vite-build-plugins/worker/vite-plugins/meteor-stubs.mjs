@@ -165,23 +165,33 @@ require('/__vite_stub${sid}.js')
 `
 }
 
+class NamedModules {
+    constructor() {
+        this._modules = {};
+    }
+
+    add(name, content) {
+        this._modules[name] = content;
+    }
+
+    get(path) {
+        const moduleName = path.replace(/^([.\/]{1,2})?|(\.\w+$)?/g, '');
+        const module = Object.entries(this._modules).find(([key]) => {
+            return key.startsWith(moduleName)
+        });
+        if (!module) {
+            throw new MeteorViteError(
+                `Could not locate module: "${moduleName}" ` +
+                `Using path: "${path}" ` +
+                `Indexed modules: ${Object.keys(this._modules).join(', ')}`);
+        }
+        return module[1];
+    }
+}
+
 function parseModules(content) {
     const regex = /(^(},)"(?<moduleName>\S+)"|\{"(?<mainModule>\S+)"):function module\(require,exports,module\)/img;
-    const namedModules = {
-        get(path) {
-            const moduleName = path.replace(/^([.\/]{1,2})?|(\.\w+$)?/g, '');
-            const module = Object.entries(this).find(([key]) => {
-                return key.startsWith(moduleName)
-            })
-            if (!module) {
-                throw new MeteorViteError(
-                    `Could not locate module: "${moduleName}" ` +
-                    `Using path: "${path}" ` +
-                    `Indexed modules: ${Object.keys(this).join(', ')}`);
-            }
-            return module[1];
-        }
-    };
+    const namedModules = new NamedModules();
     let mainModule = '';
 
     function getModuleSnippet(fromIndex) {
@@ -197,7 +207,7 @@ function parseModules(content) {
             continue;
         }
 
-        namedModules[match.groups.moduleName] = getModuleSnippet(match.index);
+        namedModules.add(match.groups.moduleName, getModuleSnippet(match.index));
     }
 
     return {
