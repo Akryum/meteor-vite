@@ -20,6 +20,8 @@ export { Meteor as MyMeteor } from 'meteor/meteor'
 
 export * from 'meteor/tracker'
 
+export { Meteor as ReExportedMeteor } from 'meteor/meteor'
+
 export { default as ReExportedDefault, other, subOther } from './other'
 
 import { Meteor } from 'meteor/meteor'

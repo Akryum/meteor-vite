@@ -1,4 +1,4 @@
-import { b, c, FIRST, first, namedFunction, MyMeteor } from 'meteor/test:ts-modules';
+import { b, c, FIRST, first, namedFunction, MyMeteor, ReExportedMeteor } from 'meteor/test:ts-modules';
 import { describe, it, expect } from 'ts-minitest';
 
 Meteor.startup(() => {
@@ -26,6 +26,12 @@ function runTests() {
             expect(MyMeteor.isServer).toBe(false);
             expect(MyMeteor.isClient).toBe(true);
             expect(typeof MyMeteor.subscribe).toBe('function');
+        });
+        
+        it('can re-export Meteor, retaining known properties', () => {
+            expect(ReExportedMeteor.isServer).toBe(false);
+            expect(ReExportedMeteor.isClient).toBe(true);
+            expect(typeof ReExportedMeteor.subscribe).toBe('function');
         });
     })
 }
