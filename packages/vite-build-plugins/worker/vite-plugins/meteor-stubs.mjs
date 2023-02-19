@@ -26,7 +26,8 @@ async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
         id = id.slice(1)
         const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
         const content = await fs.readFile(file, 'utf8')
-        const { baseModule: moduleContent, namedModules } = parseModules(content);
+        const { baseModule, namedModules } = parseModules(content);
+        let moduleContent = baseModule;
 
         let code = `const g = typeof window !== 'undefined' ? window : global\n`
 
@@ -160,36 +161,30 @@ require('/__vite_stub${sid}.js')
 `
 }
 
-function readModuleContent(content) {
-    const contentRegex = /function module\d*\(require,exports,module/;
-
-    const moduleStartIndex = content.search(contentRegex)
-    const moduleEndIndex = content.slice(moduleStartIndex + 1).search(contentRegex) + moduleStartIndex;
-    const moduleContent = content.slice(moduleStartIndex, moduleEndIndex);
-    const lines = moduleContent.split(/[\n\r]+/);
-
-    return moduleContent.replace(lines[lines.length - 1], '');
-}
-
 function parseModules(content) {
-    const moduleRegex = /^},"(?<moduleName>\S+)":function module\(require,exports,module\)/im;
-    const baseModule = readModuleContent(content);
-    let remainingContent = content.replace(baseModule, '');
-    const namedModules = {};
-    let match = '';
+    const regex = /(^(},)"(?<moduleName>\S+)"|\{"(?<mainModule>\S+)"):function module\(require,exports,module\)/img;
+    const externalModules = {};
+    let mainModule = '';
 
-    while (match = remainingContent.match(moduleRegex)) {
-        const { moduleName } = match?.groups || {};
-        if (!moduleName) {
-            break;
+    function getModuleSnippet(fromIndex) {
+        const contentStart = content.slice(fromIndex).replace(/.*$/m, '');
+        const toIndex = contentStart.search(regex);
+
+        return contentStart.slice(0, toIndex);
+    }
+
+    for (const match of content.matchAll(regex)) {
+        if (match.groups.mainModule) {
+            mainModule = getModuleSnippet(match.index);
+            continue;
         }
-        namedModules[moduleName] = readModuleContent(remainingContent);
-        remainingContent = remainingContent.replace(namedModules[moduleName], '');
+
+        externalModules[match.groups.moduleName] = getModuleSnippet(match.index);
     }
 
     return {
-        baseModule,
-        namedModules,
+        mainModule,
+        externalModules,
     }
 }
 
