@@ -25,17 +25,11 @@ async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
     if (!id.startsWith('\0meteor/')) {
        return;
     }
-
     id = id.slice(1);
-    const {
-        mainModule,
-        namedModules,
-        fileContent
-    } = await getSourceText({ id, meteorPackagePath });
-    let code = `const g = typeof window !== 'undefined' ? window : global\n`
+    const { mainModule, namedModules, fileContent } = await getSourceText({ id, meteorPackagePath });
     const moduleList = [mainModule];
-
     const exportedKeys = []
+    let code = `const g = typeof window !== 'undefined' ? window : global\n`
 
     // Meteor exports
     const [, packageName, exported] = /Package\._define\("(.*?)"(?:,\s*exports)?,\s*{\n((?:\s*(?:\w+):\s*\w+,?\n)+)}\)/.exec(fileContent) ?? []
@@ -224,9 +218,10 @@ async function getSourceText({ meteorPackagePath, id }) {
          * @type {string | undefined}
          */
         importPath
-    } = id.match(/(?<packageId>[\w\-. ]+:[\w\-. ]+)(?<importPath>\/.+)?/)?.groups || {};
+    } = id.match(/(meteor\/)(?<packageId>[\w\-. ]+(:[\w\-. ]+)?)(?<importPath>\/.+)?/)?.groups || {};
 
-    const sourcePath = path.join(meteorPackagePath, packageId.replace(':', '_'), importPath);
+    const sourceFile = `${packageId.replace(':', '_')}.js`;
+    const sourcePath = path.join(meteorPackagePath, sourceFile);
     const fileContent = await fs.readFile(sourcePath, 'utf8')
     const { mainModule, namedModules } = parseModules(fileContent);
 
