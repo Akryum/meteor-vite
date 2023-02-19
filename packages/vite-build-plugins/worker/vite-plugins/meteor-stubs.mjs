@@ -78,7 +78,7 @@ ${generated.join('\n')}\n`
             if (!isRelativeExport) {
                 code += `export ${[wildcard, named].filter(Boolean).join(', ')} from '${linkExport[0]}'\n`
             } else if (wildcard) {
-                moduleList.push(namedModules.get(linkExport[0]))
+                moduleList.push(namedModules.get(linkExport[0]).content);
             }
         }
     }
@@ -185,7 +185,10 @@ class NamedModules {
                 `Using path: "${path}" ` +
                 `Indexed modules: ${Object.keys(this._modules).join(', ')}`);
         }
-        return module[1];
+        return {
+            name: module[0],
+            content: module[1],
+        };
     }
 }
 
@@ -226,7 +229,7 @@ function createDebugLogger(packageName, currentFile) {
 }
 
 async function getSourceText({ meteorPackagePath, id }) {
-    const {
+    let {
         /**
          * Base Atmosphere package import This is usually where we find the full package content, even for packages
          * that have multiple entry points.
@@ -251,7 +254,9 @@ async function getSourceText({ meteorPackagePath, id }) {
     let { mainModule, namedModules } = parseModules(fileContent);
 
     if (importPath) {
-        mainModule = namedModules.get(importPath);
+        const requestedModule = namedModules.get(importPath);
+        mainModule = requestedModule.content;
+        packageId = `${packageId}/${requestedModule.name}`;
     }
 
     return {
