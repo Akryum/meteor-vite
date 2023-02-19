@@ -10,6 +10,7 @@ import {
     ExportXString,
     ExportXObject,
 } from 'meteor/test:ts-modules';
+import { ExplicitRelativePath } from 'meteor/test:ts-modules/explicit-relative-path';
 import { describe, it, expect } from 'ts-minitest';
 
 Meteor.startup(() => {
@@ -49,6 +50,12 @@ function runTests() {
             expect(ExportXInteger).toBe(1);
             expect(ExportXString).toBe('foo');
             expect(ExportXObject.key).toBe('value');
+        });
+        
+        it('can import using paths relative to the package root', () => {
+            expect(ExplicitRelativePath).toBe(
+                'this should be imported as "meteor/test:ts-modules/explicit-relative-path"'
+            );
         });
     })
 }
