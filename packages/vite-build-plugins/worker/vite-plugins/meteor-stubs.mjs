@@ -24,7 +24,7 @@ export function MeteorStubs({ meteorPackagePath, projectJson, isForProduction = 
 async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
     if (id.startsWith('\0meteor/')) {
         id = id.slice(1)
-        const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
+        const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:([\w\-. ]+).*/, '_$1')}.js`)
         const content = await fs.readFile(file, 'utf8')
         const { mainModule, namedModules } = parseModules(content);
         const moduleList = [mainModule];
