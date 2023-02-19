@@ -161,7 +161,8 @@ function readModuleContent(content) {
     const contentRegex = /function module\d*\(require,exports,module/;
 
     const moduleStartIndex = content.search(contentRegex)
-    const moduleContent = content.slice(moduleStartIndex, content.search(contentRegex) + moduleStartIndex + 1);
+    const moduleEndIndex = content.slice(moduleStartIndex + 1).search(contentRegex) + moduleStartIndex;
+    const moduleContent = content.slice(moduleStartIndex, moduleEndIndex);
 
     return moduleContent;
 }
