@@ -45,7 +45,7 @@ function runTests() {
             expect(typeof ReExportedMeteor.subscribe).toBe('function');
         });
         
-        it('can export * from "export-star-from"', () => {
+        it('can export * from relative modules', () => {
             expect(ExportXInteger).toBe(1);
             expect(ExportXString).toBe('foo');
             expect(ExportXObject.key).toBe('value');
