@@ -26,8 +26,8 @@ async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
         id = id.slice(1)
         const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:/g, '_')}.js`)
         const content = await fs.readFile(file, 'utf8')
-        const { baseModule, namedModules } = parseModules(content);
-        let moduleContent = baseModule;
+        const { mainModule, namedModules } = parseModules(content);
+        let moduleContent = mainModule;
 
         let code = `const g = typeof window !== 'undefined' ? window : global\n`
 
@@ -163,7 +163,7 @@ require('/__vite_stub${sid}.js')
 
 function parseModules(content) {
     const regex = /(^(},)"(?<moduleName>\S+)"|\{"(?<mainModule>\S+)"):function module\(require,exports,module\)/img;
-    const externalModules = {};
+    const namedModules = {};
     let mainModule = '';
 
     function getModuleSnippet(fromIndex) {
@@ -179,12 +179,12 @@ function parseModules(content) {
             continue;
         }
 
-        externalModules[match.groups.moduleName] = getModuleSnippet(match.index);
+        namedModules[match.groups.moduleName] = getModuleSnippet(match.index);
     }
 
     return {
         mainModule,
-        externalModules,
+        namedModules,
     }
 }
 
