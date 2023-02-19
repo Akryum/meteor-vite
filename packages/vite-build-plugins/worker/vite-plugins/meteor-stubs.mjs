@@ -94,7 +94,7 @@ ${generated.join('\n')}\n`
         for (const content of moduleList) {
             const [, exports] = /module\d*\.export\({\n((?:.*\n)+?)}\);/.exec(content) ?? []
             moduleExports += `${exports}\n`;
-            hasModuleDefaultExport = content.includes('module.exportDefault(') || hasModuleDefaultExport;
+            hasModuleDefaultExport = content.match(/module\d*\.exportDefault\(/) || hasModuleDefaultExport;
 
         }
         const hasModuleExports = !!moduleExports || !!relativeExportKeys.length
