@@ -160,8 +160,8 @@ require('/__vite_stub${sid}.js')
 function readModuleContent(content) {
     const contentRegex = /function module\d*\(require,exports,module/;
 
-    const moduleStartIndex = content.indexOf(contentRegex)
-    const moduleContent = content.slice(moduleStartIndex, content.indexOf(contentRegex, moduleStartIndex + 1));
+    const moduleStartIndex = content.search(contentRegex)
+    const moduleContent = content.slice(moduleStartIndex, content.search(contentRegex) + moduleStartIndex + 1);
 
     return moduleContent;
 }
