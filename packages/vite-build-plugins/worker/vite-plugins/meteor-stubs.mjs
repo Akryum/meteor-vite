@@ -163,3 +163,10 @@ function readModuleContent(content) {
 
     return moduleContent;
 }
+
+function createDebugLogger(packageName, currentFile) {
+    if (currentFile.includes(packageName)) {
+        return (...args) => console.info(`[${packageName}]`, ...args);
+    }
+    return (...args) => null;
+}
