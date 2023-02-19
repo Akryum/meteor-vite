@@ -23,9 +23,23 @@ export function MeteorStubs({ meteorPackagePath, projectJson, isForProduction = 
 
 async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
     if (id.startsWith('\0meteor/')) {
-        id = id.slice(1)
-        const file = path.join(meteorPackagePath, `${id.replace(/^meteor\//, '').replace(/:([\w\-. ]+).*/, '_$1')}.js`)
-        const content = await fs.readFile(file, 'utf8')
+        id = id.slice(1);
+        const {
+            /**
+             * Name of the package. E.g. `ostrio:cookies`
+             * This is usually where we find the full package content, even for packages that have multiple
+             * entry points.
+             */
+            packageId,
+            /**
+             * Requested file path inside the package. E.g. `/lib/index.js`.
+             * Used for packages that have multiple entry points or no mainModule specified in package.js.
+             * E.g. `import { Something } from `ostrio:cookies/some-module`
+             */
+            importPath
+        } = id.match(/(?<packageId>[\w\-. ]+:[\w\-. ]+)(?<importPath>\/.+)?/)?.groups || {};
+        const packagePath = path.join(meteorPackagePath, `${packageId.replace(':', '_')}.js`);
+        const content = await fs.readFile(packagePath, 'utf8')
         const { mainModule, namedModules } = parseModules(content);
         const moduleList = [mainModule];
         let moduleContent = mainModule;
