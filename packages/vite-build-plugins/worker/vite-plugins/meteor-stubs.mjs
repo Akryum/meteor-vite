@@ -78,8 +78,12 @@ ${generated.join('\n')}\n`
             if (!isRelativeExport) {
                 code += `export ${[wildcard, named].filter(Boolean).join(', ')} from '${linkExport[0]}'\n`
             } else if (wildcard) {
-                const key = Object.keys(namedModules).find(key => key ?? key.startsWith(`${linkExport[0]}.`))
-                moduleList.push(namedModules[key]);
+                const moduleName = linkExport[0].replace(/^(\.\/)|(\.\w+$)/g, '');
+                Object.entries(namedModules).forEach(([key, value]) => {
+                    if (key.startsWith(moduleName)) {
+                        moduleList.push(value);
+                    }
+                })
             }
         }
     }
@@ -92,7 +96,6 @@ ${generated.join('\n')}\n`
         const [, exports] = /module\d*\.export\({\n((?:.*\n)+?)\s*}\);/.exec(content) ?? []
         moduleExports += `${exports}\n`;
         hasModuleDefaultExport = content.match(/module\d*\.exportDefault\(/) || hasModuleDefaultExport;
-
     }
     const hasModuleExports = !!moduleExports || !!relativeExportKeys.length
     if (hasModuleExports || hasModuleDefaultExport) {
