@@ -258,7 +258,7 @@ async function getSourceText({ meteorPackagePath, id, projectJson }) {
 
 async function checkManifest({ id, sourceName, projectJson, importPath }) {
     const manifestPath = path.join('.meteor', 'local', 'isopacks', sourceName, 'web.browser.json');
-    if (!existsSync(manifestPath)) {
+    if (!existsSync(manifestPath) || !projectJson) {
         return;
     }
 
