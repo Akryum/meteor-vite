@@ -264,16 +264,16 @@ async function checkManifest({ id, sourceName, projectJson, importPath }) {
 
     async function autoImport() {
         if (!projectJson.meteor?.mainModule?.client) {
-            throw new Error(`No meteor.mainModule.client found in package.json`)
+            throw new Error(`⚡  No meteor.mainModule.client found in package.json`)
         }
         const meteorClientEntryFile = path.resolve(process.cwd(), projectJson.meteor.mainModule.client)
         if (!existsSync(meteorClientEntryFile)) {
-            throw new Error(`meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
+            throw new Error(`⚡  meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
         }
         const content = await fs.readFile(meteorClientEntryFile, 'utf8')
         if (!content.includes(`'${id}'`)) {
             await fs.writeFile(meteorClientEntryFile, `import '${id}'\n${content}`)
-            throw new Error(`Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
+            throw new Error(`⚡  Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
         }
     }
 
