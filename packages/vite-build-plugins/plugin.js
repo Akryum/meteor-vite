@@ -7,26 +7,34 @@ ViteBuildPluginBase = class ViteBuildPluginBase {
         meteorStubs: 'worker/vite-plugins/meteor-stubs.mjs',
     };
 
-    sources;
+    _sources = null;
+
+    get sources() {
+        if (process.env.NODE_ENV !== 'production') {
+            throw new Error('⚡ ViteBuildPluginBase.sources should only be used during the production build');
+        }
+
+        if (this._sources) {
+            return this._sources;
+        }
+
+        return this._sources = Object.fromEntries(
+            Object.entries(this.paths).map(([moduleName, relativePath]) => {
+                    try {
+                        return [moduleName, Assets.getText(relativePath)]
+                    } catch (error) {
+                        console.error(`⚡  %s`, pc.red(`Failed to load ${pc.yellow(moduleName)}\n  ${pc.gray(relativePath)}`));
+                        return [moduleName, '']
+                    }
+                }
+            ),
+        );
+    }
 
     constructor() {
         if (typeof Assets.absoluteFilePath === 'function') {
             this.paths = Object.fromEntries(
               Object.entries(this.paths).map(([moduleName, relativePath]) => [moduleName, Assets.absoluteFilePath?.(relativePath)]),
-            );
-        }
-
-        if (process.env.NODE_ENV === 'production') {
-            this.sources = Object.fromEntries(
-              Object.entries(this.paths).map(([moduleName, relativePath]) => {
-                  try {
-                      return [moduleName, Assets.getText(relativePath)]
-                  } catch (error) {
-                      console.error(`⚡  %s`, pc.red(`Failed to load ${pc.yellow(moduleName)}\n  ${pc.gray(relativePath)}`));
-                      return [moduleName, '']
-                  }
-              }
-              ),
             );
         }
     }
