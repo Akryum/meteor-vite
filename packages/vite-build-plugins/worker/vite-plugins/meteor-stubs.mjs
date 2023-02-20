@@ -177,9 +177,8 @@ class NamedModules {
         });
         if (!module) {
             throw new MeteorViteError(
-                `Could not locate module: "${moduleName}" ` +
-                `Using path: "${path}" ` +
-                `Indexed modules: ${Object.keys(this._modules).join(', ')}`);
+                `Could not locate module: "${path}" \n` +
+                `Indexed files:\n  - ${Object.keys(this._modules).join('\n  - ')}`);
         }
         return {
             name: module[0],
