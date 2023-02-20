@@ -272,7 +272,7 @@ async function checkManifest({ id, sourceName, projectJson, importPath }) {
         }
         const content = await fs.readFile(meteorClientEntryFile, 'utf8')
         if (!content.includes(`'${id}'`)) {
-            await fs.writeFile(meteorClientEntryFile, `import '${id}'\n${content}`)
+            await fs.writeFile(meteorClientEntryFile, viteAutoImportBlock({ content, id }))
             throw new Error(`⚡  Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
         }
     }
@@ -291,3 +291,22 @@ async function checkManifest({ id, sourceName, projectJson, importPath }) {
 
 }
 
+
+
+function viteAutoImportBlock({ content, id}) {
+    let imports = content.match(/\*\*\/(.*)\/\*\* End of vite:bundler auto-imports \*\*\//)?.[1] || '';
+    imports += `import '${id}';\n`;
+    const block =
+`/** 
+ * These modules are automatically imported by vite:bundler.
+ * You can commit these to your project or move them elsewhere if you'd like, 
+ * but they must be imported somewhere in your Meteor entrypoint file.
+ * 
+ * More info: https://github.com/Akryum/meteor-vite/blob/main/packages/vite-bundler/README.md#lazy-loaded-meteor-packages
+ **/
+${imports}
+/** End of vite:bundler auto-imports **/
+
+${content}`;
+    return block;
+}
