@@ -23,7 +23,7 @@ ViteBuildPluginBase = class ViteBuildPluginBase {
                     try {
                         return [moduleName, Assets.getText(relativePath)]
                     } catch (error) {
-                        console.error(`⚡  %s`, pc.red(`Failed to load ${pc.yellow(moduleName)}\n  ${pc.gray(relativePath)}`));
+                        console.error(`⚡  %s`, pc.red(`Failed to load ${pc.yellow(moduleName)}\n  ${pc.gray(relativePath)}`, { error }));
                         return [moduleName, '']
                     }
                 }
