@@ -10,6 +10,7 @@ import {
     ExportXString,
     ExportXObject,
 } from 'meteor/test:ts-modules';
+import DefaultReExport, { NamedReExport } from 'meteor/test:ts-modules/packages/test-ts-modules/re-exports-index';
 import { ExplicitRelativePath } from 'meteor/test:ts-modules/explicit-relative-path';
 import { describe, it, expect } from 'ts-minitest';
 
@@ -56,6 +57,14 @@ function runTests() {
             expect(ExplicitRelativePath).toBe(
                 'this should be imported as "meteor/test:ts-modules/explicit-relative-path"'
             );
+        });
+        
+        it('can re-export named exports from other modules as default', () => {
+            expect(DefaultReExport).toBe('DefaultReExport');
+        });
+        
+        it('can re-export named exports from other modules', () => {
+            expect(NamedReExport).toBe('NamedReExport');
         });
     })
 }
