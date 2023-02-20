@@ -10,7 +10,7 @@ import {
     ExportXString,
     ExportXObject,
 } from 'meteor/test:ts-modules';
-import DefaultReExport, { NamedReExport } from 'meteor/test:ts-modules/packages/test-ts-modules/re-exports-index';
+import DefaultReExport, { NamedReExport } from 'meteor/test:ts-modules/re-exports-index';
 import { ExplicitRelativePath } from 'meteor/test:ts-modules/explicit-relative-path';
 import { describe, it, expect } from 'ts-minitest';
 
