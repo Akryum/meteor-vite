@@ -162,8 +162,9 @@ require('/__vite_stub${sid}.js')
 }
 
 class NamedModules {
-    constructor() {
+    constructor(packageId) {
         this._modules = {};
+        this.packageId = packageId;
     }
 
     add(name, content) {
@@ -177,8 +178,8 @@ class NamedModules {
         });
         if (!module) {
             throw new MeteorViteError(
-                `Could not locate module: "${path}" \n` +
-                `Indexed files:\n  - ${Object.keys(this._modules).join('\n  - ')}`);
+                `Could not locate module "${path}". Maybe it's not available in ${this.packageId}?\n` +
+                `Detected files in ${this.packageId}:\n  - ${Object.keys(this._modules).join('\n  - ')}`);
         }
         return {
             name: module[0],
@@ -187,9 +188,9 @@ class NamedModules {
     }
 }
 
-function parseModules(content) {
+function parseModules(content, packageId) {
     const regex = /(^(},)"(?<moduleName>\S+)"|\{"(?<mainModule>\S+)"):function module\(require,exports,module\)/img;
-    const namedModules = new NamedModules();
+    const namedModules = new NamedModules(packageId);
     let mainModule = '';
 
     function getModuleSnippet(fromIndex) {
@@ -250,7 +251,7 @@ async function getSourceText({ meteorPackagePath, id, projectJson }) {
 
     await checkManifest({ id, sourceName, projectJson, importPath });
 
-    let { mainModule, namedModules } = parseModules(fileContent);
+    let { mainModule, namedModules } = parseModules(fileContent, packageId);
 
     if (importPath) {
         const requestedModule = namedModules.get(importPath);
