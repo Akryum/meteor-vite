@@ -26,7 +26,12 @@ async function load({ id, meteorPackagePath, projectJson, isForProduction }) {
        return;
     }
     id = id.slice(1);
-    const { mainModule, namedModules, fileContent, packageId } = await getSourceText({ id, meteorPackagePath });
+    const {
+        mainModule,
+        namedModules,
+        fileContent,
+        packageId
+    } = await getSourceText({ id, meteorPackagePath, isForProduction, projectJson });
     const moduleList = [mainModule];
     const exportedKeys = []
     let code = `const g = typeof window !== 'undefined' ? window : global\n`
@@ -120,31 +125,11 @@ ${generated.join('\n')}\n`
     }
 
     // Lazy (Isopack)
-    // When bundling for production we can omit this build step.
+    // When bundling for production we can omit this build step?
     if (isForProduction) {
         return code;
     }
 
-    const manifestFile = path.join('.meteor', 'local', 'isopacks', `${id.replace(/^meteor\//, '').replace(/:/g, '_')}`, 'web.browser.json')
-    if (existsSync(manifestFile)) {
-        const manifest = JSON.parse(await fs.readFile(manifestFile, 'utf8'))
-        const resource = manifest.resources.find(r => r.fileOptions.mainModule)
-        if (resource?.fileOptions.lazy) {
-            // Auto-import the package to make it available
-            if (!projectJson.meteor?.mainModule?.client) {
-                throw new Error(`No meteor.mainModule.client found in package.json`)
-            }
-            const meteorClientEntryFile = path.resolve(process.cwd(), projectJson.meteor.mainModule.client)
-            if (!existsSync(meteorClientEntryFile)) {
-                throw new Error(`meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
-            }
-            const content = await fs.readFile(meteorClientEntryFile, 'utf8')
-            if (!content.includes(`'${id}'`)) {
-                await fs.writeFile(meteorClientEntryFile, `import '${id}'\n${content}`)
-                throw new Error(`Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
-            }
-        }
-    }
 
     return code
 }
@@ -228,7 +213,7 @@ function createDebugLogger(packageName, currentFile) {
     return (...args) => null;
 }
 
-async function getSourceText({ meteorPackagePath, id }) {
+async function getSourceText({ meteorPackagePath, id, projectJson }) {
     let {
         /**
          * Base Atmosphere package import This is usually where we find the full package content, even for packages
@@ -248,9 +233,13 @@ async function getSourceText({ meteorPackagePath, id }) {
     } = id.match(/(?<packageId>(meteor\/)[\w\-. ]+(:[\w\-. ]+)?)(?<importPath>\/.+)?/)?.groups || {};
 
     const packageName = packageId.replace(/^meteor\//, '');
-    const sourceFile = `${packageName.replace(':', '_')}.js`;
+    const sourceName = packageName.replace(':', '_');
+    const sourceFile = `${sourceName}.js`;
     const sourcePath = path.join(meteorPackagePath, sourceFile);
-    const fileContent = await fs.readFile(sourcePath, 'utf8')
+    const fileContent = await fs.readFile(sourcePath, 'utf8');
+
+    await checkManifest({ id, sourceName, projectJson, importPath });
+
     let { mainModule, namedModules } = parseModules(fileContent);
 
     if (importPath) {
@@ -266,3 +255,39 @@ async function getSourceText({ meteorPackagePath, id }) {
         packageId,
     }
 }
+
+async function checkManifest({ id, sourceName, projectJson, importPath }) {
+    const manifestPath = path.join('.meteor', 'local', 'isopacks', sourceName, 'web.browser.json');
+    if (!existsSync(manifestPath)) {
+        return;
+    }
+
+    async function autoImport() {
+        if (!projectJson.meteor?.mainModule?.client) {
+            throw new Error(`No meteor.mainModule.client found in package.json`)
+        }
+        const meteorClientEntryFile = path.resolve(process.cwd(), projectJson.meteor.mainModule.client)
+        if (!existsSync(meteorClientEntryFile)) {
+            throw new Error(`meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
+        }
+        const content = await fs.readFile(meteorClientEntryFile, 'utf8')
+        if (!content.includes(`'${id}'`)) {
+            await fs.writeFile(meteorClientEntryFile, `import '${id}'\n${content}`)
+            throw new Error(`Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
+        }
+    }
+
+    const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
+    let resource = manifest.resources.find((resource) => resource.fileOptions.mainModule);
+
+    // If a specific file is requested, e.g. `meteor/ostrio:cookies/some-module.js`
+    if (importPath) {
+        resource = manifest.resources.find((resource) => resource.file.includes(importPath));
+    }
+
+    if (resource?.fileOptions?.lazy) {
+        await autoImport();
+    }
+
+}
+
