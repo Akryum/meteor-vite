@@ -9,7 +9,7 @@ Package.describe({
 Package.onUse(function(api) {
     api.use('ecmascript')
     api.use('typescript')
-    api.use('zodern:types:1.0.9')
+    api.use('zodern:types')
     api.addFiles('explicit-relative-path.ts');
     api.mainModule('index.ts', ['client', 'server']);
 })
