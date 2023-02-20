@@ -1,3 +1,5 @@
+import pc from 'picocolors';
+
 ViteBuildPluginBase = class ViteBuildPluginBase {
     paths = {
         workerDev: 'worker/worker-dev.mjs',
@@ -16,7 +18,15 @@ ViteBuildPluginBase = class ViteBuildPluginBase {
 
         if (process.env.NODE_ENV === 'production') {
             this.sources = Object.fromEntries(
-              Object.entries(this.paths).map(([moduleName, relativePath]) => [moduleName, Assets.getText(relativePath)]),
+              Object.entries(this.paths).map(([moduleName, relativePath]) => {
+                  try {
+                      return [moduleName, Assets.getText(relativePath)]
+                  } catch (error) {
+                      console.error(`⚡  %s`, pc.red(`Failed to load ${pc.yellow(moduleName)}\n  ${pc.gray(relativePath)}`));
+                      return [moduleName, '']
+                  }
+              }
+              ),
             );
         }
     }
