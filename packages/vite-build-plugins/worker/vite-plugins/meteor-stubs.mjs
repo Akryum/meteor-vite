@@ -189,9 +189,8 @@ class NamedModules {
 }
 
 function parseModules(content, packageId) {
-    const regex = /(^(},)"(?<moduleName>\S+)"|\{"(?<mainModule>\S+)"):function module\(require,exports,module\)/img;
+    const regex = /(?:^},|)"(?<moduleName>[\w\-. ]+)":function module\(require,exports,module\)/img;
     const namedModules = new NamedModules(packageId);
-    let mainModule = '';
 
     function getModuleSnippet(fromIndex) {
         const contentStart = content.slice(fromIndex).replace(/.*$/m, '');
@@ -201,16 +200,11 @@ function parseModules(content, packageId) {
     }
 
     for (const match of content.matchAll(regex)) {
-        if (match.groups.mainModule) {
-            mainModule = getModuleSnippet(match.index);
-            continue;
-        }
-
         namedModules.add(match.groups.moduleName, getModuleSnippet(match.index));
     }
 
     return {
-        mainModule,
+        mainModule: namedModules._modules[0],
         namedModules,
     }
 }
