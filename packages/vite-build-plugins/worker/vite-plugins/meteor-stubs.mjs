@@ -106,12 +106,23 @@ ${generated.join('\n')}\n`
     if (hasModuleExports) {
         const keys = moduleExports.split('\n').map(line => {
             const [,key] = /(\w+?):\s*/.exec(line) ?? []
+            return key
+        }).concat(relativeExportKeys).filter((key) => {
+            if (!key) {
+                return;
+            }
+            if (exportedKeys.includes(key)) {
+                return;
+            }
+            if (key === '*') {
+                return;
+            }
             if (key === 'default') {
                 hasModuleDefaultExport = true;
-                return undefined;
+                return;
             }
-            return key
-        }).concat(relativeExportKeys).filter(key => key && !exportedKeys.includes(key) && key !== '*')
+            return true;
+        })
         exportedKeys.push(...keys)
         finalHasModuleExports = keys.length > 0
         const generated = keys.map(key => `export const ${key} = m2.${key}`)
