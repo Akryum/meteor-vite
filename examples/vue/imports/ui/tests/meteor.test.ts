@@ -1,0 +1,18 @@
+import { Meteor } from 'meteor/meteor';
+import { describe, it, expect } from 'ts-minitest';
+
+Meteor.startup(() => {
+    setTimeout(() => runTests(), 500)
+})
+
+function runTests() {
+    describe('Meteor Core Packages', () => {
+        it('can explicitly import Meteor', () => {
+            expect(typeof Meteor).toBe('object');
+            expect(Meteor.isServer).toBe(false);
+            expect(Meteor.isClient).toBe(true);
+            expect(typeof Meteor.subscribe).toBe('function');
+        })
+    })
+}
+
