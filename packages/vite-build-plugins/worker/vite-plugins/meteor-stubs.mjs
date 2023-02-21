@@ -189,8 +189,9 @@ class NamedModules {
 }
 
 function parseModules(content, packageId) {
-    const regex = /(?:^},|)"(?<moduleName>[\w\-. ]+)":function module\(require,exports,module\)/img;
+    const regex = /(?:^},|{)"(?<moduleName>[\w\-. ]+)":function module\(require,exports,module\)/img;
     const namedModules = new NamedModules(packageId);
+    let mainModule = '';
 
     function getModuleSnippet(fromIndex) {
         const contentStart = content.slice(fromIndex).replace(/.*$/m, '');
@@ -200,11 +201,16 @@ function parseModules(content, packageId) {
     }
 
     for (const match of content.matchAll(regex)) {
-        namedModules.add(match.groups.moduleName, getModuleSnippet(match.index));
+        const content = getModuleSnippet(match.index)
+        namedModules.add(match.groups.moduleName, content);
+
+        if (!mainModule) {
+            mainModule = content;
+        }
     }
 
     return {
-        mainModule: namedModules._modules[0],
+        mainModule,
         namedModules,
     }
 }
@@ -243,9 +249,13 @@ async function getSourceText({ meteorPackagePath, id, projectJson }) {
     const sourcePath = path.join(meteorPackagePath, sourceFile);
     const fileContent = await fs.readFile(sourcePath, 'utf8');
 
-    await checkManifest({ id, sourceName, projectJson, importPath });
+    const manifest = await checkManifest({ id, sourceName, projectJson, importPath });
 
     let { mainModule, namedModules } = parseModules(fileContent, packageId);
+
+    if (manifest && manifest.mainModule) {
+        mainModule = namedModules.get(manifest.mainModule.path).content;
+    }
 
     if (importPath) {
         const requestedModule = namedModules.get(importPath);
@@ -283,17 +293,26 @@ async function checkManifest({ id, sourceName, projectJson, importPath }) {
     }
 
     const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
-    let resource = manifest.resources.find((resource) => resource.fileOptions.mainModule);
+    let mainModule;
+    const resources = manifest.resources.filter((resource) => {
+        if (resource.fileOptions.mainModule) {
+            mainModule = resource;
+            return true;
+        }
+        if (importPath) {
+            return resource.file.includes(importPath);
+        }
+    });
 
-    // If a specific file is requested, e.g. `meteor/ostrio:cookies/some-module.js`
-    if (importPath) {
-        resource = manifest.resources.find((resource) => resource.file.includes(importPath));
+    await Promise.all(resources.map(async (resource) => {
+        if (resource.fileOptions.lazy) {
+            await autoImport();
+        }
+    }))
+
+    return {
+        mainModule,
     }
-
-    if (resource?.fileOptions?.lazy) {
-        await autoImport();
-    }
-
 }
 
 

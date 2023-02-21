@@ -20,8 +20,13 @@ Meteor.startup(() => {
   app.mount('#app');
   
   WrapConsole();
-  
-  import('./tests/ts-modules.test').catch((error) => {
+  Promise.all([
+    import('./tests/ts-modules.test'),
+    import('./tests/meteor.test'),
+  ]).catch((error) => {
     console.error('Error importing test module!', error);
+    return [];
+  }).then((tests) => {
+    return tests.map((test) => test.default());
   });
 })
