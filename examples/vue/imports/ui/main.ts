@@ -25,5 +25,8 @@ Meteor.startup(() => {
     import('./tests/meteor.test'),
   ]).catch((error) => {
     console.error('Error importing test module!', error);
+    return [];
+  }).then((tests) => {
+    return tests.map((test) => test.default());
   });
 })
