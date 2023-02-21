@@ -249,9 +249,13 @@ async function getSourceText({ meteorPackagePath, id, projectJson }) {
     const sourcePath = path.join(meteorPackagePath, sourceFile);
     const fileContent = await fs.readFile(sourcePath, 'utf8');
 
-    await checkManifest({ id, sourceName, projectJson, importPath });
+    const manifest = await checkManifest({ id, sourceName, projectJson, importPath });
 
     let { mainModule, namedModules } = parseModules(fileContent, packageId);
+
+    if (manifest && manifest.mainModule) {
+        mainModule = namedModules.get(manifest.mainModule.path).content;
+    }
 
     if (importPath) {
         const requestedModule = namedModules.get(importPath);
@@ -306,6 +310,9 @@ async function checkManifest({ id, sourceName, projectJson, importPath }) {
         }
     }))
 
+    return {
+        mainModule,
+    }
 }
 
 
