@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises'
 import { build, resolveConfig } from 'vite';
 import { MeteorStubs } from './vite-plugins/meteor-stubs.mjs';
 
@@ -24,6 +25,7 @@ const results = await build({
         MeteorStubs({
             isForProduction: true,
             meteorPackagePath,
+            projectJson: JSON.parse(await fs.readFile('package.json', 'utf-8'))
         }),
     ],
 });
