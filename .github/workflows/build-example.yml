@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - github-workflows
+      - add-test-suite
   pull_request:
     branches:
       - main
