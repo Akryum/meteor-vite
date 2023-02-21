@@ -289,16 +289,22 @@ async function checkManifest({ id, sourceName, projectJson, importPath }) {
     }
 
     const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
-    let resource = manifest.resources.find((resource) => resource.fileOptions.mainModule);
+    let mainModule;
+    const resources = manifest.resources.filter((resource) => {
+        if (resource.fileOptions.mainModule) {
+            mainModule = resource;
+            return true;
+        }
+        if (importPath) {
+            return resource.file.includes(importPath);
+        }
+    });
 
-    // If a specific file is requested, e.g. `meteor/ostrio:cookies/some-module.js`
-    if (importPath) {
-        resource = manifest.resources.find((resource) => resource.file.includes(importPath));
-    }
-
-    if (resource?.fileOptions?.lazy) {
-        await autoImport();
-    }
+    await Promise.all(resources.map(async (resource) => {
+        if (resource.fileOptions.lazy) {
+            await autoImport();
+        }
+    }))
 
 }
 
