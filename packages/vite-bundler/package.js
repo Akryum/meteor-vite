@@ -21,7 +21,6 @@ Package.registerBuildPlugin({
     execa: '6.1.0',
     'fs-extra': '10.1.0',
     'picocolors': '1.0.0',
-    'vite': '4.1.0',
   },
 })
 
