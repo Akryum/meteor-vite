@@ -20,7 +20,7 @@ const meteorMainModule = pkg.meteor?.mainModule?.client
 const replaceMeteorPackages = [
   { startsWith: 'standard-minifier', replaceWith: '' },
   { startsWith: 'refapp:meteor-typescript', replaceWith: 'typescript' },
-  ...(pkg.meteorVite?.replacePackages || {})
+  ...pkg?.meteorVite?.replacePackages || []
 ]
 if (!meteorMainModule) {
   throw new Error('No meteor main module found, please add meteor.mainModule.client to your package.json')
