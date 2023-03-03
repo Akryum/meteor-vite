@@ -74,7 +74,7 @@ try {
       const lines = content.split('\n')
       content = lines.map(line => {
         if (!line.startsWith(pack.startsWith)) {
-          return '';
+          return line;
         }
         return pack.replaceWith || '';
       }).join('\n')
