@@ -19,6 +19,7 @@ const meteorMainModule = pkg.meteor?.mainModule?.client
 // Useful for other build-time packages that may conflict with Meteor-Vite's temporary build.
 const replaceMeteorPackages = [
   { startsWith: 'standard-minifier', replaceWith: '' },
+  { startsWith: 'refapp:meteor-typescript', replaceWith: 'typescript' },
   ...(pkg.meteorVite?.replacePackages || {})
 ]
 if (!meteorMainModule) {
