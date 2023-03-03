@@ -14,6 +14,13 @@ if (!fs.existsSync(path.join(cwd, 'package.json'))) return
 
 const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'))
 const meteorMainModule = pkg.meteor?.mainModule?.client
+
+// Meteor packages to omit or replace the temporary build.
+// Useful for other build-time packages that may conflict with Meteor-Vite's temporary build.
+const replaceMeteorPackages = [
+  { startsWith: 'standard-minifier', replaceWith: '' },
+  ...(pkg.meteorVite?.replacePackages || {})
+]
 if (!meteorMainModule) {
   throw new Error('No meteor main module found, please add meteor.mainModule.client to your package.json')
 }
@@ -28,6 +35,7 @@ const filesToCopy = [
   path.join('.meteor', 'release'),
   path.join('.meteor', 'versions'),
   'package.json',
+  'tsconfig.json',
   meteorMainModule,
 ]
 
@@ -57,12 +65,19 @@ try {
   if (fs.existsSync(path.join(cwd, 'packages')) && !fs.existsSync(path.join(tempMeteorProject, 'packages'))) {
     fs.symlinkSync(path.join(cwd, 'packages'), path.join(tempMeteorProject, 'packages'))
   }
-  // Remove minifier
+  // Remove/replace conflicting Atmosphere packages
   {
     const file = path.join(tempMeteorProject, '.meteor', 'packages')
     let content = fs.readFileSync(file, 'utf8')
-    const lines = content.split('\n')
-    content = lines.filter(line => !line.startsWith('standard-minifier')).join('\n')
+    for (const pack of replaceMeteorPackages) {
+      const lines = content.split('\n')
+      content = lines.map(line => {
+        if (!line.startsWith(pack.startsWith)) {
+          return '';
+        }
+        return pack.replaceWith || '';
+      }).join('\n')
+    }
     fs.writeFileSync(file, content)
   }
   // Remove server entry
