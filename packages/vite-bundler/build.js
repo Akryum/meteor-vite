@@ -3,6 +3,7 @@ import { performance } from 'node:perf_hooks'
 import fs from 'fs-extra'
 import { execaSync } from 'execa'
 import pc from 'picocolors'
+import esbuild from 'esbuild';
 
 if (process.env.VITE_METEOR_DISABLED) return
 if (process.env.NODE_ENV !== 'production') return
@@ -298,15 +299,13 @@ try {
 
         if (path.extname(from) === '.js') {
           // Transpile to Meteor target (Dynamic import support)
-          // @TODO don't use Babel
           const source = fs.readFileSync(from, 'utf8')
-          const babelOptions = Babel.getDefaultOptions()
-          babelOptions.babelrc = true
-          babelOptions.sourceMaps = true
-          babelOptions.filename = babelOptions.sourceFileName = from
-          const transpiled = Babel.compile(source, babelOptions, {
-            cacheDirectory: path.join(cwd, 'node_modules', '.babel-cache'),
-          })
+
+          const transpiled = esbuild.transformSync(source, {
+            format: 'cjs',
+            sourcemap: true,
+          });
+
           fs.writeFileSync(to, transpiled.code, 'utf8')
         } else {
           fs.copyFileSync(from, to)

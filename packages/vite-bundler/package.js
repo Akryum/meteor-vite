@@ -2,7 +2,7 @@ Package.describe({
   name: 'vite:bundler',
   version: '0.1.10',
   summary: 'Integrate the Vite.js bundler with Meteor',
-  git: 'https://github.com/Akryum/meteor-vite',
+  git: 'https://github.com/networksforchange/meteor-vite',
   documentation: 'README.md',
 })
 
@@ -20,6 +20,7 @@ Package.registerBuildPlugin({
     execa: '6.1.0',
     'fs-extra': '10.1.0',
     'picocolors': '1.0.0',
+    esbuild: '0.17.18',
   },
 })
 
