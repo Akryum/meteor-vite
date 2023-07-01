@@ -188,19 +188,19 @@ class NamedModules {
     }
 }
 
-function parseModules(content, packageId) {
+function getModuleCode(fromText, packageId) {
     const regex = /(?:^},|{)"(?<moduleName>[\w\-. ]+)":function module\(require,exports,module\)/img;
     const namedModules = new NamedModules(packageId);
     let mainModule = '';
 
     function getModuleSnippet(fromIndex) {
-        const contentStart = content.slice(fromIndex).replace(/.*$/m, '');
+        const contentStart = fromText.slice(fromIndex).replace(/.*$/m, '');
         const toIndex = contentStart.search(regex);
 
         return contentStart.slice(0, toIndex);
     }
 
-    for (const match of content.matchAll(regex)) {
+    for (const match of fromText.matchAll(regex)) {
         const content = getModuleSnippet(match.index)
         namedModules.add(match.groups.moduleName, content);
 
@@ -251,7 +251,7 @@ async function getSourceText({ meteorPackagePath, id, projectJson }) {
 
     const manifest = await checkManifest({ id, sourceName, projectJson, importPath });
 
-    let { mainModule, namedModules } = parseModules(fileContent, packageId);
+    let { mainModule, namedModules } = getModuleCode(fileContent, packageId);
 
     if (manifest && manifest.mainModule) {
         mainModule = namedModules.get(manifest.mainModule.path).content;
