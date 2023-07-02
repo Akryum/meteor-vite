@@ -101,6 +101,8 @@ function readModuleExports(node: Node) {
         if (args[0].type !== 'ObjectExpression') throw new ModuleExportsError('Unexpected export type!', exports)
         return handleExports(args[0]);
     }
+    
+    // Todo: Meteor's default module export `module.exportDefault()`
 
     // Meteor's module declaration method. `module.link(...)`
     if (callee.property.name !== 'link') return;
