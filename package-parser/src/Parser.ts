@@ -22,7 +22,6 @@ export async function parseModule(options: { fileContent: string | Promise<strin
 
 function parseSource(code: string) {
     return new Promise<ParserResult>((resolve, reject) => {
-        const startTime = Date.now();
         const source = parse(code);
         let completed = false;
         
