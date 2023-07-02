@@ -60,7 +60,26 @@ function parseMeteorInstall(node: CallExpression) {
     const packageName = meteor.value.properties[0];
     const modules = packageName.value.properties;
     const fileNames = modules.map((module) => module.key.value);
-    
+
+    const moduleBody = modules[0].value.body;
+
+    moduleBody.body.forEach((node) => {
+        if (node.type !== 'ExpressionStatement') return;
+        if (node.expression.type !== 'CallExpression') return;
+        const { callee, arguments: args } = node.expression;
+        if (callee.type !== 'MemberExpression') return;
+        if (callee.object.type !== 'Identifier') return;
+
+        // Meteor's module declaration object. `module.`
+        if (callee.object.name !== 'module') return;
+
+        // Meteor's module declaration method. `export()`
+        if (callee.property.type !== 'Identifier') return;
+        if (callee.property.name !== 'export') return;
+
+        console.log({ 'module.export()': { args } })
+    });
+
     return {
         fileNames,
         packageName: packageName.key.value,
