@@ -63,6 +63,8 @@ function parseMeteorInstall(node: CallExpression) {
 
     const moduleBody = modules[0].value.body;
 
+    const moduleExports: { [key in string]: ModuleExports } = {};
+
     modules.forEach((module) => {
         const fileName = module.key.value;
         module.value.body.body.forEach((node) => {
@@ -71,7 +73,7 @@ function parseMeteorInstall(node: CallExpression) {
                 return;
             }
 
-            console.log({ [`module.export() // ${fileName.toString()}`]: exports })
+            moduleExports[fileName.toString()] = exports;
         });
     })
 
@@ -80,6 +82,7 @@ function parseMeteorInstall(node: CallExpression) {
     return {
         fileNames,
         packageName: packageName.key.value,
+        moduleExports,
     };
 }
 
@@ -121,6 +124,7 @@ class ModuleExportsError extends Error {
 }
 
 type ParserResult = ReturnType<typeof parseMeteorInstall>;
+type ModuleExports = Required<ReturnType<typeof readModuleExports>>;
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
