@@ -1,7 +1,5 @@
-export default class Parser {
-    constructor(protected readonly moduleContent: string | Promise<string>) {}
-    
-    public async getFileList() {
-        return []
+export async function parseModule(options: { fileContent: string | Promise<string> }) {
+    return {
+        fileList: []
     }
 }
