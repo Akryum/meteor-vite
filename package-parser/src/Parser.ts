@@ -61,8 +61,6 @@ function parseMeteorInstall(node: CallExpression) {
     const modules = packageName.value.properties;
     const fileNames = modules.map((module) => module.key.value);
 
-    const moduleBody = modules[0].value.body;
-
     const moduleExports: { [key in string]: ModuleExports } = {};
 
     modules.forEach((module) => {
@@ -76,8 +74,6 @@ function parseMeteorInstall(node: CallExpression) {
             moduleExports[fileName.toString()] = exports;
         });
     })
-
-    moduleBody.body.forEach((node) => readModuleExports(node));
 
     return {
         fileNames,
