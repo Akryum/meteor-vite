@@ -106,7 +106,7 @@ function readModuleExports(node: Node) {
     // Meteor's module declaration method. `module.export(...)`
     if (callee.property.name === 'export') {
         if (args[0].type !== 'ObjectExpression') throw new ModuleExportsError('Unexpected export type!', exports)
-        return readExport({
+        return formatExports({
             expression: args[0]
         });
     }
@@ -119,7 +119,7 @@ function readModuleExports(node: Node) {
     if (args[1].type !== 'ObjectExpression') throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
     if (args[2].type !== 'NumericLiteral') throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0]);
 
-    return readExport({
+    return formatExports({
         packageName: args[0],
         expression: args[1],
         id: args[2],
@@ -135,7 +135,7 @@ function handleMainModule({ expression }: ExpressionStatement) {
     if (callee.object.type !== 'FunctionExpression') return;
     
     const mainModule = callee.object.body;
-    const moduleExports: ReturnType<typeof readExport> = [];
+    const moduleExports: ReturnType<typeof formatExports> = [];
     
     mainModule.body.forEach((node) => {
         const exports = readModuleExports(node);
@@ -146,7 +146,7 @@ function handleMainModule({ expression }: ExpressionStatement) {
     return moduleExports;
 }
 
-function readExport({ expression, packageName, id }: {
+function formatExports({ expression, packageName, id }: {
     expression: ObjectExpression,
     packageName?: StringLiteral,
     id?: NumericLiteral,
