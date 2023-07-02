@@ -63,28 +63,43 @@ function parseMeteorInstall(node: CallExpression) {
 
     const moduleBody = modules[0].value.body;
 
-    moduleBody.body.forEach((node) => {
-        if (node.type !== 'ExpressionStatement') return;
-        if (node.expression.type !== 'CallExpression') return;
-        const { callee, arguments: args } = node.expression;
-        if (callee.type !== 'MemberExpression') return;
-        if (callee.object.type !== 'Identifier') return;
+    modules.forEach((module) => {
+        const fileName = module.key.value;
+        module.value.body.body.forEach((node) => {
+            const exports = readModuleExports(node);
+            if (!exports) {
+                return;
+            }
 
-        // Meteor's module declaration object. `module.`
-        if (callee.object.name !== 'module') return;
+            console.log({ [`module.export() // ${fileName.toString()}`]: exports })
+        });
+    })
 
-        // Meteor's module declaration method. `export()`
-        if (callee.property.type !== 'Identifier') return;
-        if (callee.property.name !== 'export') return;
-
-        console.log({ 'module.export()': { args } })
-    });
+    moduleBody.body.forEach((node) => readModuleExports(node));
 
     return {
         fileNames,
         packageName: packageName.key.value,
     };
 }
+
+function readModuleExports(node: Node) {
+    if (node.type !== 'ExpressionStatement') return;
+    if (node.expression.type !== 'CallExpression') return;
+    const { callee, arguments: args } = node.expression;
+    if (callee.type !== 'MemberExpression') return;
+    if (callee.object.type !== 'Identifier') return;
+
+    // Meteor's module declaration object. `module.`
+    if (callee.object.name !== 'module') return;
+
+    // Meteor's module declaration method. `export()`
+    if (callee.property.type !== 'Identifier') return;
+    if (callee.property.name !== 'export') return;
+
+    return args
+}
+
 type ParserResult = ReturnType<typeof parseMeteorInstall>;
 
 
