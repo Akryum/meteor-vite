@@ -58,27 +58,28 @@ function parseMeteorInstall(node: CallExpression) {
     const node_modules = packageConfig.properties[0];
     const meteor = node_modules.value.properties[0];
     const packageName = meteor.value.properties[0];
-    const modules = packageName.value.properties;
-    const fileNames = modules.map((module) => module.key.value);
+    const packageModules = packageName.value.properties;
 
-    const moduleExports: { [key in string]: ModuleExports } = {};
+    const modules: { [key in string]: ModuleExports } = {};
 
-    modules.forEach((module) => {
-        const fileName = module.key.value;
+    packageModules.forEach((module) => {
+        const fileName = module.key.value.toString()
+        const exportList: ModuleExports = [];
+
+        modules[fileName.toString()] = exportList;
+
         module.value.body.body.forEach((node) => {
             const exports = readModuleExports(node);
             if (!exports) {
                 return;
             }
-
-            moduleExports[fileName.toString()] = exports;
+            exportList.push(...exports);
         });
     })
 
     return {
-        fileNames,
         packageName: packageName.key.value,
-        moduleExports,
+        modules,
     };
 }
 
