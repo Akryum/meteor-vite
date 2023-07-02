@@ -9,6 +9,7 @@ export const TestTsModulesMock = {
     },
     files: [
         'explicit-relative-path.ts',
+        'index.ts',
         'export-star-from.ts',
         're-exports-index.ts',
         're-exports-source.ts',
