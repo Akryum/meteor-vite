@@ -6,10 +6,10 @@ describe('Meteor bundle parser', () => {
     
     it('can read the bundle file list', async () => {
         const parsedModule = await parseModule({
-            fileContent: TestTsModulesMock.file
+            fileContent: TestTsModulesMock.fileContent
         });
         
-        expect(parsedModule.fileList).toEqual(TestTsModulesMock.files);
+        expect(parsedModule.fileList).toEqual(TestTsModulesMock.fileList);
     })
     
 })
