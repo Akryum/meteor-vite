@@ -12,45 +12,47 @@ import {
 export async function parseModule(options: { fileContent: string | Promise<string> }) {
     const startTime = Date.now();
     const tokenizedPackage = parse(await options.fileContent);
+    let result: ReturnType<typeof parseMeteorInstall>;
+    
     traverse(tokenizedPackage, {
         enter(node) {
-            const handler = HandlerMap[node.type];
-            if (typeof handler !== 'function') {
+            if (node.type !== 'CallExpression') {
+                return;
+            }
+            
+            if (typeof node.callee !== 'object') {
                 return;
             }
             
             // @ts-ignore
-            handler(node);
+            if (node.callee.name !== 'meteorInstall') {
+                return;
+            }
+            
+            result = parseMeteorInstall(node)
+            console.log({
+                result,
+                timeSpent: `${Date.now() - startTime}ms`,
+            })
         }
     })
     
-    console.log({ timeSpent: `${Date.now() - startTime}ms` })
+    console.log({ totalTimeSpent: `${Date.now() - startTime}ms` })
     
     return {
         fileList: []
     }
 }
 
-const HandlerMap: Partial<{ [key in Node['type']]: (node: Node & { type: key }) => void }> = {
-    CallExpression(node: CallExpression) {
-        if (typeof node.callee !== 'object') {
-            return;
-        }
-        
-        // @ts-ignore
-        if (node.callee.name !== 'meteorInstall') {
-            return;
-        }
-        
-        const packageConfig = node.arguments[0] as PackageConfig;
-        const node_modules = packageConfig.properties[0];
-        const meteor = node_modules.value.properties[0];
-        const packageName = meteor.value.properties[0];
-        const modules = packageName.value.properties;
-        const fileNames = modules.map((module) => module.key.value);
-        
-        console.log({ packageName: packageName.key.value, fileNames });
-    },
+function parseMeteorInstall(node: CallExpression) {
+    const packageConfig = node.arguments[0] as PackageConfig;
+    const node_modules = packageConfig.properties[0];
+    const meteor = node_modules.value.properties[0];
+    const packageName = meteor.value.properties[0];
+    const modules = packageName.value.properties;
+    const fileNames = modules.map((module) => module.key.value);
+    
+    return { packageName: packageName.key.value, fileNames };
 }
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
