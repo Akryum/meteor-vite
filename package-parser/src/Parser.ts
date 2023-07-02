@@ -1,12 +1,11 @@
 import { parse } from '@babel/parser';
 import {
-    CallExpression,
+    CallExpression, Expression, ExpressionStatement,
     FunctionExpression,
     Node, NumericLiteral,
     ObjectExpression,
-    ObjectProperty, StringLiteral,
+    ObjectProperty, PatternLike, StringLiteral,
     traverse,
-    VariableDeclaration,
 } from '@babel/types';
 
 export async function parseModule(options: { fileContent: string | Promise<string> }) {
@@ -91,6 +90,9 @@ function parseMeteorInstall(node: CallExpression) {
 
 function readModuleExports(node: Node) {
     if (node.type !== 'ExpressionStatement') return;
+    if (node.expression.type === 'UnaryExpression') {
+        return handleMainModule(node);
+    }
     if (node.expression.type !== 'CallExpression') return;
     const { callee, arguments: args } = node.expression;
     if (callee.type !== 'MemberExpression') return;
@@ -123,19 +125,42 @@ function readModuleExports(node: Node) {
     })
 }
 
+function handleMainModule({ expression }: ExpressionStatement) {
+    if (expression.type !== 'UnaryExpression') return;
+    if (expression.operator !== '!') return;
+    if (expression.argument.type !== 'CallExpression') return;
+    const callee = expression.argument.callee
+    if (callee.type !== 'MemberExpression') return;
+    if (callee.object.type !== 'FunctionExpression') return;
+    const mainModule = callee.object.body;
+    const exports: ReturnType<typeof handleLink | typeof handleExports> = [];
+    mainModule.body.forEach((node) => {
+        const exports = readModuleExports(node);
+        if (!exports) return;
+        exports.push(...exports)
+    });
+    return exports;
+}
+
 function handleLink({ packageName, exports, id }: {
     packageName: StringLiteral,
     exports: ObjectExpression,
     id: NumericLiteral,
 }) {
     return exports.properties.map((property) => {
-        if (property.type !== "ObjectProperty") throw new ModuleExportsError('Unexpected property type!', property);
+        if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
         let key: string | undefined;
+        let value: Expression | PatternLike | undefined;
         if (property.key.type === 'Identifier') {
             key = property.key.name
         }
         if (property.key.type === 'StringLiteral') {
             key = property.key.value;
+        }
+        if (property.type === 'ObjectProperty') {
+            value = property.value;
+        } else if (key !== 'Meteor') {
+            console.warn('Need further implementation for object method handling!', property);
         }
         if (!key) {
             throw new ModuleExportsError('Unexpected property key type!', property)
@@ -143,8 +168,8 @@ function handleLink({ packageName, exports, id }: {
 
         return {
             key,
+            value,
             type: 're-export',
-            value: property.value,
             fromPackage: packageName.value,
             id: id.value,
         };
@@ -152,13 +177,19 @@ function handleLink({ packageName, exports, id }: {
 }
 function handleExports(exports: ObjectExpression) {
     return exports.properties.map((property) => {
-        if (property.type !== "ObjectProperty") throw new ModuleExportsError('Unexpected property type!', property);
+        if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
         if (property.key.type !== 'Identifier') throw new ModuleExportsError('Unexpected property key type!', property);
-
+        let value: Expression | PatternLike | undefined;
+        if (property.type === 'ObjectProperty') {
+            value = property.value;
+        } else {
+            console.warn('Need further implementation for object method handling!', property);
+        }
+        
         return {
             key: property.key.name,
             type: 'export',
-            value: property.value,
+            value,
         };
     });
 }
