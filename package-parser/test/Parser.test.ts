@@ -10,7 +10,7 @@ describe('Meteor bundle parser', async () => {
     });
     
     it('can read the bundle file list', () => {
-        expect(parsedModule.fileList).toEqual(TestTsModulesMock.fileList);
+        expect(parsedModule.fileNames).toEqual(TestTsModulesMock.fileNames);
     });
     
     it('can detect the package name', () => {

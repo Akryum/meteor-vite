@@ -7,7 +7,7 @@ export const TestTsModulesMock = {
     exports: {
         // todo
     },
-    fileList: [
+    fileNames: [
         'explicit-relative-path.ts',
         'index.ts',
         'export-star-from.ts',

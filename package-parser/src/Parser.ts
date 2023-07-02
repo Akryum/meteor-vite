@@ -18,9 +18,7 @@ export async function parseModule(options: { fileContent: string | Promise<strin
         timeSpent: `${Date.now() - startTime}ms`
     });
     
-    return {
-        fileList: result.fileNames
-    }
+    return result;
 }
 
 function parseSource(code: string) {
