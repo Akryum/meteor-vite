@@ -130,10 +130,19 @@ function handleLink({ packageName, exports, id }: {
 }) {
     return exports.properties.map((property) => {
         if (property.type !== "ObjectProperty") throw new ModuleExportsError('Unexpected property type!', property);
-        if (property.key.type !== 'Identifier') throw new ModuleExportsError('Unexpected property key type!', property);
+        let key: string | undefined;
+        if (property.key.type === 'Identifier') {
+            key = property.key.name
+        }
+        if (property.key.type === 'StringLiteral') {
+            key = property.key.value;
+        }
+        if (!key) {
+            throw new ModuleExportsError('Unexpected property key type!', property)
+        }
 
         return {
-            key: property.key.name,
+            key,
             type: 're-export',
             value: property.value,
             fromPackage: packageName.value,
