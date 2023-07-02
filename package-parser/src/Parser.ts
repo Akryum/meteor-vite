@@ -91,7 +91,7 @@ function readModuleExports(node: Node) {
     if (callee.object.type !== 'Identifier') return;
 
     // Meteor's module declaration object. `module.`
-    if (callee.object.name !== 'module') return;
+    if (!callee.object.name.match(/^module\d*$/)) return;
 
     if (callee.property.type !== 'Identifier') return;
 
@@ -120,7 +120,7 @@ function handleLink(linkArgs: {
     exports: ObjectExpression,
     id: NumericLiteral,
 }) {
-
+    // todo
 }
 function handleExports(exports: ObjectExpression) {
     return exports.properties.map((property) => {
