@@ -11,37 +11,51 @@ import {
 
 export async function parseModule(options: { fileContent: string | Promise<string> }) {
     const startTime = Date.now();
-    const tokenizedPackage = parse(await options.fileContent);
-    let result: ReturnType<typeof parseMeteorInstall>;
-    
-    traverse(tokenizedPackage, {
-        enter(node) {
-            if (node.type !== 'CallExpression') {
-                return;
-            }
-            
-            if (typeof node.callee !== 'object') {
-                return;
-            }
-            
-            // @ts-ignore
-            if (node.callee.name !== 'meteorInstall') {
-                return;
-            }
-            
-            result = parseMeteorInstall(node)
-            console.log({
-                result,
-                timeSpent: `${Date.now() - startTime}ms`,
-            })
-        }
-    })
-    
-    console.log({ totalTimeSpent: `${Date.now() - startTime}ms` })
+    const { result, timeSpent } = await parseSource(await options.fileContent);
+    console.log({
+        result,
+        timeSpentParsing: timeSpent,
+        overallTimeSpent: `${Date.now() - startTime}ms`
+    });
     
     return {
-        fileList: []
+        fileList: result.fileNames
     }
+}
+
+function parseSource(code: string) {
+    return new Promise<ParserResult>((resolve, reject) => {
+        const startTime = Date.now();
+        const source = parse(code);
+        let completed = false;
+        
+        traverse(source, {
+            enter(node) {
+                if (node.type !== 'CallExpression') {
+                    return;
+                }
+                
+                if (typeof node.callee !== 'object') {
+                    return;
+                }
+                
+                // @ts-ignore
+                if (node.callee.name !== 'meteorInstall') {
+                    return;
+                }
+                
+                resolve({
+                    result: parseMeteorInstall(node),
+                    timeSpent: `${Date.now() - startTime}ms`,
+                });
+                completed = true;
+            }
+        });
+        
+        if (!completed) {
+            reject(new Error('Unable to parse Meteor package!'))
+        }
+    })
 }
 
 function parseMeteorInstall(node: CallExpression) {
@@ -53,6 +67,14 @@ function parseMeteorInstall(node: CallExpression) {
     const fileNames = modules.map((module) => module.key.value);
     
     return { packageName: packageName.key.value, fileNames };
+}
+
+interface ParserResult {
+    result: {
+        packageName: string;
+        fileNames: string[];
+    }
+    timeSpent: string;
 }
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
