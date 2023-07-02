@@ -133,14 +133,17 @@ function handleMainModule({ expression }: ExpressionStatement) {
     const callee = expression.argument.callee
     if (callee.type !== 'MemberExpression') return;
     if (callee.object.type !== 'FunctionExpression') return;
+    
     const mainModule = callee.object.body;
-    const exports: ReturnType<typeof readExport> = [];
+    const moduleExports: ReturnType<typeof readExport> = [];
+    
     mainModule.body.forEach((node) => {
         const exports = readModuleExports(node);
         if (!exports) return;
-        exports.push(...exports)
+        moduleExports.push(...exports)
     });
-    return exports;
+    
+    return moduleExports;
 }
 
 function readExport({ expression, packageName, id }: {
