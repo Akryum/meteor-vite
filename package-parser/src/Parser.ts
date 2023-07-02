@@ -107,7 +107,9 @@ function readModuleExports(node: Node) {
     // Meteor's module declaration method. `module.export(...)`
     if (callee.property.name === 'export') {
         if (args[0].type !== 'ObjectExpression') throw new ModuleExportsError('Unexpected export type!', exports)
-        return handleExports(args[0]);
+        return readExport({
+            expression: args[0]
+        });
     }
     
     // Todo: Meteor's default module export `module.exportDefault()`
@@ -118,9 +120,9 @@ function readModuleExports(node: Node) {
     if (args[1].type !== 'ObjectExpression') throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
     if (args[2].type !== 'NumericLiteral') throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0]);
 
-    return handleLink({
+    return readExport({
         packageName: args[0],
-        exports: args[1],
+        expression: args[1],
         id: args[2],
     })
 }
@@ -133,7 +135,7 @@ function handleMainModule({ expression }: ExpressionStatement) {
     if (callee.type !== 'MemberExpression') return;
     if (callee.object.type !== 'FunctionExpression') return;
     const mainModule = callee.object.body;
-    const exports: ReturnType<typeof handleLink | typeof handleExports> = [];
+    const exports: ReturnType<typeof readExport> = [];
     mainModule.body.forEach((node) => {
         const exports = readModuleExports(node);
         if (!exports) return;
@@ -142,56 +144,46 @@ function handleMainModule({ expression }: ExpressionStatement) {
     return exports;
 }
 
-function handleLink({ packageName, exports, id }: {
-    packageName: StringLiteral,
-    exports: ObjectExpression,
-    id: NumericLiteral,
+function readExport({ expression, packageName, id }: {
+    expression: ObjectExpression,
+    packageName?: StringLiteral,
+    id?: NumericLiteral,
 }) {
-    return exports.properties.map((property) => {
+    return expression.properties.map((property) => {
         if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
-        let key: string | undefined;
-        let value: Expression | PatternLike | undefined;
+        const result: {
+            key?: string,
+            value?: ObjectProperty['value'],
+            type?: 're-export' | 'export';
+            fromPackage?: string;
+            id?: number;
+        } = {
+            type: 'export',
+        }
         if (property.key.type === 'Identifier') {
-            key = property.key.name
+            result.key = property.key.name
         }
         if (property.key.type === 'StringLiteral') {
-            key = property.key.value;
+            result.key = property.key.value;
         }
         if (property.type === 'ObjectProperty') {
-            value = property.value;
-        } else if (key !== 'Meteor') {
+            result.value = property.value;
+        } else if (result.key !== 'Meteor') {
             console.warn('Need further implementation for object method handling!', property);
         }
-        if (!key) {
+        if (!result.key) {
             throw new ModuleExportsError('Unexpected property key type!', property)
         }
-
-        return {
-            key,
-            value,
-            type: 're-export',
-            fromPackage: packageName.value,
-            id: id.value,
-        };
-    });
-}
-function handleExports(exports: ObjectExpression) {
-    return exports.properties.map((property) => {
-        if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
-        if (property.key.type !== 'Identifier') throw new ModuleExportsError('Unexpected property key type!', property);
-        let value: Expression | PatternLike | undefined;
-        if (property.type === 'ObjectProperty') {
-            value = property.value;
-        } else {
-            console.warn('Need further implementation for object method handling!', property);
+        if (packageName) {
+            result.type = 're-export';
+        }
+        if (id) {
+            result.id = id.value;
         }
         
-        return {
-            key: property.key.name,
-            type: 'export',
-            value,
-        };
-    });
+        return result;
+    })
+    
 }
 
 class ModuleExportsError extends Error {
