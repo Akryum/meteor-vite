@@ -97,11 +97,30 @@ function readModuleExports(node: Node) {
     if (callee.property.type !== 'Identifier') return;
     if (callee.property.name !== 'export') return;
 
-    return args
+    const exports = args[0];
+    if (exports.type !== 'ObjectExpression') throw new ModuleExportsError('Unexpected export type!', exports)
+
+    return exports.properties.map((property) => {
+        if (property.type !== "ObjectProperty") throw new ModuleExportsError('Unexpected property type!', property);
+        if (property.key.type !== 'Identifier') throw new ModuleExportsError('Unexpected property key type!', property);
+
+        return {
+            key: property.key.name,
+            value: property.value,
+        };
+    });
+}
+
+class ModuleExportsError extends Error {
+    constructor(
+        public readonly message: string,
+        public readonly node: Node
+    ) {
+        super(message);
+    }
 }
 
 type ParserResult = ReturnType<typeof parseMeteorInstall>;
-
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
