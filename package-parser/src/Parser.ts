@@ -2,7 +2,7 @@ import { parse } from '@babel/parser';
 import {
     CallExpression,
     FunctionExpression,
-    Node,
+    Node, NumericLiteral,
     ObjectExpression,
     ObjectProperty, StringLiteral,
     traverse,
@@ -93,13 +93,26 @@ function readModuleExports(node: Node) {
     // Meteor's module declaration object. `module.`
     if (callee.object.name !== 'module') return;
 
-    // Meteor's module declaration method. `export()`
     if (callee.property.type !== 'Identifier') return;
-    if (callee.property.name !== 'export') return;
 
-    const exports = args[0];
-    if (exports.type !== 'ObjectExpression') throw new ModuleExportsError('Unexpected export type!', exports)
 
+    // Meteor's module declaration method. `module.export(...)`
+    if (callee.property.name === 'export') {
+        if (args[0].type !== 'ObjectExpression') throw new ModuleExportsError('Unexpected export type!', exports)
+        return handleExports(args[0]);
+    }
+
+    // Meteor's module declaration method. `module.link(...)`
+    if (callee.property.name !== 'link') return;
+    if (args[0].type !== 'StringLiteral') throw new ModuleExportsError('Expected string as the first argument in module.link()!', args[0]);
+    if (args[1].type !== 'ObjectExpression') throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
+    if (args[2].type !== 'NumericLiteral') throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0]);
+
+    return handleLink([args[0], args[1], args[2]])
+}
+
+function handleLink(args: [StringLiteral, ObjectExpression, NumericLiteral]) {}
+function handleExports(exports: ObjectExpression) {
     return exports.properties.map((property) => {
         if (property.type !== "ObjectProperty") throw new ModuleExportsError('Unexpected property type!', property);
         if (property.key.type !== 'Identifier') throw new ModuleExportsError('Unexpected property key type!', property);
