@@ -17,6 +17,7 @@ describe('Mock package: `test:ts-modules`', async () => {
             describe(key, () => {
                 const parsedExports =  parsedModule.modules[key];
                 const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
+                const mockReExports = mockExports?.filter(({ type }) => type === 're-export')
                 
                 
                 it('has parsed exports', () => {
@@ -30,6 +31,21 @@ describe('Mock package: `test:ts-modules`', async () => {
                         it(`export { ${mockExport.key} }`, () => {
                             const expectation = expect.arrayContaining(
                                 [expect.objectContaining({ key: mockExport.key, type: mockExport.type })]
+                            )
+                            expect(parsedExports).toEqual(expectation)
+                        })
+                    })
+                })
+                
+                describe('Re-exports', () => {
+                    mockReExports?.forEach((mockExport) => {
+                        it(`export { ${mockExport.key} } from '${mockExport.fromPackage}'`, () => {
+                            const expectation = expect.arrayContaining(
+                                [expect.objectContaining({
+                                    key: mockExport.key,
+                                    type: mockExport.type,
+                                    fromPackage: mockExport.fromPackage
+                                })]
                             )
                             expect(parsedExports).toEqual(expectation)
                         })
