@@ -1,5 +1,13 @@
 import { parse } from '@babel/parser';
-import { Node, traverse, VariableDeclaration } from '@babel/types';
+import {
+    CallExpression,
+    FunctionExpression,
+    Node,
+    ObjectExpression,
+    ObjectProperty, StringLiteral,
+    traverse,
+    VariableDeclaration,
+} from '@babel/types';
 
 export async function parseModule(options: { fileContent: string | Promise<string> }) {
     const startTime = Date.now();
@@ -24,32 +32,48 @@ export async function parseModule(options: { fileContent: string | Promise<strin
 }
 
 const HandlerMap: Partial<{ [key in Node['type']]: (node: Node & { type: key }) => void }> = {
-    VariableDeclaration(node: VariableDeclaration) {
-        if (node.declarations[0].id.type !== 'Identifier') {
-            return;
-        }
-        const name = node.declarations[0].id.name;
-        
-        if (name !== 'meteorInstall') {
+    CallExpression(node: CallExpression) {
+        if (typeof node.callee !== 'object') {
             return;
         }
         
-        console.log({ [name]: node.declarations[0] })
-    }
+        // @ts-ignore
+        if (node.callee.name !== 'meteorInstall') {
+            return;
+        }
+        
+        const packageConfig = node.arguments[0] as PackageConfig;
+        const node_modules = packageConfig.properties[0];
+        const meteor = node_modules.value.properties[0];
+        const packageName = meteor.value.properties[0];
+        const modules = packageName.value.properties;
+        const fileNames = modules.map((module) => module.key.value);
+        
+        console.log({ packageName: packageName.key.value, fileNames });
+    },
 }
 
-function getNamedDeclaration(node: Node) {
-    if (node.type !== 'VariableDeclaration') {
-        return;
-    }
-    
-    if (node.declarations[0].id.type !== 'Identifier') {
-        return;
-    }
-    
-    if (typeof node.declarations[0].id.name !== 'undefined') {
-        return;
-    }
-    
-    return node;
-}
+type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
+type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
+
+type PackageConfig = KnownObjectExpression<{
+    properties: [KnownObjectProperty<{
+        key: StringLiteral & { value: 'node_modules' }
+        value: KnownObjectExpression<{
+            properties: [KnownObjectProperty<{
+                key: StringLiteral & { value: 'meteor' },
+                value: KnownObjectExpression<{
+                    properties: [KnownObjectProperty<{
+                        key: StringLiteral, // Package name
+                        value: KnownObjectExpression<{
+                            properties: Array<KnownObjectProperty<{
+                                key: StringLiteral, // File name
+                                value: FunctionExpression, // Module function
+                            }>>
+                        }>
+                    }>]
+                }>
+            }>]
+        }>
+    }>]
+}>
