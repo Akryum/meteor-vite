@@ -1,6 +1,6 @@
 import FS from 'fs/promises';
 import Path from 'path';
-import { ModuleExports, ModuleList } from '../../src/Parser';
+import { ModuleList } from '../../src/Parser';
 
 
 const Placeholder = {} as any;
@@ -18,18 +18,13 @@ export const TestTsModulesMock = {
             { type: 'export', key: 'b', value: Placeholder },
             { type: 'export', key: 'c', value: Placeholder },
             { type: 'export', key: 'namedFunction', value: Placeholder },
-            { type: 're-export', key: 'Meteor', value: Placeholder, id: 0 },
-            { type: 're-export', key: '*', value: Placeholder, id: 1 },
-            { type: 're-export', key: 'Meteor', value: Placeholder, id: 2 },
-            { type: 're-export', key: 'Meteor', id: 3 },
-            {
-                type: 're-export',
-                key: 'NamedRelativeInteger',
-                value: Placeholder,
-                id: 4
-            },
-            { type: 're-export', key: '*', value: Placeholder, id: 5 },
-            { type: 'export-default', key: 'namedFunction' }
+            { type: 're-export', key: 'Meteor', value: Placeholder, fromPackage: 'meteor/meteor', id: 0 },
+            { type: 're-export', key: '*', value: Placeholder, fromPackage: 'meteor/tracker', id: 1 },
+            { type: 're-export', key: 'Meteor', value: Placeholder, fromPackage: 'meteor/meteor', id: 2 },
+            { type: 're-export', key: 'Meteor', fromPackage: 'meteor/meteor', id: 3 },
+            { type: 're-export', key: 'NamedRelativeInteger', value: Placeholder, fromPackage: './relative-module', id: 4 },
+            { type: 're-export', key: '*', value: Placeholder, fromPackage: './export-star-from', id: 5 },
+            { type: 'export-default', key: 'namedFunction' },
         ],
         'export-star-from.ts': [
             { type: 'export', key: 'ExportXInteger', value: Placeholder },
@@ -37,8 +32,8 @@ export const TestTsModulesMock = {
             { type: 'export', key: 'ExportXObject', value: Placeholder }
         ],
         're-exports-index.ts': [
-            { type: 're-export', key: 'DefaultReExport', value: Placeholder, id: 0 },
-            { type: 're-export', key: 'NamedReExport', value: Placeholder, id: 0 }
+            { type: 're-export', key: 'DefaultReExport', value: Placeholder, fromPackage: './re-exports-source', id: 0 },
+            { type: 're-export', key: 'NamedReExport', value: Placeholder, fromPackage: './re-exports-source', id: 0 },
         ],
         're-exports-source.ts': [
             { type: 'export', key: 'DefaultReExport', value: Placeholder },
