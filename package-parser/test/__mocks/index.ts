@@ -1,8 +1,9 @@
 import FS from 'fs/promises';
 import Path from 'path';
+import { ModuleExports, ModuleList } from '../../src/Parser';
 
 
-const Placeholder = {};
+const Placeholder = {} as any;
 
 export const TestTsModulesMock = {
     fileContent: FS.readFile(Path.join(__dirname, 'meteor-bundle/test_ts-modules.js'), 'utf-8'),
@@ -46,7 +47,7 @@ export const TestTsModulesMock = {
         'relative-module.ts': [
             { type: 'export', key: 'NamedRelativeInteger', value: Placeholder }
         ]
-    },
+    } satisfies ModuleList,
     fileNames: [
         'explicit-relative-path.ts',
         'index.ts',

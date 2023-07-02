@@ -64,7 +64,7 @@ function parseMeteorInstall(node: CallExpression) {
     const packageName = meteor.value.properties[0];
     const packageModules = packageName.value.properties;
 
-    const modules: { [key in string]: ModuleExports } = {};
+    const modules: ModuleList = {};
 
     packageModules.forEach((module) => {
         const fileName = module.key.value.toString()
@@ -199,6 +199,7 @@ class ModuleExportsError extends Error {
 
 type ParserResult = ReturnType<typeof parseMeteorInstall>;
 export type ModuleExports = Required<ReturnType<typeof readModuleExports>>;
+export type ModuleList = { [key in string]: ModuleExports };
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
