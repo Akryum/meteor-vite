@@ -108,10 +108,20 @@ function readModuleExports(node: Node) {
     if (args[1].type !== 'ObjectExpression') throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
     if (args[2].type !== 'NumericLiteral') throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0]);
 
-    return handleLink([args[0], args[1], args[2]])
+    return handleLink({
+        packageName: args[0],
+        exports: args[1],
+        id: args[2],
+    })
 }
 
-function handleLink(args: [StringLiteral, ObjectExpression, NumericLiteral]) {}
+function handleLink(linkArgs: {
+    packageName: StringLiteral,
+    exports: ObjectExpression,
+    id: NumericLiteral,
+}) {
+
+}
 function handleExports(exports: ObjectExpression) {
     return exports.properties.map((property) => {
         if (property.type !== "ObjectProperty") throw new ModuleExportsError('Unexpected property type!', property);
