@@ -50,6 +50,12 @@ function parseSource(code: string) {
         if (!completed) {
             reject(new Error('Unable to parse Meteor package!'))
         }
+    }).catch((error: Error) => {
+        if (error instanceof ModuleExportsError) {
+            console.error(error);
+            throw new Error('Failed to parse source code. See previous error.')
+        }
+        throw error;
     })
 }
 
