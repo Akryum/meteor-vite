@@ -11,11 +11,11 @@ import {
 
 export async function parseModule(options: { fileContent: string | Promise<string> }) {
     const startTime = Date.now();
-    const { result, timeSpent } = await parseSource(await options.fileContent);
+    const result = await parseSource(await options.fileContent);
+    
     console.log({
         result,
-        timeSpentParsing: timeSpent,
-        overallTimeSpent: `${Date.now() - startTime}ms`
+        timeSpent: `${Date.now() - startTime}ms`
     });
     
     return {
@@ -44,10 +44,7 @@ function parseSource(code: string) {
                     return;
                 }
                 
-                resolve({
-                    result: parseMeteorInstall(node),
-                    timeSpent: `${Date.now() - startTime}ms`,
-                });
+                resolve(parseMeteorInstall(node));
                 completed = true;
             }
         });
@@ -66,16 +63,13 @@ function parseMeteorInstall(node: CallExpression) {
     const modules = packageName.value.properties;
     const fileNames = modules.map((module) => module.key.value);
     
-    return { packageName: packageName.key.value, fileNames };
+    return {
+        fileNames,
+        packageName: packageName.key.value,
+    };
 }
+type ParserResult = ReturnType<typeof parseMeteorInstall>;
 
-interface ParserResult {
-    result: {
-        packageName: string;
-        fileNames: string[];
-    }
-    timeSpent: string;
-}
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
