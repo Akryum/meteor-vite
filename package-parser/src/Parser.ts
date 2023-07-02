@@ -115,12 +115,23 @@ function readModuleExports(node: Node) {
     })
 }
 
-function handleLink(linkArgs: {
+function handleLink({ packageName, exports, id }: {
     packageName: StringLiteral,
     exports: ObjectExpression,
     id: NumericLiteral,
 }) {
-    // todo
+    return exports.properties.map((property) => {
+        if (property.type !== "ObjectProperty") throw new ModuleExportsError('Unexpected property type!', property);
+        if (property.key.type !== 'Identifier') throw new ModuleExportsError('Unexpected property key type!', property);
+
+        return {
+            key: property.key.name,
+            type: 're-export' as const,
+            value: property.value,
+            fromPackage: packageName.value,
+            id: id.value,
+        };
+    });
 }
 function handleExports(exports: ObjectExpression) {
     return exports.properties.map((property) => {
@@ -129,6 +140,7 @@ function handleExports(exports: ObjectExpression) {
 
         return {
             key: property.key.name,
+            type: 'export' as const,
             value: property.value,
         };
     });
