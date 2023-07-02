@@ -178,6 +178,7 @@ function formatExports({ expression, packageName, id }: {
         }
         if (packageName) {
             result.type = 're-export';
+            result.fromPackage = packageName.value;
         }
         if (id) {
             result.id = id.value;
