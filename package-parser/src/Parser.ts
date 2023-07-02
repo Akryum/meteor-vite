@@ -2,8 +2,8 @@ import { parse } from '@babel/parser';
 import { Node, traverse, VariableDeclaration } from '@babel/types';
 
 export async function parseModule(options: { fileContent: string | Promise<string> }) {
+    const startTime = Date.now();
     const tokenizedPackage = parse(await options.fileContent);
-    
     traverse(tokenizedPackage, {
         enter(node) {
             const handler = HandlerMap[node.type];
@@ -15,6 +15,8 @@ export async function parseModule(options: { fileContent: string | Promise<strin
             handler(node);
         }
     })
+    
+    console.log({ timeSpent: `${Date.now() - startTime}ms` })
     
     return {
         fileList: []
