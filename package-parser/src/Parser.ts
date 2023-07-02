@@ -1,5 +1,5 @@
 import { parse } from '@babel/parser';
-import { Node, traverse } from '@babel/types';
+import { Node, traverse, VariableDeclaration } from '@babel/types';
 
 export async function parseModule(options: { fileContent: string | Promise<string> }) {
     const tokenizedPackage = parse(await options.fileContent);
@@ -22,15 +22,19 @@ export async function parseModule(options: { fileContent: string | Promise<strin
 }
 
 const HandlerMap: Partial<{ [key in Node['type']]: (node: Node & { type: key }) => void }> = {
-    VariableDeclaration(node) {
+    VariableDeclaration(node: VariableDeclaration) {
         if (node.declarations[0].id.type !== 'Identifier') {
             return;
         }
         const name = node.declarations[0].id.name;
         
-        console.log({ [name]: node })
+        if (name !== 'meteorInstall') {
+            return;
+        }
+        
+        console.log({ [name]: node.declarations[0] })
     }
-};
+}
 
 function getNamedDeclaration(node: Node) {
     if (node.type !== 'VariableDeclaration') {
