@@ -126,7 +126,7 @@ function handleLink({ packageName, exports, id }: {
 
         return {
             key: property.key.name,
-            type: 're-export' as const,
+            type: 're-export',
             value: property.value,
             fromPackage: packageName.value,
             id: id.value,
@@ -140,7 +140,7 @@ function handleExports(exports: ObjectExpression) {
 
         return {
             key: property.key.name,
-            type: 'export' as const,
+            type: 'export',
             value: property.value,
         };
     });
