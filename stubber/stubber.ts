@@ -5,7 +5,7 @@ import FS from 'fs'
 // Get package name
 // Get files
 
-const output = babelParser.parse(FS.readFileSync('../__mocks/meteor-bundle/test_ts-modules.js', 'utf-8'))
+const output = babelParser.parse(FS.readFileSync('./__mocks/meteor-bundle/test_ts-modules.js', 'utf-8'))
 
 
 const mainFunction = output.program.body[0].expression.callee.body;
