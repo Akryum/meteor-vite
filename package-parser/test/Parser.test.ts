@@ -41,9 +41,6 @@ describe('Meteor bundle parser', async () => {
                             expect(parsedExports).toEqual(expectation)
                         })
                     })
-                    it('has the expected exports', () => {
-                        console.log({ module: parsedExports, mockModule: mockExports });
-                    })
                 })
                 
                 
