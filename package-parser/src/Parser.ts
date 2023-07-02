@@ -198,7 +198,7 @@ class ModuleExportsError extends Error {
 }
 
 type ParserResult = ReturnType<typeof parseMeteorInstall>;
-type ModuleExports = Required<ReturnType<typeof readModuleExports>>;
+export type ModuleExports = Required<ReturnType<typeof readModuleExports>>;
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
