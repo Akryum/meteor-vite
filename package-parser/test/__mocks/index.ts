@@ -10,40 +10,40 @@ export const TestTsModulesMock = {
     packageName: 'test:ts-modules',
     modules: {
         'explicit-relative-path.ts': [
-            { type: 'export', name: 'ExplicitRelativePath', value: Placeholder }
+            { type: 'export', name: 'ExplicitRelativePath', }
         ],
         'index.ts': [
-            { type: 'export', name: 'first', value: Placeholder },
-            { type: 'export', name: 'FIRST', value: Placeholder },
-            { type: 'export', name: 'b', value: Placeholder },
-            { type: 'export', name: 'c', value: Placeholder },
-            { type: 'export', name: 'namedFunction', value: Placeholder },
-            { type: 're-export', name: 'Meteor', as: 'MyMeteor', value: Placeholder, from: 'meteor/meteor', id: 0 },
-            { type: 're-export', name: '*', value: Placeholder, from: 'meteor/tracker', id: 1 },
-            { type: 're-export', name: 'Meteor', as: 'ReExportedMeteor', value: Placeholder, from: 'meteor/meteor', id: 2 },
+            { type: 'export', name: 'first', },
+            { type: 'export', name: 'FIRST', },
+            { type: 'export', name: 'b', },
+            { type: 'export', name: 'c', },
+            { type: 'export', name: 'namedFunction', },
+            { type: 're-export', name: 'Meteor', as: 'MyMeteor', from: 'meteor/meteor', id: 0 },
+            { type: 're-export', name: '*', from: 'meteor/tracker', id: 1 },
+            { type: 're-export', name: 'Meteor', as: 'ReExportedMeteor', from: 'meteor/meteor', id: 2 },
             
             // todo: this should not be a re-export.
             { type: 're-export', name: 'Meteor', from: 'meteor/meteor', id: 3 },
             
-            { type: 're-export', name: 'NamedRelativeInteger', value: Placeholder, from: './relative-module', id: 4 },
-            { type: 're-export', name: '*', value: Placeholder, from: './export-star-from', id: 5 },
+            { type: 're-export', name: 'NamedRelativeInteger', from: './relative-module', id: 4 },
+            { type: 're-export', name: '*', from: './export-star-from', id: 5 },
             { type: 'export-default', name: 'namedFunction' },
         ],
         'export-star-from.ts': [
-            { type: 'export', name: 'ExportXInteger', value: Placeholder },
-            { type: 'export', name: 'ExportXString', value: Placeholder },
-            { type: 'export', name: 'ExportXObject', value: Placeholder }
+            { type: 'export', name: 'ExportXInteger', },
+            { type: 'export', name: 'ExportXString', },
+            { type: 'export', name: 'ExportXObject', }
         ],
         're-exports-index.ts': [
-            { type: 're-export', name: 'DefaultReExport', value: Placeholder, from: './re-exports-source', id: 0 },
-            { type: 're-export', name: 'NamedReExport', value: Placeholder, from: './re-exports-source', id: 0 },
+            { type: 're-export', name: 'DefaultReExport', from: './re-exports-source', id: 0 },
+            { type: 're-export', name: 'NamedReExport', from: './re-exports-source', id: 0 },
         ],
         're-exports-source.ts': [
-            { type: 'export', name: 'DefaultReExport', value: Placeholder },
-            { type: 'export', name: 'NamedReExport', value: Placeholder }
+            { type: 'export', name: 'DefaultReExport', },
+            { type: 'export', name: 'NamedReExport', }
         ],
         'relative-module.ts': [
-            { type: 'export', name: 'NamedRelativeInteger', value: Placeholder }
+            { type: 'export', name: 'NamedRelativeInteger', }
         ]
     } satisfies ModuleList,
     fileNames: [

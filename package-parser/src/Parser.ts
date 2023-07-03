@@ -159,14 +159,6 @@ const propParser = {
         
         throw new ModuleExportsError('Unsupported property key type!', property);
     },
-    
-    getValue(property: ObjectMethod | ObjectProperty) {
-        if (property.type === 'ObjectMethod') {
-            return;
-        }
-        
-        return property.value
-    }
 }
 
 function formatExports({ expression, packageName, id }: {
@@ -178,14 +170,12 @@ function formatExports({ expression, packageName, id }: {
         if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
         const result: {
             name?: string,
-            value?: ObjectProperty['value'],
             type: ModuleType;
             id?: number;
             from?: string;
             as?: string;
         } = {
             name: propParser.getKey(property),
-            value: propParser.getValue(property),
             type: 'export',
             id: id && id.value,
         }
@@ -207,12 +197,13 @@ function formatExports({ expression, packageName, id }: {
         }
         
         if (result.type === 're-export' && property.type === 'ObjectProperty') {
-            if (result.value?.type !== 'StringLiteral') {
+            const content = property.value;
+            if (content.type !== 'StringLiteral') {
                 throw new ModuleExportsError('Received unsupported result type in re-export!', property);
             }
             
-            if (result.value.value !== result.name) {
-                result.as = result.value.value;
+            if (content.value !== result.name) {
+                result.as = content.value;
             }
         }
         
