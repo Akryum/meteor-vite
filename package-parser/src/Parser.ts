@@ -177,14 +177,14 @@ function formatExports({ expression, packageName, id }: {
     return expression.properties.map((property) => {
         if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
         const result: {
-            key?: string,
+            name?: string,
             value?: ObjectProperty['value'],
-            as?: string;
             type: ModuleType;
-            fromPackage?: string;
             id?: number;
+            from?: string;
+            as?: string;
         } = {
-            key: propParser.getKey(property),
+            name: propParser.getKey(property),
             value: propParser.getValue(property),
             type: 'export',
             id: id && id.value,
@@ -192,11 +192,11 @@ function formatExports({ expression, packageName, id }: {
         
         if (packageName) {
             result.type = 're-export';
-            result.fromPackage = packageName.value;
+            result.from = packageName.value;
         }
         
         if (result.type === 're-export' && property.type === 'ObjectMethod') {
-            if (result.key === 'Meteor') {
+            if (result.name === 'Meteor') {
                 result.type = 'global-binding';
             } else {
                 throw new ModuleExportsError(
@@ -211,7 +211,7 @@ function formatExports({ expression, packageName, id }: {
                 throw new ModuleExportsError('Received unsupported result type in re-export!', property);
             }
             
-            if (result.value.value !== result.key) {
+            if (result.value.value !== result.name) {
                 result.as = result.value.value;
             }
         }

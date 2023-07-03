@@ -13,24 +13,24 @@ describe('Mock package: `test:ts-modules`', async () => {
     })
     
     describe('Package files', () => {
-        Object.entries(TestTsModulesMock.modules).forEach(([key, mockExports]: [string, ModuleExports]) => {
-            describe(key, () => {
-                const parsedExports =  parsedModule.modules[key];
+        Object.entries(TestTsModulesMock.modules).forEach(([filePath, mockExports]: [string, ModuleExports]) => {
+            describe(filePath, () => {
+                const parsedExports =  parsedModule.modules[filePath];
                 const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
                 const mockReExports = mockExports?.filter(({ type }) => type === 're-export')
                 
                 
                 it('has parsed exports', () => {
-                    expect(Object.keys(parsedModule.modules)).toContain(key);
+                    expect(Object.keys(parsedModule.modules)).toContain(filePath);
                     expect(parsedExports).toBeDefined();
                 });
                 
                 
                 describe('Named exports', () => {
                     namedMockExports?.forEach((mockExport) => {
-                        it(`export { ${mockExport.key} }`, () => {
+                        it(`export { ${mockExport.name} }`, () => {
                             const expectation = expect.arrayContaining(
-                                [expect.objectContaining({ key: mockExport.key, type: mockExport.type })]
+                                [expect.objectContaining({ name: mockExport.name, type: mockExport.type })]
                             )
                             expect(parsedExports).toEqual(expectation)
                         })
@@ -39,12 +39,12 @@ describe('Mock package: `test:ts-modules`', async () => {
                 
                 describe('Re-exports', () => {
                     mockReExports?.forEach((mockExport) => {
-                        it(`export { ${mockExport.key} } from '${mockExport.fromPackage}'`, () => {
+                        it(`export { ${mockExport.name} } from '${mockExport.from}'`, () => {
                             const expectation = expect.arrayContaining(
                                 [expect.objectContaining({
-                                    key: mockExport.key,
+                                    name: mockExport.name,
                                     type: mockExport.type,
-                                    fromPackage: mockExport.fromPackage
+                                    fromPackage: mockExport.from
                                 })]
                             )
                             expect(parsedExports).toEqual(expectation)
