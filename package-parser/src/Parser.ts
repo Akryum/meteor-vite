@@ -3,8 +3,8 @@ import {
     CallExpression, Expression, ExpressionStatement,
     FunctionExpression,
     Node, NumericLiteral,
-    ObjectExpression,
-    ObjectProperty, PatternLike, StringLiteral,
+    ObjectExpression, ObjectMethod,
+    ObjectProperty, PatternLike, SpreadElement, StringLiteral,
     traverse,
 } from '@babel/types';
 
@@ -148,13 +148,25 @@ function handleMainModule({ expression }: ExpressionStatement) {
     return moduleExports;
 }
 
+function getPropertyKey(property: ObjectMethod | ObjectProperty | SpreadElement) {
+    if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
+    
+    if (property.key.type === 'Identifier') {
+        return property.key.name;
+    }
+    if (property.key.type === 'StringLiteral') {
+        return property.key.value;
+    }
+    
+    throw new ModuleExportsError('Unsupported property key type!', property);
+}
+
 function formatExports({ expression, packageName, id }: {
     expression: ObjectExpression,
     packageName?: StringLiteral,
     id?: NumericLiteral,
 }) {
     return expression.properties.map((property) => {
-        if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
         const result: {
             key?: string,
             value?: ObjectProperty['value'],
@@ -163,19 +175,11 @@ function formatExports({ expression, packageName, id }: {
             fromPackage?: string;
             id?: number;
         } = {
+            key: getPropertyKey(property),
             type: 'export',
-        }
-        if (property.key.type === 'Identifier') {
-            result.key = property.key.name
-        }
-        if (property.key.type === 'StringLiteral') {
-            result.key = property.key.value;
         }
         if (property.type === 'ObjectProperty') {
             result.value = property.value;
-        }
-        if (!result.key) {
-            throw new ModuleExportsError('Unexpected property key type!', property)
         }
         if (packageName) {
             result.type = 're-export';
