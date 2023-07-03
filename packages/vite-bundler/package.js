@@ -6,11 +6,6 @@ Package.describe({
   documentation: 'README.md',
 })
 
-// todo: publish to npm
-const localNpmDepednencies = {
-  'meteor-vite': `file://${process.env.PWD ?? process.cwd()}/../../npm-packages/meteor-vite`
-}
-
 Package.registerBuildPlugin({
   name: 'vite',
   use: [
@@ -26,11 +21,9 @@ Package.registerBuildPlugin({
     execa: '6.1.0',
     'fs-extra': '10.1.0',
     'picocolors': '1.0.0',
-    ...localNpmDepednencies
   },
 })
 
-Npm.depends(localNpmDepednencies);
 Package.onUse(function(api) {
   api.use('isobuild:compiler-plugin@1.0.0')
   api.use('zodern:types')
