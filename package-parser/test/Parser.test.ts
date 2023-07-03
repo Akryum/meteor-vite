@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ModuleExports, parseModule } from '../src/Parser';
+import { ModuleExport, parseModule } from '../src/Parser';
 import { TestTsModulesMock } from './__mocks'
 
 describe('Mock package: `test:ts-modules`', async () => {
@@ -13,7 +13,7 @@ describe('Mock package: `test:ts-modules`', async () => {
     })
     
     describe('Package files', () => {
-        Object.entries(TestTsModulesMock.modules).forEach(([filePath, mockExports]: [string, ModuleExports]) => {
+        Object.entries(TestTsModulesMock.modules).forEach(([filePath, mockExports]: [string, ModuleExport[]]) => {
             describe(filePath, () => {
                 const parsedExports =  parsedModule.modules[filePath];
                 const namedMockExports = mockExports?.filter(({ type }) => type === 'export')

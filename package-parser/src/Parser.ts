@@ -70,7 +70,7 @@ function parseMeteorInstall(node: CallExpression) {
 
     packageModules.forEach((module) => {
         const fileName = module.key.value.toString()
-        const exportList: ModuleExports = [];
+        const exportList: ModuleExport[] = [];
 
         modules[fileName.toString()] = exportList;
 
@@ -168,13 +168,7 @@ function formatExports({ expression, packageName, id }: {
 }) {
     return expression.properties.map((property) => {
         if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
-        const result: {
-            name?: string,
-            type: ModuleType;
-            id?: number;
-            from?: string;
-            as?: string;
-        } = {
+        const result: ModuleExport = {
             name: propParser.getKey(property),
             type: 'export',
             id: id && id.value,
@@ -222,14 +216,40 @@ class ModuleExportsError extends Error {
 }
 
 type ParserResult = ReturnType<typeof parseMeteorInstall>;
-export type ModuleExports = Required<ReturnType<typeof readModuleExports>>;
-export type ModuleList = { [key in string]: ModuleExports };
+export type ModuleList = { [key in string]: ModuleExport[] };
+export type ModuleExport = {
+    /**
+     * "Name" of the object to be exported.
+     * @example ts
+     * export const <name> = '...'
+     */
+    name?: string,
+    type: 'export' // Named export (export const fooBar = '...')
+          | 're-export' // Exporting properties from another module. (export { fooBar } from './somewhere'  )
+          | 'global-binding' // Meteor globals. (`Meteor`, `DDP`, etc) These should likely just be excluded from the Vite stubs.
+          | 'export-default' // Default module export (export default fooBar);
+    
+    /**
+     * Internal Meteor ID for a linked Meteor module.
+     * This isn't really all that useful apart from testing.
+     */
+    id?: number;
+    
+    /**
+     * The module we're re-exporting from. This only applies to re-exports.
+     * @example ts
+     * export { foo } from '<from>'
+     */
+    from?: string;
+    
+    /**
+     * The value of the "as" keyword when exporting a module.
+     * @example ts
+     * export { foo as bar }
+     */
+    as?: string;
+};
 
-type ModuleType =
-    'export' // Named export (export const fooBar = '...')
-    | 're-export' // Exporting properties from another module. (export { fooBar } from './somewhere'  )
-    | 'global-binding' // Meteor globals. (`Meteor`, `DDP`, etc) These should likely just be excluded from the Vite stubs.
-    | 'export-default' // Default module export (export default fooBar)
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
