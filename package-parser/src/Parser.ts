@@ -79,7 +79,7 @@ function parsePackageScope(node: Node) {
     let packageExports = node.arguments[2];
     
     // Deals with the meteor/meteor core packages that don't use the module system.
-    if (!packageExports && node.arguments[1].type === 'ObjectExpression') {
+    if (!packageExports && node.arguments[1]?.type === 'ObjectExpression') {
         packageExports = node.arguments[1]
     }
     
