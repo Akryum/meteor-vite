@@ -83,7 +83,7 @@ export default new class Serialize {
 
 export function getMainModule(result: ParserResult) {
     if (!result.mainModulePath) return;
-    const [node_modules, meteor, packageName, ...filePath] = result.mainModulePath.replace(/^\/+/, '').split('/');
+    const [node_modules, meteor, packageName, ...filePath] = result.mainModulePath.replace(/^\/+/g, '').split('/');
     const moduleKey = filePath.join('/');
     return result.modules[moduleKey];
 }
