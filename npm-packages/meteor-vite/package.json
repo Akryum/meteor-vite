@@ -16,7 +16,8 @@
       "src/index.ts"
     ],
     "outDir": "dist",
-    "format": "esm"
+    "format": "esm",
+    "sourcemap": "inline"
   },
   "keywords": [],
   "author": "",
