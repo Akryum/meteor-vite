@@ -1,10 +1,13 @@
+import { ModuleExport } from './Parser';
 
-function moduleTemplate({ stubId, packageId }: TemplateOptions) {
+export const METEOR_STUB_KEY = `m2`;
+
+function stubTemplate({ stubId, packageId }: TemplateOptions) {
     return`
-let m2
+let ${METEOR_STUB_KEY}
 const require = Package.modules.meteorInstall({
   '__vite_stub${stubId}.js': (require, exports, module) => {
-    m2 = require('${packageId}')
+    ${METEOR_STUB_KEY} = require('${packageId}')
   },
 }, {
   "extensions": [
@@ -27,8 +30,6 @@ interface TemplateOptions {
      */
     packageId: string;
     
-    /**
-     * Vite-meteor-stub ID
-     */
+    exports: ModuleExport[],
     stubId: number;
 }

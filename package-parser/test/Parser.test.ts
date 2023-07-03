@@ -29,7 +29,7 @@ describe('Mock package: `test:ts-modules`', async () => {
                 
                 describe('Named exports', () => {
                     namedMockExports?.forEach((mockExport) => {
-                        it(toExport(mockExport), () => {
+                        it(`export const ${mockExport.name}`, () => {
                             const expectation = expect.arrayContaining([mockExport])
                             expect(parsedExports).toEqual(expectation)
                         })
