@@ -5,14 +5,17 @@ export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
 export const TEMPLATE_GLOBAL_KEY = 'g';
 
-export function stubTemplate({ stubId, packageId, exports, packageScopeExports }: TemplateOptions) {
-    const moduleExports = prepareExports(exports);
-    const packageScope = preparePackageScopeExports(packageScopeExports);
+export function stubTemplate({ stubId, packageId, moduleExports, packageScopeExports }: TemplateOptions) {
+    const serialized = {
+        modules: Serialize.moduleExports(moduleExports),
+        packages: Serialize.packageScopeExports(packageScopeExports)
+    };
     
     return`
+// packageId: ${packageId}
 const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global
-${packageScope.top}
-${moduleExports.top}
+${serialized.packages.top}
+${serialized.modules.top}
 
 let ${METEOR_STUB_KEY};
 const require = Package.modules.meteorInstall({
@@ -26,54 +29,9 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub${stubId}.js')
 
-${packageScope.bottom}
-${moduleExports.bottom}
+${serialized.packages.bottom}
+${serialized.modules.bottom}
 `
-}
-
-function preparePackageScopeExports(packageExports: PackageScopeExports) {
-    const top: string[] = [];
-    const bottom: string[] = [];
-    
-    const exportList = Object.entries(packageExports);
-    
-    exportList.forEach(([name, exports]) => {
-        top.push(Serialize.packageScopeImport(name));
-        exports.forEach((key) => bottom.push(Serialize.packageScopeExport(key)));
-    });
-    
-    return {
-        top: top.join('\n'),
-        bottom: bottom.join('\n'),
-    };
-}
-
-function prepareExports(exports: ModuleExport[]) {
-    const top: string[] = [];
-    const bottom: string[] = [];
-    
-    exports.forEach((module) => {
-        if (module.type === 'global-binding') return;
-        
-        const line = Serialize.moduleExport(module);
-        
-        if (module.type === 're-export') {
-            top.push(line);
-        }
-        
-        if (module.type === 'export') {
-            bottom.push(line);
-        }
-        
-        if (module.type === 'export-default') {
-            bottom.push(line)
-        }
-    })
-    
-    return {
-        top: top.join('\n'),
-        bottom: bottom.join('\n'),
-    }
 }
 
 interface TemplateOptions {
@@ -87,7 +45,7 @@ interface TemplateOptions {
      * 'meteor/ostrio:cookies/some-module'
      */
     packageId: string;
-    exports: ModuleExport[],
+    moduleExports: ModuleExport[],
     packageScopeExports: PackageScopeExports,
     stubId: number;
 }
