@@ -22,8 +22,7 @@ export const TestTsModulesMock = {
             { type: 're-export', name: '*', from: 'meteor/tracker', id: 1 },
             { type: 're-export', name: 'Meteor', as: 'ReExportedMeteor', from: 'meteor/meteor', id: 2 },
             
-            // todo: this should not be a re-export.
-            { type: 're-export', name: 'Meteor', from: 'meteor/meteor', id: 3 },
+            { type: 'global-binding', name: 'Meteor', from: 'meteor/meteor', id: 3 },
             
             { type: 're-export', name: 'NamedRelativeInteger', from: './relative-module', id: 4 },
             { type: 're-export', name: '*', from: './export-star-from', id: 5 },
