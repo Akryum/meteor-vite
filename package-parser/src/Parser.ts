@@ -1,10 +1,10 @@
 import { parse } from '@babel/parser';
 import {
     CallExpression, ExpressionStatement,
-    FunctionExpression,
+    FunctionExpression, MemberExpression,
     Node, NumericLiteral,
     ObjectExpression, ObjectMethod,
-    ObjectProperty, StringLiteral,
+    ObjectProperty, shallowEqual, StringLiteral,
     traverse,
 } from '@babel/types';
 
@@ -55,6 +55,41 @@ function parseSource(code: string) {
         }
         throw error;
     })
+}
+
+
+function parsePackageScope(node: Node) {
+    if (node.type !== 'CallExpression') return;
+    if (node.callee.type !== 'MemberExpression') return;
+    const { object, property } = node.callee;
+    if (object.type !== 'Identifier') return;
+    if (object.name !== 'Package') return;
+    if (property.type !== 'Identifier') return;
+    if (property.name !== '_define') return;
+    
+    const packageExports = node.arguments[2];
+    const packageName = node.arguments[0];
+    if (!packageExports) return;
+    if (packageExports.type !== 'ObjectExpression') {
+        throw new ModuleExportsError('Unexpected type received for package-scope exports argument!', packageExports);
+    }
+    if (packageName.type !== 'StringLiteral') {
+        throw new ModuleExportsError('Unexpected type received for package name!', packageName);
+    }
+    
+    const exports: PackageExport[] = [];
+    
+    packageExports.properties.forEach((property) => {
+        if (property.type === 'SpreadElement') {
+            throw new ModuleExportsError('Unexpected property type received for package-scope exports!', property)
+        }
+        exports.push({
+            packageName: packageName.value,
+            name: propParser.getKey(property),
+        })
+    })
+    
+    return exports;
 }
 
 function parseMeteorInstall(node: CallExpression) {
@@ -247,6 +282,15 @@ export type ModuleExport = {
      */
     as?: string;
 };
+
+/**
+ * Meteor package-level exports.
+ * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
+ */
+export type PackageExport = {
+    packageName: string;
+    name: string;
+}
 
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
