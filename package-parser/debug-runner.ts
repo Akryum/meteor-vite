@@ -1,5 +1,4 @@
 import { parseModule, ParserResult } from './src/Parser';
-import ViteServer from './src/ViteServer';
 import { Check, TsModules } from './test/__mocks';
 
 
@@ -8,13 +7,13 @@ import { Check, TsModules } from './test/__mocks';
  * Works well with ts-node-dev. :)
  */
 (async () => {
-    const logResponse = (response: ParserResult) => {
-        console.log(`${'--'.repeat(64)}`)
-        console.log(response);
-    }
     
-    await parseModule({ fileContent: await Check.fileContent }).then(logResponse);
-    await parseModule({ fileContent: await TsModules.fileContent }).then(logResponse);
+    const mocks = [Check, TsModules];
+    
+    for (const { fileContent } of mocks) {
+        console.log(`${'--'.repeat(64)}`)
+        console.log(await parseModule({ fileContent: fileContent }));
+    }
     
     ViteServer.then((server) => {
         server.listen(4949);
