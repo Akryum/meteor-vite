@@ -184,6 +184,8 @@ function formatExports({ expression, packageName, id }: {
         if (id) {
             result.id = id.value;
         }
+        // Todo: Prevent the globally linked Meteor instance from being marked as a re-export
+        // I believe it should be omitted from the export list entirely.
         if (result.type === 're-export' && result.key !== 'Meteor') {
             if (property.type !== 'ObjectProperty') {
                 throw new ModuleExportsError('Received unexpected property type for re-export', property);
