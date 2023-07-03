@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ModuleExport, parseModule } from '../src/Parser';
-import Serialize from '../src/util/Serialize';
+import Serialize, { getMainModule } from '../src/util/Serialize';
 import { Check, TsModules } from './__mocks';
 
 describe('Mock package: `test:ts-modules`', async () => {
@@ -15,6 +15,11 @@ describe('Mock package: `test:ts-modules`', async () => {
     
     it('detected the correct main module path', () => {
         expect(parsedModule.mainModulePath).toEqual(mockModule.mainModulePath);
+    });
+    
+    it('has index.ts assigned as the main module export point', () => {
+        const mainModuleExports = getMainModule(parsedModule);
+        expect(mainModuleExports).toEqual(mockModule.modules['index.ts']);
     })
     
     describe('Package files', () => {
@@ -66,6 +71,11 @@ describe('Mock package `check`', async () => {
     
     it('detected the correct main module path', () => {
         expect(parsedModule.mainModulePath).toEqual(mockModule.mainModulePath);
+    });
+    
+    it('has index.ts assigned as the main module export point', () => {
+        const mainModuleExports = getMainModule(parsedModule);
+        expect(mainModuleExports).toEqual(mockModule.modules['match.js']);
     })
     
     describe('Package files', () => {
