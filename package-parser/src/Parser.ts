@@ -47,6 +47,10 @@ function parseSource(code: string) {
         });
         
         if (!result.packageName || !Object.keys({ ...result.modules, ...result.packageScopeExports }).length) {
+            console.warn(
+                'Unable to retrieve any metadata from the provided source code!',
+                { result }
+            );
             return reject(new Error('Unable to parse Meteor package!'));
         }
         
