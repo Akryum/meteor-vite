@@ -1,7 +1,7 @@
 import { METEOR_STUB_KEY } from './MeteorStub';
 import { ModuleExport } from './Parser';
 
-export function toExport(module: ModuleExport) {
+export function exportTemplate(module: ModuleExport) {
     if (module.type === 're-export') {
         return `export { ${module.name} ${module.as && `as ${module.as} ` || ''}} from '${module.from}';`
     }
