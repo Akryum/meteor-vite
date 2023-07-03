@@ -1,10 +1,10 @@
 import { parse } from '@babel/parser';
 import {
-    CallExpression, Expression, ExpressionStatement,
+    CallExpression, ExpressionStatement,
     FunctionExpression,
     Node, NumericLiteral,
     ObjectExpression, ObjectMethod,
-    ObjectProperty, PatternLike, SpreadElement, StringLiteral,
+    ObjectProperty, StringLiteral,
     traverse,
 } from '@babel/types';
 
