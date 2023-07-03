@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ModuleExport, parseModule } from '../src/Parser';
-import { exportTemplate } from '../src/Serializer';
 import { Check, TsModules } from './__mocks';
+import Serialize from '../src/Serialize';
 
 describe('Mock package: `test:ts-modules`', async () => {
     const mockModule = TsModules;
@@ -38,7 +38,7 @@ describe('Mock package: `test:ts-modules`', async () => {
                 
                 describe('Re-exports', () => {
                     mockReExports?.forEach((mockExport) => {
-                        it(exportTemplate(mockExport), () => {
+                        it(Serialize.moduleExport(mockExport), () => {
                             expect(parsedExports).toEqual(
                                 expect.arrayContaining([mockExport])
                             )
@@ -85,7 +85,7 @@ describe('Mock package `check`', async () => {
                 
                 describe('Re-exports', () => {
                     mockReExports?.forEach((mockExport) => {
-                        it(exportTemplate(mockExport), ({ expect }) => {
+                        it(Serialize.moduleExport(mockExport), ({ expect }) => {
                             expect(parsedExports).toEqual(
                                 expect.arrayContaining([mockExport])
                             )

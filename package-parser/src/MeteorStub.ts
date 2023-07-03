@@ -1,11 +1,11 @@
 import { ModuleExport, PackageScopeExports } from './Parser';
-import { exportTemplate } from './Serializer';
+import Serialize from './Serialize';
 
 export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
 export const TEMPLATE_GLOBAL_KEY = 'g';
 
-function stubTemplate({ stubId, packageId, exports, packageScopeExports }: TemplateOptions) {
+export function stubTemplate({ stubId, packageId, exports, packageScopeExports }: TemplateOptions) {
     const moduleExports = prepareExports(exports);
     const packageScope = preparePackageScopeExports(packageScopeExports);
     
@@ -38,8 +38,8 @@ function preparePackageScopeExports(packageExports: PackageScopeExports) {
     const exportList = Object.entries(packageExports);
     
     exportList.forEach(([name, exports]) => {
-        top.push(`const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${name}'];`);
-        exports.forEach((key) => bottom.push(`export const ${key} = ${PACKAGE_SCOPE_KEY}.${key};`));
+        top.push(Serialize.packageScopeImport(name));
+        exports.forEach((key) => bottom.push(Serialize.packageScopeExport(key)));
     });
     
     return {
@@ -55,7 +55,7 @@ function prepareExports(exports: ModuleExport[]) {
     exports.forEach((module) => {
         if (module.type === 'global-binding') return;
         
-        const line = exportTemplate(module);
+        const line = Serialize.moduleExport(module);
         
         if (module.type === 're-export') {
             top.push(line);
