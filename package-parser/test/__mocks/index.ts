@@ -1,10 +1,10 @@
 import FS from 'fs/promises';
 import Path from 'path';
-import { ModuleList } from '../../src/Parser';
+import { ModuleList, PackageScopeExports } from '../../src/Parser';
 
 export const TsModules = prepareMock({
-    fileName: 'test_ts-modules.js',
     packageName: 'test:ts-modules',
+    fileName: 'test_ts-modules.js',
     modules: {
         'explicit-relative-path.ts': [
             { type: 'export', name: 'ExplicitRelativePath' },
@@ -40,9 +40,11 @@ export const TsModules = prepareMock({
             { type: 'export', name: 'NamedRelativeInteger' },
         ],
     } satisfies ModuleList,
+    packageScopeExports: {},
 });
 
 export const Check = prepareMock({
+    packageName: 'check',
     fileName: 'check.js',
     modules: {
         'match.js': [
@@ -54,19 +56,25 @@ export const Check = prepareMock({
             { name: 'isPlainObject', type: 'export' }
         ]
     },
-    packageName: 'check',
+    packageScopeExports: {
+        'check': ['check', 'Match']
+    },
 });
 
 export const MeteorJs = prepareMock({
     fileName: 'meteor.js',
     modules: {},
     packageName: 'meteor',
+    packageScopeExports: {
+        'meteor': ['Meteor', 'global', 'meteorEnv']
+    },
 })
 
 function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
     fileName: string;
     packageName: string;
     modules: Modules;
+    packageScopeExports: PackageScopeExports,
 }) {
     return {
         fileContent: FS.readFile(Path.join(__dirname, `meteor-bundle/${fileName}`), 'utf-8'),
