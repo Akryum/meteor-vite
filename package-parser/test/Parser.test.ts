@@ -30,9 +30,7 @@ describe('Mock package: `test:ts-modules`', async () => {
                 describe('Named exports', () => {
                     namedMockExports?.forEach((mockExport) => {
                         it(toExport(mockExport), () => {
-                            const expectation = expect.arrayContaining(
-                                [expect.objectContaining({ name: mockExport.name, type: mockExport.type })]
-                            )
+                            const expectation = expect.arrayContaining([mockExport])
                             expect(parsedExports).toEqual(expectation)
                         })
                     })
@@ -41,14 +39,9 @@ describe('Mock package: `test:ts-modules`', async () => {
                 describe('Re-exports', () => {
                     mockReExports?.forEach((mockExport) => {
                         it(toExport(mockExport), () => {
-                            const expectation = expect.arrayContaining(
-                                [expect.objectContaining({
-                                    name: mockExport.name,
-                                    type: mockExport.type,
-                                    fromPackage: mockExport.from
-                                })]
+                            expect(parsedExports).toEqual(
+                                expect.arrayContaining([mockExport])
                             )
-                            expect(parsedExports).toEqual(expectation)
                         })
                     })
                 })
