@@ -1,5 +1,5 @@
-import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './MeteorStub';
-import { ModuleExport, PackageScopeExports } from './Parser';
+import { METEOR_STUB_KEY } from './MeteorStub';
+import { ModuleExport } from './Parser';
 
 export function exportTemplate(module: ModuleExport) {
     if (module.type === 're-export') {
@@ -15,19 +15,3 @@ export function exportTemplate(module: ModuleExport) {
     throw new Error('Tried to format an non-supported module export!');
 }
 
-export function packageScopeTemplate(packageExports: PackageScopeExports) {
-    const top: string[] = [];
-    const bottom: string[] = [];
-    
-    const exportList = Object.entries(packageExports);
-    
-    exportList.forEach(([name, exports]) => {
-        top.push(`const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${name}'];`);
-        exports.forEach((key) => bottom.push(`export const ${key} = ${PACKAGE_SCOPE_KEY}.${key};`));
-    });
-    
-    return {
-        top: top.join('\n'),
-        bottom: bottom.join('\n'),
-    };
-}

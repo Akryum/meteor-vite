@@ -1,5 +1,5 @@
 import { ModuleExport, PackageScopeExports } from './Parser';
-import { exportTemplate, packageScopeTemplate } from './Serializer';
+import { exportTemplate } from './Serializer';
 
 export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
@@ -7,7 +7,7 @@ export const TEMPLATE_GLOBAL_KEY = 'g';
 
 function stubTemplate({ stubId, packageId, exports, packageScopeExports }: TemplateOptions) {
     const moduleExports = prepareExports(exports);
-    const packageScope = packageScopeTemplate(packageScopeExports);
+    const packageScope = preparePackageScopeExports(packageScopeExports);
     
     return`
 const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global
@@ -29,6 +29,23 @@ require('/__vite_stub${stubId}.js')
 ${packageScope.bottom}
 ${moduleExports.bottom}
 `
+}
+
+function preparePackageScopeExports(packageExports: PackageScopeExports) {
+    const top: string[] = [];
+    const bottom: string[] = [];
+    
+    const exportList = Object.entries(packageExports);
+    
+    exportList.forEach(([name, exports]) => {
+        top.push(`const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${name}'];`);
+        exports.forEach((key) => bottom.push(`export const ${key} = ${PACKAGE_SCOPE_KEY}.${key};`));
+    });
+    
+    return {
+        top: top.join('\n'),
+        bottom: bottom.join('\n'),
+    };
 }
 
 function prepareExports(exports: ModuleExport[]) {
