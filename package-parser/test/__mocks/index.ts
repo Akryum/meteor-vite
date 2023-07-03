@@ -60,7 +60,7 @@ export const Check = prepareMock({
     packageScopeExports: {
         'check': ['check', 'Match']
     },
-    mainModulePath: '/node_modules/meteor/test:modules/index.js'
+    mainModulePath: '/node_modules/meteor/check/match.js'
 });
 
 export const MeteorJs = prepareMock({
