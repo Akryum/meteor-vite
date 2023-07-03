@@ -1,8 +1,10 @@
 import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
-import { parseModule } from '../Parser';
+import { ModuleExport, parseModule, ParserResult } from '../Parser';
+import { getMainModule, getModuleFromPath } from '../util/Serialize';
 import { stubTemplate } from './StubTemplate';
+
 
 export function MeteorViteStubs(settings: PluginSettings): Plugin {
     return {
@@ -27,21 +29,19 @@ export function MeteorViteStubs(settings: PluginSettings): Plugin {
     }
 }
 
-/**
- * Unique ID for the next stub.
- * @type {number}
- */
-let stubId = 0;
-
-// todo: 1 Detect requested module from request ID.
-// todo: 2 Detect mainModule from file source.
-// todo: 3 Handle isopack auto-imports
+// todo: Handle isopack auto-imports
 async function createMeteorStub({ file }: StubContext) {
     const parserResult = await parseModule({ fileContent: file.content })
+    let requestedModule: ModuleExport[] = getMainModule(parserResult) || [];
+    
+    if (file.importPath) {
+        requestedModule = getModuleFromPath({ result: parserResult, importPath: file.importPath }).modules;
+    }
+    
     const template = stubTemplate({
         stubId: stubId++,
         packageId: file.packageId,
-        moduleExports: parserResult.modules[0] || [],
+        moduleExports: requestedModule,
         packageScopeExports: parserResult.packageScopeExports,
     });
     
@@ -82,6 +82,13 @@ function loadFileData({ id, meteorPackagePath }: Pick<StubContext, 'id' | 'meteo
         sourcePath,
     }
 }
+
+
+/**
+ * Unique ID for the next stub.
+ * @type {number}
+ */
+let stubId = 0;
 
 interface PluginSettings {
     /**
