@@ -14,6 +14,19 @@ describe('MeteorStub', () => {
         expect(template).toContain(`export default ${METEOR_STUB_KEY}.default`)
     });
     
+    it(`does not create a package scope export key if it isn't necessary`, () => {
+        const template = stubTemplate({
+            stubId: 0,
+            packageId: 'meteor/exampleuser:foobar',
+            moduleExports: [
+                { type: 'export-default' }
+            ],
+            packageScopeExports: {},
+        });
+        expect(template).not.toContain(`const ${PACKAGE_SCOPE_KEY}`);
+        expect(template).not.toContain(`${PACKAGE_SCOPE_KEY}.Package`);
+    })
+    
     it('can create package-scope export templates', () => {
         const template = stubTemplate({
             stubId: 0,
