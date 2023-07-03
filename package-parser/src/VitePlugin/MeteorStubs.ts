@@ -44,7 +44,7 @@ async function createMeteorStub({ file }: StubContext) {
         packageScopeExports: parserResult.packageScopeExports,
     });
     
-    console.log(parserResult);
+    console.log(`${file.packageId}: ${parserResult.timeSpent}`);
     
     return template;
 }
