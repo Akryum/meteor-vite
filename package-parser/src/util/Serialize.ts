@@ -100,3 +100,18 @@ export type SerializedParserResult = {
         }
     }
 }
+
+export function getModuleFromPath({ result, importPath }: { result: ParserResult, importPath: string }) {
+    const entries = Object.entries(result.modules);
+    const file = entries.find(([fileName, modules]) => {
+        return importPath.replace(/^\/+/g, '') === fileName.replace(/\.\w{2,5}$/g, '')
+    });
+    
+    if (!file) {
+        throw new Error(`Could not locate module for path: ${importPath}!`);
+    }
+    
+    const [fileName, modules] = file;
+    
+    return { fileName, modules };
+}
