@@ -39,7 +39,7 @@ describe('Mock package: `test:ts-modules`', async () => {
                 
                 describe('Re-exports', () => {
                     mockReExports?.forEach((mockExport) => {
-                        it(`export { ${mockExport.name} } from '${mockExport.from}'`, () => {
+                        it(`export { ${mockExport.name} ${mockExport.as && `as ${mockExport.as} ` || ''}} from '${mockExport.from}'`, () => {
                             const expectation = expect.arrayContaining(
                                 [expect.objectContaining({
                                     name: mockExport.name,
