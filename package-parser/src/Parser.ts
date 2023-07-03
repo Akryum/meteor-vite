@@ -1,7 +1,7 @@
 import { parse } from '@babel/parser';
 import {
     CallExpression, ExpressionStatement,
-    FunctionExpression, MemberExpression,
+    FunctionExpression, is, MemberExpression,
     Node, NumericLiteral,
     ObjectExpression, ObjectMethod,
     ObjectProperty, shallowEqual, StringLiteral,
@@ -37,32 +37,21 @@ function parseSource(code: string) {
         
         traverse(source, {
             enter(node) {
-                const scope = parsePackageScope(node);
-                if (scope) {
-                    result.packageScopeExports[scope.name] = scope.exports;
-                }
-                if (node.type !== 'CallExpression') {
-                    return;
-                }
-                
-                if (typeof node.callee !== 'object') {
-                    return;
-                }
-                
-                // @ts-ignore
-                if (node.callee.name !== 'meteorInstall') {
-                    return;
-                }
+                const packageScope = parsePackageScope(node);
                 const meteorInstall = parseMeteorInstall(node);
                 
                 if (meteorInstall) {
                     Object.assign(result, meteorInstall)
                 }
+                
+                if (packageScope) {
+                    result.packageScopeExports[packageScope.name] = packageScope.exports;
+                }
             }
         });
         
         if (!result.packageName || !Object.keys({ ...result.modules, ...result.packageScopeExports }).length) {
-            reject(new Error('Unable to parse Meteor package!'))
+            return reject(new Error('Unable to parse Meteor package!'));
         }
         
         resolve(result);
@@ -111,7 +100,10 @@ function parsePackageScope(node: Node) {
     return packageExport;
 }
 
-function parseMeteorInstall(node: CallExpression) {
+function parseMeteorInstall(node: Node) {
+    if (node.type !== 'CallExpression') return;
+    if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
+    
     const packageConfig = node.arguments[0] as PackageConfig;
     const node_modules = packageConfig.properties[0];
     const meteor = node_modules.value.properties[0];
