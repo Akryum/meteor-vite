@@ -30,7 +30,7 @@ export const TestTsModulesMock = {
             { type: 'export', name: 'ExportXObject' },
         ],
         're-exports-index.ts': [
-            { type: 're-export', name: 'DefaultReExport', from: './re-exports-source', id: 0 },
+            { type: 're-export', name: 'DefaultReExport', as: 'default', from: './re-exports-source', id: 0 },
             { type: 're-export', name: 'NamedReExport', from: './re-exports-source', id: 0 },
         ],
         're-exports-source.ts': [
