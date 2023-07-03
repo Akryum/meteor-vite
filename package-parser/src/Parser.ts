@@ -26,7 +26,7 @@ function parseSource(code: string) {
         modules: ModuleList;
         packageScopeExports: Record<string, string[]>;
     }
-    return new Promise((resolve, reject) => {
+    return new Promise<ParserResult>((resolve, reject) => {
         const source = parse(code);
         const result: ParserResult = {
             packageName: '',
