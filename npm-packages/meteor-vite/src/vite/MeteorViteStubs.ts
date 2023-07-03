@@ -139,14 +139,11 @@ async function checkManifest({ id, file, projectJsonContent: projectJson }: Stub
         }
     });
     
-    await Promise.all(resources.map(async (resource) => {
-        if (resource.fileOptions.lazy) {
+    for (const { fileOptions } of resources) {
+        if (fileOptions.lazy) {
             await autoImport();
+            return;
         }
-    }))
-    
-    return {
-        mainModule,
     }
 }
 
