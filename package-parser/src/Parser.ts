@@ -17,8 +17,6 @@ export async function parseModule(options: { fileContent: string | Promise<strin
         timeSpent: `${Date.now() - startTime}ms`
     });
     
-    console.log(result.modules);
-    
     return result;
 }
 
@@ -148,17 +146,25 @@ function handleMainModule({ expression }: ExpressionStatement) {
     return moduleExports;
 }
 
-function getPropertyKey(property: ObjectMethod | ObjectProperty | SpreadElement) {
-    if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
+const propParser = {
+    getKey(property: ObjectMethod | ObjectProperty) {
+        if (property.key.type === 'Identifier') {
+            return property.key.name;
+        }
+        if (property.key.type === 'StringLiteral') {
+            return property.key.value;
+        }
+        
+        throw new ModuleExportsError('Unsupported property key type!', property);
+    },
     
-    if (property.key.type === 'Identifier') {
-        return property.key.name;
+    getValue(property: ObjectMethod | ObjectProperty) {
+        if (property.type === 'ObjectMethod') {
+            return;
+        }
+        
+        return property.value
     }
-    if (property.key.type === 'StringLiteral') {
-        return property.key.value;
-    }
-    
-    throw new ModuleExportsError('Unsupported property key type!', property);
 }
 
 function formatExports({ expression, packageName, id }: {
@@ -167,6 +173,7 @@ function formatExports({ expression, packageName, id }: {
     id?: NumericLiteral,
 }) {
     return expression.properties.map((property) => {
+        if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
         const result: {
             key?: string,
             value?: ObjectProperty['value'],
@@ -175,11 +182,9 @@ function formatExports({ expression, packageName, id }: {
             fromPackage?: string;
             id?: number;
         } = {
-            key: getPropertyKey(property),
+            key: propParser.getKey(property),
+            value: propParser.getValue(property),
             type: 'export',
-        }
-        if (property.type === 'ObjectProperty') {
-            result.value = property.value;
         }
         if (packageName) {
             result.type = 're-export';
