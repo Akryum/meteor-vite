@@ -6,6 +6,9 @@ export default new class Serialize {
     
     public moduleExport(module: ModuleExport) {
         if (module.type === 're-export') {
+            if (module.name?.trim() === '*' && !module.as) {
+                return `export * from '${module.from}';`
+            }
             return `export { ${module.name} ${module.as && `as ${module.as} ` || ''}} from '${module.from}';`
         }
         if (module.type === 'export-default') {
