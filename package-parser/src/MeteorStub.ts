@@ -7,9 +7,10 @@ function stubTemplate({ stubId, packageId, exports }: TemplateOptions) {
     const { templateTop, templateBottom } = prepareExports(exports);
     
     return`
+const g = typeof window !== 'undefined' ? window : global
 ${templateTop}
 
-let ${METEOR_STUB_KEY}
+let ${METEOR_STUB_KEY};
 const require = Package.modules.meteorInstall({
   '__vite_stub${stubId}.js': (require, exports, module) => {
     ${METEOR_STUB_KEY} = require('${packageId}')
