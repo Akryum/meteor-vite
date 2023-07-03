@@ -1,0 +1,1 @@
+export { MeteorViteStubs } from './vite/MeteorViteStubs';
