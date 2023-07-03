@@ -2,9 +2,8 @@ import FS from 'fs/promises';
 import Path from 'path';
 import { ModuleList } from '../../src/Parser';
 
-
-export const TestTsModulesMock = {
-    fileContent: FS.readFile(Path.join(__dirname, 'meteor-bundle/test_ts-modules.js'), 'utf-8'),
+export const TsModules = prepareMock({
+    fileName: 'test_ts-modules.js',
     packageName: 'test:ts-modules',
     modules: {
         'explicit-relative-path.ts': [
@@ -41,12 +40,15 @@ export const TestTsModulesMock = {
             { type: 'export', name: 'NamedRelativeInteger' },
         ],
     } satisfies ModuleList,
-    fileNames: [
-        'explicit-relative-path.ts',
-        'index.ts',
-        'export-star-from.ts',
-        're-exports-index.ts',
-        're-exports-source.ts',
-        'relative-module.ts',
-    ],
-};
+});
+
+function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
+    fileName: string;
+    packageName: string;
+    modules: Modules;
+}) {
+    return {
+        fileContent: FS.readFile(Path.join(__dirname, `meteor-bundle/${fileName}`), 'utf-8'),
+        ...details,
+    }
+}
