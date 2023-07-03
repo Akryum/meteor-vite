@@ -2,7 +2,7 @@
   "name": "meteor-vite",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "ts-node-dev src/dev/debug-runner.ts",
     "build": "tsup",
