@@ -156,6 +156,7 @@ function formatExports({ expression, packageName, id }: {
         const result: {
             key?: string,
             value?: ObjectProperty['value'],
+            as?: string;
             type?: 're-export' | 'export' | 'export-default';
             fromPackage?: string;
             id?: number;
