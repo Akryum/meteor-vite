@@ -33,13 +33,14 @@ export function MeteorStubs(settings: PluginSettings): Plugin {
  */
 let stubId = 0;
 
+// todo: 1 Detect requested module from request ID.
+// todo: 2 Detect mainModule from file source.
+// todo: 3 Handle isopack auto-imports
 async function createMeteorStub({ file }: StubContext) {
     const parserResult = await parseModule({ fileContent: file.content })
     const template = stubTemplate({
         stubId: stubId++,
         packageId: file.packageId,
-        // todo: 1 Detect requested module from request ID.
-        // todo: 2 Detect mainModule from file source.
         moduleExports: parserResult.modules[0] || [],
         packageScopeExports: parserResult.packageScopeExports,
     });
