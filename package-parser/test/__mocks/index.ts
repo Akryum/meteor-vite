@@ -55,6 +55,12 @@ export const Check = prepareMock({
         ]
     },
     packageName: 'check',
+});
+
+export const MeteorJs = prepareMock({
+    fileName: 'meteor.js',
+    modules: {},
+    packageName: 'meteor',
 })
 
 function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
