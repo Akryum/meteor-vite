@@ -4,16 +4,23 @@ import { ModuleExport, PackageScopeExports, ParserResult } from '../Parser';
 
 export default new class Serialize {
     
-    public moduleExport(module: ModuleExport) {
+    public moduleExport(module: ModuleExport, packageName: string) {
         if (module.type === 're-export') {
+            let from = module.from?.startsWith('.')
+                       ? `${packageName}/${module.from?.replace(/^[./]+/, '')}`
+                       : module.from;
+            
             if (module.name?.trim() === '*' && !module.as) {
-                return `export * from '${module.from}';`
+                return `export * from '${from}';`
             }
-            return `export { ${module.name} ${module.as && `as ${module.as} ` || ''}} from '${module.from}';`
+            
+            return `export { ${module.name} ${module.as && `as ${module.as} ` || ''}} from '${from}';`
         }
+        
         if (module.type === 'export-default') {
             return `export default ${METEOR_STUB_KEY}.default ?? ${METEOR_STUB_KEY};`
         }
+        
         if (module.type === 'export') {
             return `export const ${module.name} = ${METEOR_STUB_KEY}.${module.name};`
         }
@@ -33,7 +40,7 @@ export default new class Serialize {
         return {
             packageScope: this.packageScopeExports(result.packageScopeExports),
             modules: Object.fromEntries(Object.entries(result.modules).map(([fileName, exports]) => {
-                return [fileName, this.moduleExports(exports)];
+                return [fileName, this.moduleExports(exports, result.packageName)];
             }))
         }
     }
@@ -55,14 +62,14 @@ export default new class Serialize {
         };
     }
     
-    public moduleExports(exports: ModuleExport[]) {
+    public moduleExports(exports: ModuleExport[], packageName: string) {
         const top: string[] = [];
         const bottom: string[] = [];
         
         exports.forEach((module) => {
             if (module.type === 'global-binding') return;
             
-            const line = this.moduleExport(module);
+            const line = this.moduleExport(module, packageName);
             
             if (module.type === 're-export') {
                 top.push(line);
