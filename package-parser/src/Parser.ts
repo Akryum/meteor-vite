@@ -10,12 +10,13 @@ import {
 
 export async function parseModule(options: { fileContent: string | Promise<string> }) {
     const startTime = Date.now();
-    const result = await parseSource(await options.fileContent);
     
-    console.log({
-        ...result,
+    const result = {
+        ...await parseSource(await options.fileContent),
         timeSpent: `${Date.now() - startTime}ms`
-    });
+    }
+    
+    console.log(result)
     
     return result;
 }
