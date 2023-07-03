@@ -1,7 +1,7 @@
 import { parse } from '@babel/parser';
 import {
     CallExpression, ExpressionStatement,
-    FunctionExpression, is, MemberExpression,
+    FunctionExpression, Identifier, is, MemberExpression,
     Node, NumericLiteral,
     ObjectExpression, ObjectMethod,
     ObjectProperty, shallowEqual, StringLiteral,
@@ -22,7 +22,8 @@ function parseSource(code: string) {
         const result: ParserResult = {
             packageName: '',
             modules: {},
-            packageScopeExports: {}
+            packageScopeExports: {},
+            mainModulePath: '',
         }
         
         
@@ -30,6 +31,7 @@ function parseSource(code: string) {
             enter(node) {
                 const packageScope = parsePackageScope(node);
                 const meteorInstall = parseMeteorInstall(node);
+                result.mainModulePath = readMainModulePath(node) || result.mainModulePath;
                 
                 if (meteorInstall) {
                     Object.assign(result, meteorInstall)
@@ -58,6 +60,17 @@ function parseSource(code: string) {
         }
         throw error;
     })
+}
+
+function readMainModulePath(node: Node) {
+    if (node.type !== 'VariableDeclarator') return;
+    if (!is('Identifier', node.id, { name: 'exports' })) return;
+    if (node.init?.type !== 'CallExpression') return;
+    if (!is('Identifier', node.init.callee, { name: 'require' })) return;
+    if (node.init.arguments[0]?.type !== 'StringLiteral') return;
+    
+    // node_modules/meteor/<author>:<packageName>/<mainModule>
+    return node.init.arguments[0].value;
 }
 
 
@@ -305,6 +318,7 @@ export type ParserResult = {
     packageName: string;
     modules: ModuleList;
     packageScopeExports: PackageScopeExports;
+    mainModulePath: string;
 }
 
 
