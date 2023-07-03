@@ -55,6 +55,7 @@ function parseFileId({ id, meteorPackagePath }: StubContext) {
     return {
         packageId,
         fileContent,
+        importPath,
     }
 }
 
