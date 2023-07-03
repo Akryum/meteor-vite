@@ -1,14 +1,18 @@
-import { ModuleExport } from './Parser';
-import { exportTemplate } from './Serializer';
+import { ModuleExport, PackageScopeExports } from './Parser';
+import { exportTemplate, packageScopeTemplate } from './Serializer';
 
 export const METEOR_STUB_KEY = `m2`;
+export const PACKAGE_SCOPE_KEY = 'm';
+export const TEMPLATE_GLOBAL_KEY = 'g';
 
-function stubTemplate({ stubId, packageId, exports }: TemplateOptions) {
-    const { templateTop, templateBottom } = prepareExports(exports);
+function stubTemplate({ stubId, packageId, exports, packageScopeExports }: TemplateOptions) {
+    const moduleExports = prepareExports(exports);
+    const packageScope = packageScopeTemplate(packageScopeExports);
     
     return`
-const g = typeof window !== 'undefined' ? window : global
-${templateTop}
+const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global
+${packageScope.top}
+${moduleExports.top}
 
 let ${METEOR_STUB_KEY};
 const require = Package.modules.meteorInstall({
@@ -22,7 +26,8 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub${stubId}.js')
 
-${templateBottom}
+${packageScope.bottom}
+${moduleExports.bottom}
 `
 }
 
@@ -49,8 +54,8 @@ function prepareExports(exports: ModuleExport[]) {
     })
     
     return {
-        templateTop: top.join('\n'),
-        templateBottom: bottom.join('\n'),
+        top: top.join('\n'),
+        bottom: bottom.join('\n'),
     }
 }
 
@@ -65,7 +70,7 @@ interface TemplateOptions {
      * 'meteor/ostrio:cookies/some-module'
      */
     packageId: string;
-    
     exports: ModuleExport[],
+    packageScopeExports: PackageScopeExports,
     stubId: number;
 }

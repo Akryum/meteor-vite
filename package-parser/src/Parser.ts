@@ -294,7 +294,7 @@ export type ModuleExport = {
     as?: string;
 };
 
-type ParserResult = {
+export type ParserResult = {
     packageName: string;
     modules: ModuleList;
     packageScopeExports: PackageScopeExports;
