@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, stubTemplate } from '../src/vite/StubTemplate';
 
-describe('MeteorStub', () => {
+describe('StubTemplate', () => {
     it('can create default export templates', () => {
         const template = stubTemplate({
             stubId: 0,
