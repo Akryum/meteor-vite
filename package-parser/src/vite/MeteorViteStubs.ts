@@ -17,7 +17,7 @@ export function MeteorViteStubs(settings: PluginSettings): Plugin {
                 return;
             }
             const context = { id: id.slice(1), ...settings }
-            const file = parseFileId(context);
+            const file = loadFileData(context);
             
             return createMeteorStub({ file, ...context, }).catch((error) => {
                 console.error('Encountered an error while package "%s" at path: %s!', file.packageId, file.sourcePath);
@@ -50,7 +50,7 @@ async function createMeteorStub({ file }: StubContext) {
     return template;
 }
 
-function parseFileId({ id, meteorPackagePath }: Pick<StubContext, 'id' | 'meteorPackagePath'>) {
+function loadFileData({ id, meteorPackagePath }: Pick<StubContext, 'id' | 'meteorPackagePath'>) {
     let {
         /**
          * Base Atmosphere package import This is usually where we find the full package content, even for packages
@@ -103,5 +103,5 @@ interface StubContext extends PluginSettings {
      * vite file ID. This is usually a relative or absolute file path.
      */
     id: string;
-    file: ReturnType<typeof parseFileId>
+    file: ReturnType<typeof loadFileData>
 }
