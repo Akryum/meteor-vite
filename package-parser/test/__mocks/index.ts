@@ -44,7 +44,16 @@ export const TsModules = prepareMock({
 
 export const Check = prepareMock({
     fileName: 'check.js',
-    modules: {},
+    modules: {
+        'match.js': [
+            { name: 'check', type: 'export' },
+            { name: 'Match', type: 'export' },
+            { name: 'isPlainObject', type: 'global-binding', id: 0, from: './isPlainObject' }
+        ],
+        'isPlainObject.js': [
+            { name: 'isPlainObject', type: 'export' }
+        ]
+    },
     packageName: 'check',
 })
 
