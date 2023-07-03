@@ -22,11 +22,6 @@ export async function parseModule(options: { fileContent: string | Promise<strin
 }
 
 function parseSource(code: string) {
-    type ParserResult = {
-        packageName: string;
-        modules: ModuleList;
-        packageScopeExports: Record<string, string[]>;
-    }
     return new Promise<ParserResult>((resolve, reject) => {
         const source = parse(code);
         const result: ParserResult = {
@@ -85,9 +80,9 @@ function parsePackageScope(node: Node) {
         throw new ModuleExportsError('Unexpected type received for package name!', packageName);
     }
     
-    const packageExport: PackageExport = {
+    const packageExport = {
         name: packageName.value,
-        exports: [],
+        exports: [] as string[],
     };
     
     packageExports.properties.forEach((property) => {
@@ -260,6 +255,11 @@ class ModuleExportsError extends Error {
     }
 }
 
+/**
+ * Meteor package-level exports.
+ * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
+ */
+export type PackageScopeExports = Record<string, string[]>;
 export type ModuleList = { [key in string]: ModuleExport[] };
 export type ModuleExport = {
     /**
@@ -294,13 +294,10 @@ export type ModuleExport = {
     as?: string;
 };
 
-/**
- * Meteor package-level exports.
- * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
- */
-export type PackageExport = {
-    name: string;
-    exports: string[];
+type ParserResult = {
+    packageName: string;
+    modules: ModuleList;
+    packageScopeExports: PackageScopeExports;
 }
 
 
