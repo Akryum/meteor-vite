@@ -1,6 +1,7 @@
 import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
+import { stubTemplate } from '../MeteorStub';
 import { parseModule } from '../Parser';
 
 export function MeteorStubs(settings: PluginSettings): Plugin {
@@ -16,15 +17,34 @@ export function MeteorStubs(settings: PluginSettings): Plugin {
                 return;
             }
             
+            id = id.slice(1);
+            
             return createMeteorStub({ id, ...settings, });
         }
     }
 }
 
+/**
+ * Unique ID for the next stub.
+ * @type {number}
+ */
+let stubId = 0;
+
 async function createMeteorStub(context: StubContext) {
     const { packageId, fileContent } = parseFileId(context);
-    const parserResult = parseModule({ fileContent });
-    console.log(parserResult); // todo: yield template
+    const parserResult = await parseModule({ fileContent });
+    const template = stubTemplate({
+        stubId: stubId++,
+        packageId,
+        // todo: 1 Detect requested module from request ID.
+        // todo: 2 Detect mainModule from file source.
+        moduleExports: parserResult.modules[0],
+        packageScopeExports: parserResult.packageScopeExports,
+    });
+    
+    console.log(parserResult);
+    
+    return template;
 }
 
 function parseFileId({ id, meteorPackagePath }: StubContext) {
