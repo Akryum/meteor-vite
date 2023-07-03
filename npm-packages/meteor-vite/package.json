@@ -2,14 +2,18 @@
   "name": "meteor-vite",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
+  "exports": {
+    "import": "./dist/index.mjs"
+  },
   "scripts": {
     "start": "ts-node-dev src/dev/debug-runner.ts",
     "build": "tsup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "tsup": {
-    "entry": ["src/index.ts"],
+    "entry": [
+      "src/index.ts"
+    ],
     "outDir": "dist",
     "format": "esm"
   },
