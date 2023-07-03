@@ -36,11 +36,11 @@ ${serialized.module.bottom.join('\n')}
 `
 }
 
-export function viteAutoImportBlock({ content, packageId }: { content: string, packageId: string }) {
+export function viteAutoImportBlock({ content, id }: { content: string, id: string }) {
     const importRegex = /(?<startBlock>\*\*\/[\r\n\s]+)(?<imports>.*[\r\n])(?<endBlock>[\s\r\n]*\/\*\* End of vite:bundler auto-imports \*\*\/)/;
     let { startBlock, imports, endBlock } = content.match(importRegex)?.groups || { imports: '' };
     
-    imports += `import '${packageId}';\n`;
+    imports += `import '${id}';\n`;
     imports = imports.trim();
     
     if (endBlock && startBlock) {

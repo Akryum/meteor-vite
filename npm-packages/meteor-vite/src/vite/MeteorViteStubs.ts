@@ -122,7 +122,7 @@ async function checkManifest({ id, file, projectJsonContent: projectJson }: Stub
         }
         const content = await FS.readFile(meteorClientEntryFile, 'utf8')
         if (!content.includes(`'${id}'`)) {
-            await FS.writeFile(meteorClientEntryFile, viteAutoImportBlock({ content, packageId: file.packageId }));
+            await FS.writeFile(meteorClientEntryFile, viteAutoImportBlock({ content, id }));
             throw new Error(`⚡  Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
         }
     }
