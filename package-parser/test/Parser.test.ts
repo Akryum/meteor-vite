@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ModuleExport, parseModule } from '../src/Parser';
+import Serialize from '../src/util/Serialize';
 import { Check, TsModules } from './__mocks';
-import Serialize from '../src/Serialize';
 
 describe('Mock package: `test:ts-modules`', async () => {
     const mockModule = TsModules;
