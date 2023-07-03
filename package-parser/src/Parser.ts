@@ -185,14 +185,7 @@ function formatExports({ expression, packageName, id }: {
         }
         
         if (result.type === 're-export' && property.type === 'ObjectMethod') {
-            if (result.name === 'Meteor') {
-                result.type = 'global-binding';
-            } else {
-                throw new ModuleExportsError(
-                    'Received an unexpected re-export property type! Maybe it needs to be included in the whitelist?',
-                    property,
-                )
-            }
+            result.type = 'global-binding';
         }
         
         if (result.type === 're-export' && property.type === 'ObjectProperty') {
