@@ -16,11 +16,11 @@ export function MeteorStubs(settings: PluginSettings): Plugin {
             if (!id.startsWith('\0meteor/')) {
                 return;
             }
+            const context = { id: id.slice(1), ...settings }
+            const file = parseFileId(context);
             
-            id = id.slice(1);
-            
-            return createMeteorStub({ id, ...settings, }).catch((error) => {
-                console.error('Encountered an error while parsing file: %s!', id);
+            return createMeteorStub({ file, ...context, }).catch((error) => {
+                console.error('Encountered an error while package "%s" at path: %s!', file.packageId, file.sourcePath);
                 throw error;
             });
         }
@@ -33,15 +33,14 @@ export function MeteorStubs(settings: PluginSettings): Plugin {
  */
 let stubId = 0;
 
-async function createMeteorStub(context: StubContext) {
-    const { packageId, fileContent } = parseFileId(context);
-    const parserResult = await parseModule({ fileContent });
+async function createMeteorStub({ file }: StubContext) {
+    const parserResult = await parseModule({ fileContent: file.content })
     const template = stubTemplate({
         stubId: stubId++,
-        packageId,
+        packageId: file.packageId,
         // todo: 1 Detect requested module from request ID.
         // todo: 2 Detect mainModule from file source.
-        moduleExports: parserResult.modules[0],
+        moduleExports: parserResult.modules[0] || [],
         packageScopeExports: parserResult.packageScopeExports,
     });
     
@@ -50,7 +49,7 @@ async function createMeteorStub(context: StubContext) {
     return template;
 }
 
-function parseFileId({ id, meteorPackagePath }: StubContext) {
+function parseFileId({ id, meteorPackagePath }: Pick<StubContext, 'id' | 'meteorPackagePath'>) {
     let {
         /**
          * Base Atmosphere package import This is usually where we find the full package content, even for packages
@@ -73,12 +72,13 @@ function parseFileId({ id, meteorPackagePath }: StubContext) {
     const sourceName = packageName.replace(':', '_');
     const sourceFile = `${sourceName}.js`;
     const sourcePath = Path.join(meteorPackagePath, sourceFile);
-    const fileContent = FS.readFile(sourcePath, 'utf-8');
+    const content = FS.readFile(sourcePath, 'utf-8');
     
     return {
+        content,
         packageId,
-        fileContent,
         importPath,
+        sourcePath,
     }
 }
 
@@ -102,4 +102,5 @@ interface StubContext extends PluginSettings {
      * Vite file ID. This is usually a relative or absolute file path.
      */
     id: string;
+    file: ReturnType<typeof parseFileId>
 }
