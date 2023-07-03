@@ -41,6 +41,7 @@ export const TsModules = prepareMock({
         ],
     } satisfies ModuleList,
     packageScopeExports: {},
+    mainModulePath: '/node_modules/meteor/test:ts-modules/index.ts'
 });
 
 export const Check = prepareMock({
@@ -59,6 +60,7 @@ export const Check = prepareMock({
     packageScopeExports: {
         'check': ['check', 'Match']
     },
+    mainModulePath: '/node_modules/meteor/test:modules/index.js'
 });
 
 export const MeteorJs = prepareMock({
@@ -68,6 +70,7 @@ export const MeteorJs = prepareMock({
     packageScopeExports: {
         'meteor': ['Meteor', 'global', 'meteorEnv']
     },
+    mainModulePath: '',
 })
 
 function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
@@ -75,6 +78,7 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
     packageName: string;
     modules: Modules;
     packageScopeExports: PackageScopeExports,
+    mainModulePath: string;
 }) {
     return {
         fileContent: FS.readFile(Path.join(__dirname, `meteor-bundle/${fileName}`), 'utf-8'),
