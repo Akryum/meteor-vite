@@ -21,12 +21,26 @@ export async function parseModule(options: { fileContent: string | Promise<strin
 }
 
 function parseSource(code: string) {
-    return new Promise<ParserResult>((resolve, reject) => {
+    type ParserResult = {
+        packageName: string;
+        modules: ModuleList;
+        packageScopeExports: Record<string, string[]>;
+    }
+    return new Promise((resolve, reject) => {
         const source = parse(code);
-        let completed = false;
+        const result: ParserResult = {
+            packageName: '',
+            modules: {},
+            packageScopeExports: {}
+        }
+        
         
         traverse(source, {
             enter(node) {
+                const scope = parsePackageScope(node);
+                if (scope) {
+                    result.packageScopeExports[scope.name] = scope.exports;
+                }
                 if (node.type !== 'CallExpression') {
                     return;
                 }
@@ -39,15 +53,19 @@ function parseSource(code: string) {
                 if (node.callee.name !== 'meteorInstall') {
                     return;
                 }
+                const meteorInstall = parseMeteorInstall(node);
                 
-                resolve(parseMeteorInstall(node));
-                completed = true;
+                if (meteorInstall) {
+                    Object.assign(result, meteorInstall)
+                }
             }
         });
         
-        if (!completed) {
+        if (!result.packageName || !Object.keys({ ...result.modules, ...result.packageScopeExports }).length) {
             reject(new Error('Unable to parse Meteor package!'))
         }
+        
+        resolve(result);
     }).catch((error: Error) => {
         if (error instanceof ModuleExportsError) {
             console.error(error);
@@ -77,19 +95,20 @@ function parsePackageScope(node: Node) {
         throw new ModuleExportsError('Unexpected type received for package name!', packageName);
     }
     
-    const exports: PackageExport[] = [];
+    const packageExport: PackageExport = {
+        name: packageName.value,
+        exports: [],
+    };
     
     packageExports.properties.forEach((property) => {
         if (property.type === 'SpreadElement') {
             throw new ModuleExportsError('Unexpected property type received for package-scope exports!', property)
         }
-        exports.push({
-            packageName: packageName.value,
-            name: propParser.getKey(property),
-        })
+        
+        packageExport.exports.push(propParser.getKey(property));
     })
     
-    return exports;
+    return packageExport;
 }
 
 function parseMeteorInstall(node: CallExpression) {
@@ -248,7 +267,6 @@ class ModuleExportsError extends Error {
     }
 }
 
-type ParserResult = ReturnType<typeof parseMeteorInstall>;
 export type ModuleList = { [key in string]: ModuleExport[] };
 export type ModuleExport = {
     /**
@@ -288,8 +306,8 @@ export type ModuleExport = {
  * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
  */
 export type PackageExport = {
-    packageName: string;
     name: string;
+    exports: string[];
 }
 
 
