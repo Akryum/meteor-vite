@@ -41,6 +41,7 @@ function parseSource(code: string) {
                 }
                 
                 if (packageScope) {
+                    result.packageName = result.packageName || packageScope.name;
                     result.packageScopeExports[packageScope.name] = packageScope.exports;
                 }
             }
@@ -74,8 +75,14 @@ function parsePackageScope(node: Node) {
     if (property.type !== 'Identifier') return;
     if (property.name !== '_define') return;
     
-    const packageExports = node.arguments[2];
     const packageName = node.arguments[0];
+    let packageExports = node.arguments[2];
+    
+    // Deals with the meteor/meteor core packages that don't use the module system.
+    if (!packageExports && node.arguments[1].type === 'ObjectExpression') {
+        packageExports = node.arguments[1]
+    }
+    
     if (!packageExports) return;
     if (packageExports.type !== 'ObjectExpression') {
         throw new ModuleExportsError('Unexpected type received for package-scope exports argument!', packageExports);
