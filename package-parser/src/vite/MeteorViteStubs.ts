@@ -1,10 +1,10 @@
 import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
-import { stubTemplate } from '../StubTemplate';
 import { parseModule } from '../Parser';
+import { stubTemplate } from './StubTemplate';
 
-export function MeteorStubs(settings: PluginSettings): Plugin {
+export function MeteorViteStubs(settings: PluginSettings): Plugin {
     return {
         name: 'meteor-vite: stubs',
         resolveId (id) {
@@ -100,7 +100,7 @@ interface PluginSettings {
 
 interface StubContext extends PluginSettings {
     /**
-     * Vite file ID. This is usually a relative or absolute file path.
+     * vite file ID. This is usually a relative or absolute file path.
      */
     id: string;
     file: ReturnType<typeof parseFileId>

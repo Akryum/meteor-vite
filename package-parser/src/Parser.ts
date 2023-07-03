@@ -290,7 +290,7 @@ export type ModuleExport = {
     name?: string,
     type: 'export' // Named export (export const fooBar = '...')
           | 're-export' // Exporting properties from another module. (export { fooBar } from './somewhere'  )
-          | 'global-binding' // Meteor globals. (`Meteor`, `DDP`, etc) These should likely just be excluded from the Vite stubs.
+          | 'global-binding' // Meteor globals. (`Meteor`, `DDP`, etc) These should likely just be excluded from the vite stubs.
           | 'export-default' // Default module export (export default fooBar);
     
     /**

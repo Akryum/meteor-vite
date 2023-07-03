@@ -1,6 +1,6 @@
-import { parseModule, ParserResult } from './src/Parser';
-import { Check, TsModules } from './test/__mocks';
-
+import { Check, TsModules } from '../../test/__mocks';
+import { parseModule } from '../Parser';
+import ViteServer from './ViteServer';
 
 /**
  * Parse test module on startup for debugging and development.
@@ -20,4 +20,4 @@ import { Check, TsModules } from './test/__mocks';
     })
 })();
 
-setInterval(() => 'Keeps the ts-node-dev process running for development')
+setInterval(() => 'Keeps the ts-node-dev process running for development', 100)

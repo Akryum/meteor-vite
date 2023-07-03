@@ -1,5 +1,5 @@
-import { ModuleExport, PackageScopeExports } from './Parser';
-import Serialize from './Serialize';
+import { ModuleExport, PackageScopeExports } from '../Parser';
+import Serialize from '../util/Serialize';
 
 export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
