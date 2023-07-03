@@ -19,7 +19,10 @@ export function MeteorStubs(settings: PluginSettings): Plugin {
             
             id = id.slice(1);
             
-            return createMeteorStub({ id, ...settings, });
+            return createMeteorStub({ id, ...settings, }).catch((error) => {
+                console.error('Encountered an error while parsing file: %s!', id);
+                throw error;
+            });
         }
     }
 }
