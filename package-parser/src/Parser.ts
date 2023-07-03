@@ -17,6 +17,8 @@ export async function parseModule(options: { fileContent: string | Promise<strin
         timeSpent: `${Date.now() - startTime}ms`
     });
     
+    console.log(result.modules);
+    
     return result;
 }
 
@@ -178,7 +180,7 @@ function formatExports({ expression, packageName, id }: {
             key?: string,
             value?: ObjectProperty['value'],
             as?: string;
-            type?: 're-export' | 'export' | 'export-default' | 'global-binding';
+            type: ModuleType;
             fromPackage?: string;
             id?: number;
         } = {
@@ -231,6 +233,12 @@ class ModuleExportsError extends Error {
 type ParserResult = ReturnType<typeof parseMeteorInstall>;
 export type ModuleExports = Required<ReturnType<typeof readModuleExports>>;
 export type ModuleList = { [key in string]: ModuleExports };
+
+type ModuleType =
+    'export' // Named export (export const fooBar = '...')
+    | 're-export' // Exporting properties from another module. (export { fooBar } from './somewhere'  )
+    | 'global-binding' // Meteor globals. (`Meteor`, `DDP`, etc) These should likely just be excluded from the Vite stubs.
+    | 'export-default' // Default module export (export default fooBar)
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
