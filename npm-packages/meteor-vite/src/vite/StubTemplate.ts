@@ -36,6 +36,30 @@ ${serialized.module.bottom.join('\n')}
 `
 }
 
+export function viteAutoImportBlock({ content, packageId }: { content: string, packageId: string }) {
+    const importRegex = /(?<startBlock>\*\*\/[\r\n\s]+)(?<imports>.*[\r\n])(?<endBlock>[\s\r\n]*\/\*\* End of vite:bundler auto-imports \*\*\/)/;
+    let { startBlock, imports, endBlock } = content.match(importRegex)?.groups || { imports: '' };
+    
+    imports += `import '${packageId}';\n`;
+    imports = imports.trim();
+    
+    if (endBlock && startBlock) {
+        return content.replace(importRegex, `${startBlock.trim()}\n${imports}\n${endBlock.trim()}`);
+    }
+    
+    return `/**
+ * These modules are automatically imported by vite:bundler.
+ * You can commit these to your project or move them elsewhere if you'd like,
+ * but they must be imported somewhere in your Meteor entrypoint file.
+ *
+ * More info: https://github.com/Akryum/meteor-vite/blob/main/packages/vite-bundler/README.md#lazy-loaded-meteor-packages
+**/
+${imports}
+/** End of vite:bundler auto-imports **/
+
+${content}`;
+}
+
 interface TemplateOptions {
     /**
      * Meteor package ID.
