@@ -1,4 +1,4 @@
-import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './MeteorStub';
+import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubTemplate';
 import { ModuleExport, PackageScopeExports, ParserResult } from './Parser';
 
 

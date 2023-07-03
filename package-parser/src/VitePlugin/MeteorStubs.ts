@@ -1,7 +1,7 @@
 import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
-import { stubTemplate } from '../MeteorStub';
+import { stubTemplate } from '../StubTemplate';
 import { parseModule } from '../Parser';
 
 export function MeteorStubs(settings: PluginSettings): Plugin {
