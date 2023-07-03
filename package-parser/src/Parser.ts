@@ -101,22 +101,29 @@ function readModuleExports(node: Node) {
 
     // Meteor's module declaration object. `module.`
     if (!callee.object.name.match(/^module\d*$/)) return;
-
     if (callee.property.type !== 'Identifier') return;
-
+    const methodName = callee.property.name as 'export' | 'link' | 'exportDefault';
+    
+    
+    if (methodName === 'exportDefault') {
+        if (args[0].type !== 'Identifier') {
+            throw new ModuleExportsError('Unexpected default export value!', args[0]);
+        }
+        
+        // todo: test for default exports with `export default { foo: 'bar' }`
+        return [{ type: 'export-default', name: args[0].name, } satisfies ModuleExport];
+    }
 
     // Meteor's module declaration method. `module.export(...)`
-    if (callee.property.name === 'export') {
+    if (methodName === 'export') {
         if (args[0].type !== 'ObjectExpression') throw new ModuleExportsError('Unexpected export type!', exports)
         return formatExports({
             expression: args[0]
         });
     }
     
-    // Todo: Meteor's default module export `module.exportDefault()`
-
     // Meteor's module declaration method. `module.link(...)`
-    if (callee.property.name !== 'link') return;
+    if (methodName !== 'link') return;
     if (args[0].type !== 'StringLiteral') throw new ModuleExportsError('Expected string as the first argument in module.link()!', args[0]);
     if (args[1].type !== 'ObjectExpression') throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
     if (args[2].type !== 'NumericLiteral') throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0]);
@@ -171,7 +178,7 @@ function formatExports({ expression, packageName, id }: {
         const result: ModuleExport = {
             name: propParser.getKey(property),
             type: 'export',
-            id: id && id.value,
+            ...id && { id: id.value }
         }
         
         if (packageName) {
