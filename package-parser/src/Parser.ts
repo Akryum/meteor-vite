@@ -17,6 +17,8 @@ export async function parseModule(options: { fileContent: string | Promise<strin
         timeSpent: `${Date.now() - startTime}ms`
     });
     
+    console.log(result.modules);
+    
     return result;
 }
 
@@ -171,8 +173,6 @@ function formatExports({ expression, packageName, id }: {
         }
         if (property.type === 'ObjectProperty') {
             result.value = property.value;
-        } else if (result.key !== 'Meteor') {
-            console.warn('Need further implementation for object method handling!', property);
         }
         if (!result.key) {
             throw new ModuleExportsError('Unexpected property key type!', property)
@@ -183,6 +183,17 @@ function formatExports({ expression, packageName, id }: {
         }
         if (id) {
             result.id = id.value;
+        }
+        if (result.type === 're-export' && result.key !== 'Meteor') {
+            if (property.type !== 'ObjectProperty') {
+                throw new ModuleExportsError('Received unexpected property type for re-export', property);
+            }
+            if (result.value?.type !== 'StringLiteral') {
+                throw new ModuleExportsError('Received unsupported result type in re-export!', property);
+            }
+            if (result.value.value !== result.key) {
+                result.as = result.value.value;
+            }
         }
         
         return result;
