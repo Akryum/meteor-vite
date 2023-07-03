@@ -42,6 +42,12 @@ export const TsModules = prepareMock({
     } satisfies ModuleList,
 });
 
+export const Check = prepareMock({
+    fileName: 'check.js',
+    modules: {},
+    packageName: 'check',
+})
+
 function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
     fileName: string;
     packageName: string;
