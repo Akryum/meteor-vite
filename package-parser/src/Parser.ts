@@ -17,8 +17,6 @@ export async function parseModule(options: { fileContent: string | Promise<strin
         timeSpent: `${Date.now() - startTime}ms`
     });
     
-    console.log(result.modules);
-    
     return result;
 }
 
