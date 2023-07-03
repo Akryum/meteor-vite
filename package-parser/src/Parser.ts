@@ -13,7 +13,7 @@ export async function parseModule(options: { fileContent: string | Promise<strin
     const result = await parseSource(await options.fileContent);
     
     console.log({
-        result,
+        ...result,
         timeSpent: `${Date.now() - startTime}ms`
     });
     

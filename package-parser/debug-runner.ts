@@ -1,5 +1,5 @@
 import { parseModule } from './src/Parser';
-import { TestTsModulesMock } from './test/__mocks';
+import { Check, TsModules } from './test/__mocks';
 
 
 /**
@@ -8,8 +8,10 @@ import { TestTsModulesMock } from './test/__mocks';
  */
 (async () => {
     console.log(`${'--'.repeat(64)}`)
+    await parseModule({ fileContent: await Check.fileContent });
     
-    await parseModule({ fileContent: await TestTsModulesMock.fileContent });
+    console.log(`${'--'.repeat(64)}`)
+    await parseModule({ fileContent: await TsModules.fileContent });
 })();
 
 setInterval(() => 'Keeps the ts-node-dev process running for development')
