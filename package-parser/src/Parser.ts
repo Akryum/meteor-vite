@@ -178,30 +178,37 @@ function formatExports({ expression, packageName, id }: {
             key?: string,
             value?: ObjectProperty['value'],
             as?: string;
-            type?: 're-export' | 'export' | 'export-default';
+            type?: 're-export' | 'export' | 'export-default' | 'global-binding';
             fromPackage?: string;
             id?: number;
         } = {
             key: propParser.getKey(property),
             value: propParser.getValue(property),
             type: 'export',
+            id: id && id.value,
         }
+        
         if (packageName) {
             result.type = 're-export';
             result.fromPackage = packageName.value;
         }
-        if (id) {
-            result.id = id.value;
-        }
-        // Todo: Prevent the globally linked Meteor instance from being marked as a re-export
-        // I believe it should be omitted from the export list entirely.
-        if (result.type === 're-export' && result.key !== 'Meteor') {
-            if (property.type !== 'ObjectProperty') {
-                throw new ModuleExportsError('Received unexpected property type for re-export', property);
+        
+        if (result.type === 're-export' && property.type === 'ObjectMethod') {
+            if (result.key === 'Meteor') {
+                result.type = 'global-binding';
+            } else {
+                throw new ModuleExportsError(
+                    'Received an unexpected re-export property type! Maybe it needs to be included in the whitelist?',
+                    property,
+                )
             }
+        }
+        
+        if (result.type === 're-export' && property.type === 'ObjectProperty') {
             if (result.value?.type !== 'StringLiteral') {
                 throw new ModuleExportsError('Received unsupported result type in re-export!', property);
             }
+            
             if (result.value.value !== result.key) {
                 result.as = result.value.value;
             }
