@@ -36,59 +36,68 @@ export default new class Serialize {
         return `const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${packageName}']`;
     }
     
-    public parserResult(result: ParserResult): SerializedParserResult {
-        return {
-            packageScope: this.packageScopeExports(result.packageScopeExports),
-            modules: Object.fromEntries(Object.entries(result.modules).map(([fileName, exports]) => {
-                return [fileName, this.moduleExports(exports, result.packageName)];
-            }))
+    public parseModules({ packageName, packageScope, modules }: {
+        packageName: string;
+        packageScope: PackageScopeExports,
+        modules: ModuleExport[]
+    }) {
+        type PlacementGroup = { top: string[], bottom: string[] }
+        const result: {
+            module: PlacementGroup,
+            package: PlacementGroup,
+        } = {
+            module: {
+                top: [],
+                bottom: []
+            },
+            package: {
+                top: [],
+                bottom: [],
+            }
         }
-    }
-    
-    public packageScopeExports(packageExports: PackageScopeExports) {
-        const top: string[] = [];
-        const bottom: string[] = [];
         
-        const exportList = Object.entries(packageExports);
+        const reservedKeys = new Set<string>();
         
-        exportList.forEach(([name, exports]) => {
-            top.push(this.packageScopeImport(name));
-            exports.forEach((key) => bottom.push(this.packageScopeExport(key)));
+        Object.entries(packageScope).forEach(([name, exports]) => {
+            result.package.top.push(this.packageScopeImport(name));
+            
+            exports.forEach((key) => {
+                reservedKeys.add(key);
+                result.package.bottom.push(this.packageScopeExport(key))
+            });
         });
         
-        return {
-            top: top.join('\n'),
-            bottom: bottom.join('\n'),
-        };
-    }
-    
-    public moduleExports(exports: ModuleExport[], packageName: string) {
-        const top: string[] = [];
-        const bottom: string[] = [];
-        
-        exports.forEach((module) => {
+        modules.forEach((module) => {
+            if (!module.name) return;
             if (module.type === 'global-binding') return;
+            if (reservedKeys.has(module.name)) {
+                console.warn('Detected duplicate export keys from module!', {
+                    packageName,
+                    packageScope,
+                    modules
+                })
+                return;
+            }
             
             const line = this.moduleExport(module, packageName);
             
             if (module.type === 're-export') {
-                top.push(line);
+                result.module.top.push(line);
             }
             
             if (module.type === 'export') {
-                bottom.push(line);
+                result.module.bottom.push(line);
             }
             
             if (module.type === 'export-default') {
-                bottom.push(line)
+                result.module.bottom.push(line)
             }
-        })
+        });
         
-        return {
-            top: top.join('\n'),
-            bottom: bottom.join('\n'),
-        }
+        
+        return result;
     }
+    
 }
 
 export function getMainModule(result: ParserResult) {

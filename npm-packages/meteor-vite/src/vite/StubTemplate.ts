@@ -1,4 +1,5 @@
-import { ModuleExport, PackageScopeExports } from '../Parser';
+import { Serializer } from 'v8';
+import { ModuleExport, PackageScopeExports, ParserResult } from '../Parser';
 import Serialize from '../util/Serialize';
 
 export const METEOR_STUB_KEY = `m2`;
@@ -6,16 +7,17 @@ export const PACKAGE_SCOPE_KEY = 'm';
 export const TEMPLATE_GLOBAL_KEY = 'g';
 
 export function stubTemplate({ stubId, packageId, moduleExports, packageScopeExports }: TemplateOptions) {
-    const serialized = {
-        modules: Serialize.moduleExports(moduleExports),
-        packages: Serialize.packageScopeExports(packageScopeExports)
-    };
+    const serialized = Serialize.parseModules({
+        packageName: packageId,
+        modules: moduleExports,
+        packageScope: packageScopeExports,
+    });
     
     return`
 // packageId: ${packageId}
 const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global
-${serialized.packages.top}
-${serialized.modules.top}
+${serialized.package.top.join('\n')}
+${serialized.module.top.join('\n')}
 
 let ${METEOR_STUB_KEY};
 const require = Package.modules.meteorInstall({
@@ -29,8 +31,8 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub${stubId}.js')
 
-${serialized.packages.bottom}
-${serialized.modules.bottom}
+${serialized.package.bottom.join('\n')}
+${serialized.module.bottom.join('\n')}
 `
 }
 
