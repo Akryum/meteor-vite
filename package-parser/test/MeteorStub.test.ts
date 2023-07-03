@@ -11,7 +11,6 @@ describe('MeteorStub', () => {
             ],
             packageScopeExports: {},
         });
-        
         expect(template).toContain(`export default ${METEOR_STUB_KEY}.default`)
     });
     
@@ -26,7 +25,7 @@ describe('MeteorStub', () => {
         });
         
         expect(template).toContain(`export const packageScopeExport`);
-        expect(template).toContain(`Package['packageScopeExport']`);
+        expect(template).toContain(`Package['exampleuser:foobar']`);
         expect(template).not.toContain('export default');
     });
     
