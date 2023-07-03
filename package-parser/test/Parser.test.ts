@@ -11,6 +11,10 @@ describe('Mock package: `test:ts-modules`', async () => {
     
     it('parsed the package name', () => {
         expect(parsedModule.packageName).toEqual(mockModule.packageName)
+    });
+    
+    it('detected the correct main module path', () => {
+        expect(parsedModule.mainModulePath).toEqual(mockModule.mainModulePath);
     })
     
     describe('Package files', () => {
@@ -58,6 +62,10 @@ describe('Mock package `check`', async () => {
     
     it('parsed the package name', () => {
         expect(parsedModule.packageName).toEqual(mockModule.packageName)
+    });
+    
+    it('detected the correct main module path', () => {
+        expect(parsedModule.mainModulePath).toEqual(mockModule.mainModulePath);
     })
     
     describe('Package files', () => {
