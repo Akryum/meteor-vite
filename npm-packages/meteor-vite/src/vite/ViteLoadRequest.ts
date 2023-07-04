@@ -120,7 +120,7 @@ export default class ViteLoadRequest {
                 this.mainModulePath = resource.path
             }
             if (isSameModulePath({
-                filepathA: this.context.file.importPath,
+                filepathA: this.context.file.importPath || '',
                 filepathB: resource.path,
                 compareExtensions: false,
             })) {
