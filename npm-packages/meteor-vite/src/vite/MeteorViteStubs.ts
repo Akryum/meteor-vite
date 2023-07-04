@@ -22,7 +22,7 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
             const parserResult = await parseModule({ fileContent: request.context.file.content });
             const moduleExports = getModuleExports({
-                importPath: request.requestedModulePath(),
+                importPath: request.requestedModulePath() || Object.keys(parserResult.modules)[0],
                 parserResult,
             }).exports;
             
