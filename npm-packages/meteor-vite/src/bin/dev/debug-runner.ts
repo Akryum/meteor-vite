@@ -1,6 +1,6 @@
-import { Check, TestLazy, TsModules } from '../../test/__mocks';
-import { parseMeteorPackage } from '../Parser';
-import ViteServer from './ViteServer';
+import { Check, TestLazy, TsModules } from '../../../test/__mocks';
+import { parseMeteorPackage } from '../../meteor/package/Parser';
+import ViteServer from './vite-server';
 
 /**
  * Parse test module on startup for debugging and development.

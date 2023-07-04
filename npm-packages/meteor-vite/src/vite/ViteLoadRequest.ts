@@ -1,9 +1,9 @@
 import { existsSync } from 'fs';
 import FS from 'fs/promises';
 import Path from 'path';
-import { isSameModulePath } from '../util/Serialize';
-import type { PluginSettings } from './MeteorViteStubs';
-import { viteAutoImportBlock } from './StubTemplate';
+import { isSameModulePath } from '../meteor/package/Serialize';
+import { viteAutoImportBlock } from '../meteor/package/StubTemplate';
+import type { PluginSettings } from './plugin/MeteorStubs';
 
 export default class ViteLoadRequest {
     

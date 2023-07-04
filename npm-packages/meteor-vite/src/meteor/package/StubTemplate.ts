@@ -1,4 +1,4 @@
-import Serialize, { PackageSubmodule } from '../util/Serialize';
+import Serialize, { PackageSubmodule } from './Serialize';
 
 export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';

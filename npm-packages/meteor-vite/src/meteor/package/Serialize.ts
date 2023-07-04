@@ -1,6 +1,6 @@
 import Path from 'path';
-import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from '../vite/StubTemplate';
-import { ModuleExport, PackageScopeExports, ParserResult } from '../Parser';
+import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubTemplate';
+import { ModuleExport, PackageScopeExports, ParserResult } from './Parser';
 
 
 export default new class Serialize {

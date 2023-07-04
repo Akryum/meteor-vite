@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { getModuleExports } from '../src/util/Serialize';
+import { getModuleExports } from '../src/meteor/package/Serialize';
 import { TsModules } from './__mocks';
 
 describe('Utility functions', () => {

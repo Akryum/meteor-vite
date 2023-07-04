@@ -1,10 +1,10 @@
 import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
-import { parseMeteorPackage } from '../Parser';
-import { getModuleExports } from '../util/Serialize';
-import { stubTemplate } from './StubTemplate';
-import ViteLoadRequest, { MeteorViteError } from './ViteLoadRequest';
+import { parseMeteorPackage } from '../../meteor/package/Parser';
+import { getModuleExports } from '../../meteor/package/Serialize';
+import { stubTemplate } from '../../meteor/package/StubTemplate';
+import ViteLoadRequest, { MeteorViteError } from '../ViteLoadRequest';
 
 /**
  * Unique ID for the next stub.
@@ -12,7 +12,7 @@ import ViteLoadRequest, { MeteorViteError } from './ViteLoadRequest';
  */
 let stubId = 0;
 
-export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
+export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
     return {
         name: 'meteor-vite: stubs',
         resolveId: (id) => ViteLoadRequest.resolveId(id),

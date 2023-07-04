@@ -1,1 +1,0 @@
-export { validateStub } from './ClientStubValidation';

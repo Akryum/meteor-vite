@@ -1,6 +1,6 @@
 import FS from 'fs/promises';
 import Path from 'path';
-import { ModuleList, PackageScopeExports } from '../../src/Parser';
+import { ModuleList, PackageScopeExports } from '../../src/meteor/package/Parser';
 
 export const TsModules = prepareMock({
     packageName: 'test:ts-modules',

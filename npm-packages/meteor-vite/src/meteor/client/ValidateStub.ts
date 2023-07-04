@@ -1,4 +1,4 @@
-import PackageJson from '../../package.json';
+import PackageJson from '../../../package.json';
 
 /**
  * Validate that the provided stub export key maps to a working export.

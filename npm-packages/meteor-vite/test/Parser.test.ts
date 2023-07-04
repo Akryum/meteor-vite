@@ -1,7 +1,7 @@
 import Path from 'path';
 import { describe, expect, it } from 'vitest';
-import { ModuleExport, parseMeteorPackage } from '../src/Parser';
-import Serialize, { getMainModule } from '../src/util/Serialize';
+import { ModuleExport, parseMeteorPackage } from '../src/meteor/package/Parser';
+import Serialize, { getMainModule } from '../src/meteor/package/Serialize';
 import { Check, MeteorJs, MockModule, OstrioCookies, TestLazy, TsModules } from './__mocks';
 
 describe('Validate known exports for mock packages', () => {
