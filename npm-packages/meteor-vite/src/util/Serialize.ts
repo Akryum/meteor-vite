@@ -125,17 +125,19 @@ export type SerializedParserResult = {
  * Check if the two provided module paths are the same.
  * Todo: this may end up causing issues if a package has say a "myModule.ts" and a "myModule.ts" file.
  */
+const REGEX_LEADING_SLASH = /^\/+/
 export function isSameModulePath(options: {
     filepathA: string,
     filepathB: string,
     compareExtensions: boolean;
 }) {
-    const fileA = Path.parse(options.filepathA)
-    const fileB = Path.parse(options.filepathB);
+    const fileA = Path.parse(options.filepathA.replace(REGEX_LEADING_SLASH, ''));
+    const fileB = Path.parse(options.filepathB.replace(REGEX_LEADING_SLASH, ''));
 
     if (fileA.dir !== fileB.dir) {
         return false;
     }
+    
     
     if (options.compareExtensions && fileA.ext !== fileB.ext) {
         return false;
@@ -143,6 +145,7 @@ export function isSameModulePath(options: {
     
     return fileA.name === fileB.name;
 }
+
 
 export function getModuleExports({ parserResult, importPath }: {
     parserResult: ParserResult,
