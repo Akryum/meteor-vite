@@ -1,6 +1,6 @@
 import { Plugin } from 'vite';
 import { ModuleExport, parseModule } from '../Parser';
-import { getModuleExports } from '../util/Serialize';
+import { getMainModule, getModuleExports } from '../util/Serialize';
 import { stubTemplate } from './StubTemplate';
 import ViteLoadRequest, { MeteorViteError } from './ViteLoadRequest';
 
@@ -30,8 +30,8 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
                     importPath: request.requestedModulePath,
                     parserResult,
                 }).exports;
-            } else { // fall back to the first parsed module in the list
-                moduleExports = parserResult.modules[0] || [];
+            } else { // fall back to a best guess of the main module
+                moduleExports = getMainModule(parserResult) || parserResult.modules[0] || [];
             }
             
             const template = stubTemplate({
