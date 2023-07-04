@@ -142,9 +142,11 @@ async function checkManifest({ id, file, projectJsonContent: projectJson }: Stub
     for (const { fileOptions } of resources) {
         if (fileOptions.lazy) {
             await autoImport();
-            return;
+            break;
         }
     }
+    
+    return manifest;
 }
 
 
