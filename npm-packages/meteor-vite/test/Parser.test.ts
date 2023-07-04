@@ -47,7 +47,7 @@ describe('Mock package: `test:ts-modules`', async () => {
                 
                 describe('Re-exports', () => {
                     mockReExports?.forEach((mockExport) => {
-                        it(Serialize.moduleExport(mockExport), () => {
+                        it(Serialize.moduleExport(mockExport, mockModule.packageName), () => {
                             expect(parsedExports).toEqual(
                                 expect.arrayContaining([mockExport])
                             )
@@ -103,7 +103,7 @@ describe('Mock package `check`', async () => {
                 
                 describe('Re-exports', () => {
                     mockReExports?.forEach((mockExport) => {
-                        it(Serialize.moduleExport(mockExport), ({ expect }) => {
+                        it(Serialize.moduleExport(mockExport, mockModule.packageName), ({ expect }) => {
                             expect(parsedExports).toEqual(
                                 expect.arrayContaining([mockExport])
                             )
