@@ -66,7 +66,7 @@ export default class ViteLoadRequest {
             importPath
         } = id.match( // todo: maybe use the Node.js Path utility?
             /(?<packageId>(meteor\/)[\w\-. ]+(:[\w\-. ]+)?)(?<importPath>\/.+)?/
-        )?.groups || {};
+        )?.groups || {} as { packageId: string, importPath?: string };
         
         const packageName = packageId.replace(/^meteor\//, '');
         const sourceName = packageName.replace(':', '_');
