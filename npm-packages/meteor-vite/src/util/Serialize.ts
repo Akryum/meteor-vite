@@ -153,7 +153,7 @@ export function getModuleExports({ parserResult, importPath }: {
     
     const [modulePath, exports] = file;
     
-    return { modulePath, exports, packageExports: parserResult.packageScopeExports };
+    return { modulePath, exports };
 }
 
 export function getMainModule(result: ParserResult): PackageModuleExports {
@@ -161,7 +161,6 @@ export function getMainModule(result: ParserResult): PackageModuleExports {
         return {
             modulePath: '',
             exports: [],
-            packageExports: result.packageScopeExports,
         }
     }
     
@@ -182,16 +181,38 @@ export function getMainModule(result: ParserResult): PackageModuleExports {
     return {
         modulePath,
         exports,
-        packageExports: result.packageScopeExports,
     }
 }
 
-export interface PackageModuleExports {
+type PackageModuleExports = Pick<PackageSubmodule, 'modulePath' | 'exports'>
+
+export interface PackageSubmodule {
+    /**
+     * Full import path for the package's requested module.
+     * @example
+     * 'ostrio:cookies/cookie-store.js'
+     */
+    importPath: string;
+    
     /**
      * Relative path from the package name to the module containing these exports.
-     * (e.g. ostrio:cookies/cookie-store.js)
+     * @example
+     * 'cookie-store.js'
      */
     modulePath: string;
+    
+    /**
+     * ESM exports from the Meteor package module.
+     * @example
+     * export const foo = '...'
+     */
     exports: ModuleExport[];
+    
+    /**
+     * Meteor package-scope exports.
+     * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
+     * @example
+     * Package.export('...')
+     */
     packageExports: PackageScopeExports;
 }

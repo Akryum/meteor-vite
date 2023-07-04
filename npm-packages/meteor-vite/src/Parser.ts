@@ -8,6 +8,7 @@ import {
     traverse,
 } from '@babel/types';
 
+// todo: Yield instance of class that implements the same result format.
 export async function parseMeteorPackage(options: { fileContent: string | Promise<string> }) {
     const startTime = Date.now();
     return {

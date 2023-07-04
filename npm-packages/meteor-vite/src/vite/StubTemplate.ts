@@ -1,4 +1,4 @@
-import Serialize, { PackageModuleExports } from '../util/Serialize';
+import Serialize, { PackageSubmodule } from '../util/Serialize';
 
 export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
@@ -6,7 +6,7 @@ export const TEMPLATE_GLOBAL_KEY = 'g';
 
 export function stubTemplate({ stubId, packageId, requestId, module }: {
     packageId: string;
-    module: PackageModuleExports,
+    module: PackageSubmodule,
     stubId: number;
     requestId: string;
 }) {
