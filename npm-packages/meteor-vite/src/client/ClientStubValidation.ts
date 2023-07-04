@@ -29,7 +29,7 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
             }))
         }
         if (typeof stubbedPackage[key] === 'undefined') {
-            errors.push(new MeteorViteError(`Could not import Meteor package into the client: '${key}' is undefined`, {
+            errors.push(new MeteorViteError(`Could not import Meteor package into the client: export '${key}' is undefined`, {
                 requestId: requestId,
                 packageName,
                 exportName: key,
