@@ -113,3 +113,5 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
         ...details,
     }
 }
+
+export type MockModule = ReturnType<typeof prepareMock>;

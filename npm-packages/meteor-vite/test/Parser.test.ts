@@ -2,10 +2,10 @@ import Path from 'path';
 import { describe, expect, it } from 'vitest';
 import { ModuleExport, parseModule } from '../src/Parser';
 import Serialize, { getMainModule } from '../src/util/Serialize';
-import { Check, MeteorJs, OstrioCookies, TestLazy, TsModules } from './__mocks';
+import { Check, MeteorJs, MockModule, OstrioCookies, TestLazy, TsModules } from './__mocks';
 
 describe('Validate known exports for mock packages', () => {
-    const mockPackages = [Check, TsModules, MeteorJs, TestLazy, OstrioCookies];
+    const mockPackages: MockModule[] = [Check, TsModules, MeteorJs, TestLazy, OstrioCookies];
     
     mockPackages.forEach((mockModule) => {
         describe(mockModule.packageName, async () => {
