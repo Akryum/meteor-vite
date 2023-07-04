@@ -40,14 +40,6 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, viteId }
 const meteor = typeof window !== 'undefined' ? window.Meteor : global.Meteor
 const settings: MeteorViteSettings = meteor?.settings?.public?.vite?.meteor || {};
 
-
-interface MeteorViteSettings {
-    /**
-     * list of packages to ignore export validation for.
-     */
-    skipValidation?: string[];
-}
-
 class MeteorViteError extends Error {
     public readonly name = '[meteor-vite] ⚠️ Error';
     constructor(message: string, { packageName, viteId, exportName }: ErrorMetadata) {
@@ -67,6 +59,13 @@ class MeteorViteError extends Error {
         super(message);
         this.stack += `\n\n${footerLines}`
     }
+}
+
+interface MeteorViteSettings {
+    /**
+     * list of packages to ignore export validation for.
+     */
+    skipValidation?: string[];
 }
 
 type ErrorMetadata = Pick<StubValidation, 'packageName' | 'viteId'> & { exportName?: string };
