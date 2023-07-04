@@ -7,13 +7,17 @@
  * TODO: Import, validate, and re-export wildcard re-exports.
  */
 export function validateStub({ stubbedPackage, exportKeys, packageName }: StubValidation) {
-    if (settings.skipValidation?.includes(packageName)) return;
+    if (settings.skipValidation?.includes(packageName)) {
+        return;
+    }
+    
+    console.debug('Meteor-Vite package validation:', {
+        packageName,
+        stubbedPackage,
+        exportKeys,
+    });
+    
     exportKeys.forEach((key) => {
-        console.debug('Meteor-Vite package validation:', {
-            packageName,
-            stubbedPackage,
-            exportKeys,
-        });
         if (!stubbedPackage) {
             throw new MeteorViteError(`Was not able to import Meteor package: "${packageName}"`)
         }
