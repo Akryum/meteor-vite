@@ -2,6 +2,7 @@ import { existsSync } from 'fs';
 import FS from 'fs/promises';
 import Path from 'path';
 import type { PluginSettings } from './MeteorViteStubs';
+import { viteAutoImportBlock } from './StubTemplate';
 
 export default class ViteLoadRequest {
     
@@ -33,6 +34,37 @@ export default class ViteLoadRequest {
     }
     
     constructor(public readonly context: RequestContext ) {};
+    
+    /**
+     * Forces an import statement for the current module into the user's Meteor mainModule.
+     * Not to be confused with Vite's entrypoint.
+     *
+     * We do this to work around how Meteor deals with lazy-loaded packages.
+     * @return {Promise<void>}
+     */
+    public async forceImport() {
+        const mainModule = this.context.pluginSettings.projectJsonContent.meteor.mainModule;
+        
+        if (!mainModule?.client) {
+            throw new Error(`⚡  No meteor.mainModule.client found in package.json`)
+        }
+        
+        const meteorClientEntryFile = Path.resolve(process.cwd(), mainModule.client);
+        
+        if (!existsSync(meteorClientEntryFile)) {
+            throw new Error(`⚡  meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
+        }
+        
+        const content = await FS.readFile(meteorClientEntryFile, 'utf8');
+        
+        if (!content.includes(`'${this.context.id}'`)) {
+            await FS.writeFile(meteorClientEntryFile, viteAutoImportBlock({
+                id: this.context.id,
+                content,
+            }));
+            throw new Error(`⚡  Auto-imported package ${this.context.id} to ${meteorClientEntryFile}, please reload`)
+        }
+    }
     
     
     protected static loadFileData({ id, pluginSettings }: PreContextRequest) {
