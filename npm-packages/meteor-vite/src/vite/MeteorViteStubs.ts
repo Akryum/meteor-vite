@@ -24,7 +24,7 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             const parserResult = await parseModule({ fileContent: request.context.file.content });
             const moduleExports = getModuleFromPath({
                 importPath: request.requestedModulePath(),
-                result: parserResult, // todo: rename key to parserResult
+                parserResult,
             }).exports;
             
             const template = stubTemplate({

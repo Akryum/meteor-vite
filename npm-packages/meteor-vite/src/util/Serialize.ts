@@ -120,8 +120,11 @@ export type SerializedParserResult = {
     }
 }
 
-export function getModuleFromPath({ result, importPath }: { result: ParserResult, importPath: string }) {
-    const entries = Object.entries(result.modules);
+export function getModuleFromPath({ parserResult, importPath }: {
+    parserResult: ParserResult,
+    importPath: string
+}) {
+    const entries = Object.entries(parserResult.modules);
     const file = entries.find(([fileName, modules]) => {
         return importPath.replace(/^\/+/g, '') === fileName.replace(/\.\w{2,5}$/g, '')
     });
