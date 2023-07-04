@@ -28,8 +28,7 @@ export default class ViteLoadRequest {
     }
     
     public static isStubRequest(id: string) {
-        return id.startsWith('\0meteor/');
-    }
+        return id.startsWith('\0meteor/');}
     
     /**
      * Slice off the request raw request identifier we use for determining whether to process the request or not.
@@ -40,58 +39,6 @@ export default class ViteLoadRequest {
     public static getStubId(viteId: string) {
         return viteId.slice(1);
     }
-   
-    
-    constructor(public readonly context: RequestContext ) {};
-    
-    /**
-     * Forces an import statement for the current module into the user's Meteor mainModule.
-     * Not to be confused with Vite's entrypoint.
-     *
-     * We do this to work around how Meteor deals with lazy-loaded packages.
-     * @return {Promise<void>}
-     */
-    public async forceImport() {
-        const mainModule = this.context.pluginSettings.projectJsonContent.meteor.mainModule;
-        
-        if (!mainModule?.client) {
-            throw new MeteorViteError(`No meteor.mainModule.client found in package.json`)
-        }
-        
-        const meteorClientEntryFile = Path.resolve(process.cwd(), mainModule.client);
-        
-        if (!existsSync(meteorClientEntryFile)) {
-            throw new MeteorViteError(`meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
-        }
-        
-        const content = await FS.readFile(meteorClientEntryFile, 'utf8');
-        
-        if (!content.includes(`'${this.context.id}'`)) {
-            await FS.writeFile(meteorClientEntryFile, viteAutoImportBlock({
-                id: this.context.id,
-                content,
-            }));
-            throw new RefreshNeeded(`Auto-imported package ${this.context.id} to ${meteorClientEntryFile}, please reload`)
-        }
-    }
-    
-    /**
-     * Relative path (to the package) for the module to yield stubs for.
-     *
-     * @example formatting
-     * this.context.id  // meteor/ostrio:cookies -> index.js (tries to detect mainModule)
-     *
-     * this.context.id // meteor/ostorio:cookies/some-file -> some-file.js
-     * this.context.id // meteor/ostorio:cookies/dir/some-other-file -> dir/some-other-file.js
-     */
-    public requestedModulePath() {
-        if (!this.context.file.importPath) {
-            // todo: check manifest for mainModule
-        }
-        
-        return this.context.file.importPath;
-    }
-    
     
     protected static loadFileData({ id, pluginSettings }: PreContextRequest) {
         let {
@@ -136,6 +83,15 @@ export default class ViteLoadRequest {
         }
     }
     
+    /**
+     * Checks Meteor for an Isopack manifest file.
+     * We use this to detect whether a module is lazy-loaded and needs to be forcefully imported and for determining
+     * the package's entrypoint.
+     *
+     * @param {FileData} file
+     * @return {Promise<any>}
+     * @protected
+     */
     protected static async loadManifest({ file }: PreContextRequest & { file: FileData }) {
         if (!existsSync(file.manifestPath)) {
             return;
@@ -143,6 +99,57 @@ export default class ViteLoadRequest {
         
         return JSON.parse(await FS.readFile(file.manifestPath, 'utf8'));
     }
+    
+    constructor(public readonly context: RequestContext ) {};
+    
+    /**
+     * Forces an import statement for the current module into the user's Meteor mainModule.
+     * Not to be confused with Vite's entrypoint.
+     *
+     * We do this to work around how Meteor deals with lazy-loaded packages.
+     * @return {Promise<void>}
+     */
+    public async forceImport() {
+        const mainModule = this.context.pluginSettings.projectJsonContent.meteor.mainModule;
+        
+        if (!mainModule?.client) {
+            throw new MeteorViteError(`No meteor.mainModule.client found in package.json`)
+        }
+        
+        const meteorClientEntryFile = Path.resolve(process.cwd(), mainModule.client);
+        
+        if (!existsSync(meteorClientEntryFile)) {
+            throw new MeteorViteError(`meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
+        }
+        
+        const content = await FS.readFile(meteorClientEntryFile, 'utf8');
+        
+        if (!content.includes(`'${this.context.id}'`)) {
+            await FS.writeFile(meteorClientEntryFile, viteAutoImportBlock({
+                id: this.context.id,
+                content,
+            }));
+            throw new RefreshNeeded(`Auto-imported package ${this.context.id} to ${meteorClientEntryFile}, please reload`)
+        }
+    }
+    /**
+     * Relative path (to the package) for the module to yield stubs for.
+     *
+     * @example formatting
+     * this.context.id  // meteor/ostrio:cookies -> index.js (tries to detect mainModule)
+     *
+     * this.context.id // meteor/ostorio:cookies/some-file -> some-file.js
+     * this.context.id // meteor/ostorio:cookies/dir/some-other-file -> dir/some-other-file.js
+     */
+    public requestedModulePath() {
+        if (!this.context.file.importPath) {
+            // todo: check manifest for mainModule
+        }
+        
+        return this.context.file.importPath;
+    }
+    
+    
     
 }
 
