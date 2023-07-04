@@ -87,6 +87,18 @@ export const TestLazy = prepareMock({
     },
     packageScopeExports: {},
     mainModulePath: '/node_modules/meteor/check/match.js'
+});
+
+export const OstrioCookies = prepareMock({
+    packageName: 'ostrio:cookies',
+    fileName: 'ostrio_cookies.js',
+    modules: {
+        'cookies.js': [
+            { type: 'export', name: 'Cookies' }
+        ]
+    },
+    packageScopeExports: {},
+    mainModulePath: '/node_modules/meteor/ostrio:cookies/cookies.js',
 })
 
 function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
