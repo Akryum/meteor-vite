@@ -1,7 +1,7 @@
 import FS from 'fs';
 import Path from 'path';
 import { createServer } from 'vite';
-import { MeteorStubs } from '../../vite/plugin';
+import { MeteorStubs } from '../../vite';
 
 const meteorRoot = Path.join(process.cwd(), '../../example/vue');
 
