@@ -1,6 +1,7 @@
-import fs from 'node:fs/promises'
-import { createServer, ResolvedConfig, ViteDevServer } from 'vite';
+import fs from 'node:fs/promises';
 import Path from 'path';
+import { createServer, ViteDevServer } from 'vite';
+import { MeteorViteConfig } from '../vite/MeteorViteConfig';
 import { MeteorStubs } from '../vite/plugin';
 
 process.on('message', async message => {
@@ -31,7 +32,7 @@ process.on('message', async message => {
 })
 
 function sendViteSetup (server: ViteDevServer) {
-    const config = server.config as MeteorViteConfig;
+    const config: MeteorViteConfig = server.config;
     
     if (typeof process.send !== 'function') {
         throw new Error('Worker was not launched with an IPC channel!');
@@ -48,14 +49,3 @@ function sendViteSetup (server: ViteDevServer) {
 }
 
 
-interface MeteorViteConfig extends ResolvedConfig {
-    meteor?: {
-        /**
-         * Vite client entry into Meteor.
-         * Not to be confused with your Meteor mainModule.
-         *
-         * @link https://github.com/Akryum/meteor-vite/blob/main/packages/vite-bundler/README.md
-         */
-        clientEntry?: string;
-    }
-}
