@@ -9,7 +9,7 @@ import PackageJson from '../../package.json';
  * TODO: Import, validate, and re-export wildcard re-exports.
  */
 export function validateStub({ stubbedPackage, exportKeys, packageName, viteId }: StubValidation) {
-    if (settings.skipValidation?.includes(packageName)) {
+    if (settings.stubValidation?.ignorePackages?.includes(packageName)) {
         return;
     }
     
@@ -62,10 +62,12 @@ class MeteorViteError extends Error {
 }
 
 interface MeteorViteSettings {
-    /**
-     * list of packages to ignore export validation for.
-     */
-    skipValidation?: string[];
+    stubValidation?: {
+        /**
+         * list of packages to ignore export validation for.
+         */
+        ignorePackages?: string[];
+    }
 }
 
 type ErrorMetadata = Pick<StubValidation, 'packageName' | 'viteId'> & { exportName?: string };
