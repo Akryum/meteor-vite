@@ -46,13 +46,13 @@ export default class ViteLoadRequest {
         const mainModule = this.context.pluginSettings.projectJsonContent.meteor.mainModule;
         
         if (!mainModule?.client) {
-            throw new Error(`⚡  No meteor.mainModule.client found in package.json`)
+            throw new MeteorViteError(`⚡  No meteor.mainModule.client found in package.json`)
         }
         
         const meteorClientEntryFile = Path.resolve(process.cwd(), mainModule.client);
         
         if (!existsSync(meteorClientEntryFile)) {
-            throw new Error(`⚡  meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
+            throw new MeteorViteError(`⚡  meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
         }
         
         const content = await FS.readFile(meteorClientEntryFile, 'utf8');
@@ -62,7 +62,7 @@ export default class ViteLoadRequest {
                 id: this.context.id,
                 content,
             }));
-            throw new Error(`⚡  Auto-imported package ${this.context.id} to ${meteorClientEntryFile}, please reload`)
+            throw new RefreshNeeded(`⚡  Auto-imported package ${this.context.id} to ${meteorClientEntryFile}, please reload`)
         }
     }
     
@@ -141,4 +141,10 @@ interface ManifestResource {
     hash: string
 }
 
-class MeteorViteStubRequestError extends Error {}
+class MeteorViteError extends Error {
+    constructor(message: string) {
+        super(`⚡  ${message}`);
+    }
+}
+class RefreshNeeded extends MeteorViteError {}
+class MeteorViteStubRequestError extends MeteorViteError {}
