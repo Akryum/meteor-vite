@@ -9,7 +9,7 @@
   "scripts": {
     "start": "ts-node-dev src/bin/debug/watch-mocks.ts",
     "watch": "tsup --watch",
-    "build": "tsup",
+    "build": "rm -rf ./dist && tsup-node",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "tsup": {
