@@ -125,23 +125,29 @@ function parseMeteorInstall(node: Node) {
     const meteor = node_modules.value.properties[0];
     const packageName = meteor.value.properties[0];
     const packageModules = packageName.value.properties;
-
-    const modules: ModuleList = {};
-
-    packageModules.forEach((module) => {
-        const fileName = module.key.value.toString()
-        const exportList: ModuleExport[] = [];
-
-        modules[fileName.toString()] = exportList;
-
-        module.value.body.body.forEach((node) => {
-            const exports = readModuleExports(node);
-            if (!exports) {
-                return;
+    const traverseModules = (properties: MeteorPackageProperty[], parentPath: string) => {
+        properties.forEach((property) => {
+            const path = `${parentPath}${property.key.value.toString()}`
+            const exportList: ModuleExport[] = [];
+            
+            if (property.value.type === 'ObjectExpression') {
+                return traverseModules(property.value.properties, `${path}/`);
             }
-            exportList.push(...exports);
-        });
-    })
+            
+            modules[path] = exportList;
+            
+            property.value.body.body.forEach((node) => {
+                const exports = readModuleExports(node);
+                if (!exports) {
+                    return;
+                }
+                exportList.push(...exports);
+            });
+        })
+    }
+    
+    const modules: ModuleList = {};
+    traverseModules(packageModules, '');
 
     return {
         packageName: packageName.key.value,
@@ -325,6 +331,14 @@ export type ParserResult = {
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
 
+type MeteorPackageProperty = KnownObjectProperty<{
+    key: StringLiteral, // File name
+    value: FunctionExpression | MeteorNestedPackageProperty, // Module function
+}>
+type MeteorNestedPackageProperty = KnownObjectExpression<{
+    properties: MeteorPackageProperty[]
+}>
+
 type PackageConfig = KnownObjectExpression<{
     properties: [KnownObjectProperty<{
         key: StringLiteral & { value: 'node_modules' }
@@ -335,10 +349,7 @@ type PackageConfig = KnownObjectExpression<{
                     properties: [KnownObjectProperty<{
                         key: StringLiteral, // Package name
                         value: KnownObjectExpression<{
-                            properties: Array<KnownObjectProperty<{
-                                key: StringLiteral, // File name
-                                value: FunctionExpression, // Module function
-                            }>>
+                            properties: MeteorPackageProperty[]
                         }>
                     }>]
                 }>
