@@ -112,19 +112,6 @@ export function getMainModule(result: ParserResult) {
     return result.modules[moduleKey];
 }
 
-export type SerializedParserResult = {
-    packageScope: {
-        top: string;
-        bottom: string;
-    },
-    modules: {
-        [key in string]: {
-            top: string;
-            bottom: string;
-        }
-    }
-}
-
 /**
  * Check if the two provided module paths are the same.
  * Todo: this may end up causing issues if a package has say a "myModule.ts" and a "myModule.ts" file.
