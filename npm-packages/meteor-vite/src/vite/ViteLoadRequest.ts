@@ -75,6 +75,23 @@ export default class ViteLoadRequest {
         }
     }
     
+    /**
+     * Relative path (to the package) for the module to yield stubs for.
+     *
+     * @example formatting
+     * this.context.id  // meteor/ostrio:cookies -> index.js (tries to detect mainModule)
+     *
+     * this.context.id // meteor/ostorio:cookies/some-file -> some-file.js
+     * this.context.id // meteor/ostorio:cookies/dir/some-other-file -> dir/some-other-file.js
+     */
+    public requestedModulePath() {
+        if (!this.context.file.importPath) {
+            // todo: check manifest for mainModule
+        }
+        
+        return this.context.file.importPath;
+    }
+    
     
     protected static loadFileData({ id, pluginSettings }: PreContextRequest) {
         let {
