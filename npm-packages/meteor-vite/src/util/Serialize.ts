@@ -132,8 +132,12 @@ export function isSameModulePath(options: {
 
 export function getModuleExports({ parserResult, importPath }: {
     parserResult: ParserResult,
-    importPath: string
-}): PackageModuleExportsResult {
+    importPath?: string
+}): PackageModuleExports {
+    if (!importPath) {
+        return getMainModule(parserResult);
+    }
+    
     const entries = Object.entries(parserResult.modules);
     const file = entries.find(
         ([fileName, modules]) => isSameModulePath({
@@ -152,7 +156,7 @@ export function getModuleExports({ parserResult, importPath }: {
     return { modulePath, exports };
 }
 
-export function getMainModule(result: ParserResult): PackageModuleExportsResult {
+export function getMainModule(result: ParserResult): PackageModuleExports {
     if (!result.mainModulePath) {
         return {
             modulePath: '',
@@ -180,7 +184,7 @@ export function getMainModule(result: ParserResult): PackageModuleExportsResult 
     }
 }
 
-interface PackageModuleExportsResult {
+export interface PackageModuleExports {
     /**
      * Relative path from the package name to the module containing these exports.
      * (e.g. ostrio:cookies/cookie-store.js)

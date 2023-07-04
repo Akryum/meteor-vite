@@ -2,7 +2,7 @@ import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
 import { ModuleExport, parseModule } from '../Parser';
-import { getMainModule, getModuleExports } from '../util/Serialize';
+import { getMainModule, getModuleExports, PackageModuleExports } from '../util/Serialize';
 import { stubTemplate } from './StubTemplate';
 import ViteLoadRequest, { MeteorViteError } from './ViteLoadRequest';
 
@@ -20,27 +20,21 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             if (!ViteLoadRequest.isStubRequest(viteId)) {
                 return;
             }
-            let moduleExports: ModuleExport[] = [];
             const timeStarted = Date.now();
             const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
             const parserResult = await parseModule({ fileContent: request.context.file.content }).catch((error) => {
                 throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
             });
             
-            if (request.requestedModulePath) {
-                moduleExports = getModuleExports({
-                    importPath: request.requestedModulePath,
-                    parserResult,
-                }).exports;
-            } else { // fall back to a best guess of the main module
-                const mainModule = getMainModule(parserResult);
-                moduleExports = mainModule.exports;
-            }
+            const module = getModuleExports({
+                importPath: request.requestedModulePath,
+                parserResult,
+            });
             
             const template = stubTemplate({
                 stubId: stubId++,
                 packageId: request.context.file.packageId,
-                moduleExports,
+                moduleExports: module.exports,
                 packageScopeExports: parserResult.packageScopeExports,
                 requestId: request.context.id,
             })
