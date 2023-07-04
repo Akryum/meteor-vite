@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "exports": {
-    "./vite": "./dist/vite/index.mjs",
+    "./plugin": "./dist/vite/index.mjs",
     "./client": "./dist/meteor/client/index.mjs"
   },
   "scripts": {
