@@ -1,11 +1,27 @@
 import { existsSync } from 'fs';
 import FS from 'fs/promises';
 import Path from 'path';
-import { PluginSettings } from './MeteorViteStubs';
+import type { PluginSettings } from './MeteorViteStubs';
 
 export default class ViteLoadRequest {
     
+    public static resolveId(id: string) {
+        if (id.startsWith('meteor/')) {
+            return `\0${id}`
+        }
+    }
+    
+    public static isStubRequest(id: string) {
+        return id.startsWith('\0meteor/');
+    }
+    
     public static async prepareContext(request: PreContextRequest) {
+        if (!this.isStubRequest(request.id)) {
+            throw new MeteorViteStubRequestError('Tried to set up file context for an unrecognized file path!');
+        }
+        
+        request.id = request.id.slice(1);
+        
         const file = this.loadFileData(request);
         const manifest = await this.loadManifest({ file, ...request });
         
@@ -92,3 +108,5 @@ interface ManifestResource {
     type: string;
     hash: string
 }
+
+class MeteorViteStubRequestError extends Error {}
