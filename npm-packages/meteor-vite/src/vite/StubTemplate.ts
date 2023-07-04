@@ -15,25 +15,25 @@ export function stubTemplate({ stubId, packageId, moduleExports, packageScopeExp
     // language="js"
     return`
 // packageId: ${packageId}
-const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global
 import { validateStub } from 'meteor-vite/client';
+const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global;
 ${serialized.package.top.join('\n')}
 ${serialized.module.top.join('\n')}
 
 let ${METEOR_STUB_KEY};
 const require = Package.modules.meteorInstall({
   '__vite_stub${stubId}.js': (require, exports, module) => {
-    ${METEOR_STUB_KEY} = require('${packageId}')
+      ${METEOR_STUB_KEY} = require('${packageId}');
     
-  validateStub({
-      packageName: '${packageId}',
-      stubbedPackage: ${METEOR_STUB_KEY},
-      exportKeys: ${JSON.stringify(serialized.exportedKeys)},
-  });
-  },
+      validateStub({
+          packageName: '${packageId}',
+          stubbedPackage: ${METEOR_STUB_KEY},
+          exportKeys: ${JSON.stringify(serialized.exportedKeys)},
+      });
+  }
 }, {
   "extensions": [
-    ".js",
+    ".js"
   ]
 })
 require('/__vite_stub${stubId}.js')
