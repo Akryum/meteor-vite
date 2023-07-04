@@ -1,15 +1,19 @@
-import { ModuleExport, PackageScopeExports, ParserResult } from '../Parser';
-import Serialize from '../util/Serialize';
+import Serialize, { PackageModuleExports } from '../util/Serialize';
 
 export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
 export const TEMPLATE_GLOBAL_KEY = 'g';
 
-export function stubTemplate({ stubId, packageId, moduleExports, requestId, packageScopeExports }: TemplateOptions) {
+export function stubTemplate({ stubId, packageId, requestId, module }: {
+    packageId: string;
+    module: PackageModuleExports,
+    stubId: number;
+    requestId: string;
+}) {
     const serialized = Serialize.parseModules({
         packageName: packageId,
-        modules: moduleExports,
-        packageScope: packageScopeExports,
+        modules: module.exports,
+        packageScope: module.packageExports,
     });
     // language="js"
     return`
@@ -66,21 +70,4 @@ ${imports}
 /** End of vite:bundler auto-imports **/
 
 ${content}`;
-}
-
-interface TemplateOptions {
-    /**
-     * Meteor package ID.
-     * Essentially `meteor/<author>:<packageName>`
-     *
-     * @example Offical package
-     * 'meteor/accounts-base'
-     * @example With sub-modules
-     * 'meteor/ostrio:cookies/some-module'
-     */
-    packageId: string;
-    moduleExports: ModuleExport[],
-    packageScopeExports: PackageScopeExports,
-    stubId: number;
-    requestId: string;
 }

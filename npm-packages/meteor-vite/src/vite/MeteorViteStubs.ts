@@ -34,9 +34,8 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             const template = stubTemplate({
                 stubId: stubId++,
                 packageId: request.context.file.packageId,
-                moduleExports: module.exports,
-                packageScopeExports: parserResult.packageScopeExports,
                 requestId: request.context.id,
+                module,
             })
             
             console.log(`${request.context.file.packageId}:`, {
