@@ -105,13 +105,6 @@ export default new class Serialize {
     
 }
 
-export function getMainModule(result: ParserResult) {
-    if (!result.mainModulePath) return;
-    const [node_modules, meteor, packageName, ...filePath] = result.mainModulePath.replace(/^\/+/g, '').split('/');
-    const moduleKey = filePath.join('/');
-    return result.modules[moduleKey];
-}
-
 /**
  * Check if the two provided module paths are the same.
  * Todo: this may end up causing issues if a package has say a "myModule.ts" and a "myModule.ts" file.
@@ -154,7 +147,35 @@ export function getModuleExports({ parserResult, importPath }: {
         throw new Error(`Could not locate module for path: ${importPath}!`);
     }
     
-    const [fileName, exports] = file;
+    const [modulePath, exports] = file;
     
-    return { fileName, exports };
+    return { modulePath, exports };
+}
+
+export function getMainModule(result: ParserResult) {
+    if (!result.mainModulePath) {
+        return {
+            modulePath: undefined,
+            exports: [],
+        }
+    }
+    
+    const [
+        node_modules,
+        meteor,
+        packageName,
+        ...filePath
+    ] = result.mainModulePath.replace(/^\/+/g, '').split('/');
+    
+    const modulePath = filePath.join('/');
+    const exports = result.modules[modulePath];
+    
+    if (!exports) {
+        throw new Error(`Could not locate '${result.mainModulePath}' in parsed '${result.packageName}' exports`);
+    }
+    
+    return {
+        modulePath,
+        exports,
+    }
 }

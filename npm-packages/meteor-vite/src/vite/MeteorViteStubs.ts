@@ -20,12 +20,12 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             if (!ViteLoadRequest.isStubRequest(viteId)) {
                 return;
             }
+            let moduleExports: ModuleExport[] = [];
             const timeStarted = Date.now();
             const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
             const parserResult = await parseModule({ fileContent: request.context.file.content }).catch((error) => {
                 throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
             });
-            let moduleExports: ModuleExport[] = [];
             
             if (request.requestedModulePath) {
                 moduleExports = getModuleExports({
@@ -33,7 +33,8 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
                     parserResult,
                 }).exports;
             } else { // fall back to a best guess of the main module
-                moduleExports = getMainModule(parserResult) || parserResult.modules[0] || [];
+                const mainModule = getMainModule(parserResult);
+                moduleExports = mainModule.exports;
             }
             
             const template = stubTemplate({
