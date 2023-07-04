@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "exports": {
-    ".": "./dist/index.mjs",
+    "./vite": "./dist/index.mjs",
     "./client": "./dist/client/index.mjs"
   },
   "scripts": {
