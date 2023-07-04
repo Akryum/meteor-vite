@@ -6,21 +6,6 @@ import { viteAutoImportBlock } from './StubTemplate';
 
 export default class ViteLoadRequest {
     
-    public static async prepareContext(request: PreContextRequest) {
-        if (!this.isStubRequest(request.id)) {
-            throw new MeteorViteStubRequestError('Tried to set up file context for an unrecognized file path!');
-        }
-        
-        const file = this.loadFileData(request);
-        const manifest = await this.loadManifest({ file, ...request });
-        
-        return new ViteLoadRequest({
-            file,
-            manifest,
-            ...request,
-        })
-    }
-    
     public static resolveId(id: string) {
         if (id.startsWith('meteor/')) {
             return `\0${id}`
@@ -40,6 +25,27 @@ export default class ViteLoadRequest {
         return viteId.slice(1);
     }
     
+    /**
+     * Parse an incoming Vite plugin load() request.
+     * Builds up the most of the metadata necessary for building up a good Meteor stub template.
+     *
+     * @param {PreContextRequest} request
+     * @return {Promise<ViteLoadRequest>}
+     */
+    public static async prepareContext(request: PreContextRequest) {
+        if (!this.isStubRequest(request.id)) {
+            throw new MeteorViteStubRequestError('Tried to set up file context for an unrecognized file path!');
+        }
+        
+        const file = this.loadFileData(request);
+        const manifest = await this.loadManifest({ file, ...request });
+        
+        return new ViteLoadRequest({
+            file,
+            manifest,
+            ...request,
+        })
+    }
     protected static loadFileData({ id, pluginSettings }: PreContextRequest) {
         let {
             /**
