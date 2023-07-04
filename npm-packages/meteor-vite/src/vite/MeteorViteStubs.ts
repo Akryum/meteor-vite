@@ -22,14 +22,15 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             const id = ViteLoadRequest.getStubId(viteId);
             const request = await ViteLoadRequest.prepareContext({ id, pluginSettings })
             const parserResult = await parseModule({ fileContent: request.context.file.content });
-            const module = getModuleFromPath({
+            const moduleExports = getModuleFromPath({
                 importPath: request.requestedModulePath(),
                 result: parserResult, // todo: rename key to parserResult
-            }).modules; // todo: refactor .modules to .exports
+            }).exports;
+            
             const template = stubTemplate({
                 stubId: stubId++,
                 packageId: request.context.file.packageId,
-                moduleExports: module,
+                moduleExports,
                 packageScopeExports: parserResult.packageScopeExports,
             })
             

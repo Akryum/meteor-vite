@@ -130,7 +130,7 @@ export function getModuleFromPath({ result, importPath }: { result: ParserResult
         throw new Error(`Could not locate module for path: ${importPath}!`);
     }
     
-    const [fileName, modules] = file;
+    const [fileName, exports] = file;
     
-    return { fileName, modules };
+    return { fileName, exports };
 }
