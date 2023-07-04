@@ -6,22 +6,10 @@ import { viteAutoImportBlock } from './StubTemplate';
 
 export default class ViteLoadRequest {
     
-    public static resolveId(id: string) {
-        if (id.startsWith('meteor/')) {
-            return `\0${id}`
-        }
-    }
-    
-    public static isStubRequest(id: string) {
-        return id.startsWith('\0meteor/');
-    }
-    
     public static async prepareContext(request: PreContextRequest) {
         if (!this.isStubRequest(request.id)) {
             throw new MeteorViteStubRequestError('Tried to set up file context for an unrecognized file path!');
         }
-        
-        request.id = request.id.slice(1);
         
         const file = this.loadFileData(request);
         const manifest = await this.loadManifest({ file, ...request });
@@ -32,6 +20,27 @@ export default class ViteLoadRequest {
             ...request,
         })
     }
+    
+    public static resolveId(id: string) {
+        if (id.startsWith('meteor/')) {
+            return `\0${id}`
+        }
+    }
+    
+    public static isStubRequest(id: string) {
+        return id.startsWith('\0meteor/');
+    }
+    
+    /**
+     * Slice off the request raw request identifier we use for determining whether to process the request or not.
+     *
+     * @example
+     * '\0meteor/meteor' -> 'meteor/meteor'
+     */
+    public static getStubId(viteId: string) {
+        return viteId.slice(1);
+    }
+   
     
     constructor(public readonly context: RequestContext ) {};
     
