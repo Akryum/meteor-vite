@@ -1,3 +1,4 @@
+import Path from 'path';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from '../vite/StubTemplate';
 import { ModuleExport, PackageScopeExports, ParserResult } from '../Parser';
 
@@ -120,14 +121,41 @@ export type SerializedParserResult = {
     }
 }
 
+/**
+ * Check if the two provided module paths are the same.
+ * Todo: this may end up causing issues if a package has say a "myModule.ts" and a "myModule.ts" file.
+ */
+export function isSameModulePath(options: {
+    filepathA: string,
+    filepathB: string,
+    compareExtensions: boolean;
+}) {
+    const fileA = Path.parse(options.filepathA)
+    const fileB = Path.parse(options.filepathB);
+
+    if (fileA.dir !== fileB.dir) {
+        return false;
+    }
+    
+    if (options.compareExtensions && fileA.ext !== fileB.ext) {
+        return false;
+    }
+    
+    return fileA.name === fileB.name;
+}
+
 export function getModuleExports({ parserResult, importPath }: {
     parserResult: ParserResult,
     importPath: string
 }) {
     const entries = Object.entries(parserResult.modules);
-    const file = entries.find(([fileName, modules]) => {
-        return importPath.replace(/^\/+/g, '') === fileName.replace(/\.\w{2,5}$/g, '')
-    });
+    const file = entries.find(
+        ([fileName, modules]) => isSameModulePath({
+            filepathA: importPath,
+            filepathB: fileName,
+            compareExtensions: false,
+        }),
+    );
     
     if (!file) {
         throw new Error(`Could not locate module for path: ${importPath}!`);
