@@ -21,6 +21,7 @@ export const TsModules = prepareMock({
             { type: 'global-binding', name: 'Meteor', from: 'meteor/meteor', id: 3 },
             { type: 're-export', name: 'NamedRelativeInteger', from: './relative-module', id: 4 },
             { type: 're-export', name: '*', from: './export-star-from', id: 5 },
+            { name: 'WhereAmI', type: 're-export', id: 6, from: './subdirectory/module-in-subdirectory', as: 'WhereIsTheSubmodule' },
             { type: 'export-default', name: 'namedFunction' },
         ],
         'export-star-from.ts': [
