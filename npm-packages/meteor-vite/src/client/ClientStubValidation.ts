@@ -7,7 +7,7 @@
  * TODO: Import, validate, and re-export wildcard re-exports.
  */
 export function validateStub({ stubbedPackage, exportKeys, packageName }: StubValidation) {
-    if (settings.skipValidation.includes(packageName)) return;
+    if (settings.skipValidation?.includes(packageName)) return;
     exportKeys.forEach((key) => {
         if (!stubbedPackage) {
             throw new MeteorViteError(`Was not able to import Meteor package: "${packageName}"`)
@@ -27,7 +27,7 @@ interface MeteorViteSettings {
     /**
      * list of packages to ignore export validation for.
      */
-    skipValidation: string[];
+    skipValidation?: string[];
 }
 
 class MeteorViteError extends Error {
