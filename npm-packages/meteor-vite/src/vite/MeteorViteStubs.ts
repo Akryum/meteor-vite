@@ -90,16 +90,18 @@ interface ManifestContent {
     format: string;
     declaredExports: [];
     uses: { 'package': string }[];
-    resources: {
-        path: string;
-        fileOptions: { lazy: boolean; mainModule: boolean };
-        extension: string;
-        file: string;
-        offset: number;
-        length: number;
-        type: string;
-        hash: string
-    }[]
+    resources: ManifestResource[]
+}
+
+interface ManifestResource {
+    path: string;
+    fileOptions: { lazy: boolean; mainModule: boolean };
+    extension: string;
+    file: string;
+    offset: number;
+    length: number;
+    type: string;
+    hash: string
 }
 
 type ProjectJson = {
