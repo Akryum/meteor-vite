@@ -73,6 +73,18 @@ export const MeteorJs = prepareMock({
     mainModulePath: '',
 })
 
+export const TestLazy = prepareMock({
+    packageName: 'test:lazy',
+    fileName: 'test_lazy.js',
+    modules: {
+        'index.js': [
+            { type: 'export', name: 'MEOWMEOW' },
+        ]
+    },
+    packageScopeExports: {},
+    mainModulePath: '/node_modules/meteor/check/match.js'
+})
+
 function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
     fileName: string;
     packageName: string;
