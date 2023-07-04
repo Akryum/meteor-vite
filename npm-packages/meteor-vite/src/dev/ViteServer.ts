@@ -10,7 +10,7 @@ export default createServer({
     plugins: [
         MeteorViteStubs({
             meteorPackagePath: Path.join(projectRoot, '.meteor', 'local', 'build', 'programs', 'web.browser', 'packages'),
-            projectJsonContent: FS.readFileSync(Path.join(projectRoot, 'package.json'), 'utf-8'),
+            projectJsonContent: JSON.parse(FS.readFileSync(Path.join(projectRoot, 'package.json'), 'utf-8')),
         })
     ]
 });
