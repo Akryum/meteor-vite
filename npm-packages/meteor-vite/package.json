@@ -17,7 +17,7 @@
     ],
     "outDir": "dist",
     "format": "esm",
-    "sourcemap": "inline"
+    "sourcemap": true
   },
   "keywords": [],
   "author": "",
