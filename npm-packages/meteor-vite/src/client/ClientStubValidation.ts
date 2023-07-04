@@ -9,10 +9,15 @@
 export function validateStub({ stubbedPackage, exportKeys, packageName }: StubValidation) {
     if (settings.skipValidation?.includes(packageName)) return;
     exportKeys.forEach((key) => {
+        console.debug('Meteor-Vite package validation:', {
+            packageName,
+            stubbedPackage,
+            exportKeys,
+        });
         if (!stubbedPackage) {
             throw new MeteorViteError(`Was not able to import Meteor package: "${packageName}"`)
         }
-        if (typeof stubbedPackage[key] !== 'undefined') {
+        if (typeof stubbedPackage[key] === 'undefined') {
             throw new MeteorViteError(`The '${key}' export from '${packageName}' is undefined! This is likely an issue with Meteor-Vite!`);
         }
     })
