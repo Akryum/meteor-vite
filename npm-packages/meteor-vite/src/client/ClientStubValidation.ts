@@ -34,8 +34,7 @@ class MeteorViteError extends Error {
     constructor(message: string) {
         super(`⚡ ${message}`);
         this.stack += '\n\n'
-            + `📨  Use the following link to report the issue\n`;
-            + `📨  https://github.com/Akryum/meteor-vite/issues`;
+            + `📨  Use the following link to report the issue - https://github.com/Akryum/meteor-vite/issues`
     }
 }
 
