@@ -23,6 +23,10 @@
   },
   "keywords": [],
   "author": "",
+  "bugs": {
+    "url": "https://github.com/Akryum/meteor-vite/issues"
+  },
+  "homepage": "https://github.com/Akryum/meteor-vite/blob/main/packages/vite-bundler/README.md",
   "license": "ISC",
   "dependencies": {
     "@babel/parser": "^7.22.5",

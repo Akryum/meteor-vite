@@ -1,3 +1,5 @@
+import PackageJson from '../../package.json';
+
 /**
  * Validate that the provided stub export key maps to a working export.
  * This is quite important we do. If vite:meteor doesn't properly parse a given package, its exports will just
@@ -55,11 +57,11 @@ class MeteorViteError extends Error {
             `⚡ Vite loader ID: ${viteId}`,
             '',
             `⚠️ Open an issue - it's likely an issue with meteor-vite rather than '${packageName}'`,
-            `    https://github.com/Akryum/meteor-vite/issues`,
+            `    ${PackageJson.bugs.url}`,
             '',
             `🔓  At your own risk, you can disable validation for the '${packageName}' package`,
             `    This may allow the app to continue running, but can lead to other things breaking.`,
-            '    https://github.com/Akryum/meteor-vite/blob/main/packages/vite-bundler/README.md',
+            `    ${PackageJson.homepage}#disable-stub-validation`,
         ].join('\n')
         
         super(message);
