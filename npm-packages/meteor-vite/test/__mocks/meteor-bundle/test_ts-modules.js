@@ -68,6 +68,9 @@ const ExplicitRelativePath = 'this should be imported as "meteor/test:ts-modules
   module1.link("./export-star-from", {
     "*": "*"
   }, 5);
+  module1.link("./subdirectory/module-in-subdirectory", {
+    WhereAmI: "WhereIsTheSubmodule"
+  }, 6);
   const first = 'lowercase';
   const FIRST = 'UPPERCASE';
   /**
@@ -147,7 +150,21 @@ module.export({
 const NamedRelativeInteger = 1;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-}}}}},{
+},"subdirectory":{"module-in-subdirectory.ts":function module(require,exports,module){
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                         //
+// packages/test_ts-modules/subdirectory/module-in-subdirectory.ts                                         //
+//                                                                                                         //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                                                                           //
+module.export({
+  WhereAmI: () => WhereAmI
+});
+const WhereAmI = 'I am in a subdirectory!';
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+}}}}}},{
   "extensions": [
     ".js",
     ".json",
