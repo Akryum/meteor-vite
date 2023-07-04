@@ -94,7 +94,8 @@ export const OstrioCookies = prepareMock({
     fileName: 'ostrio_cookies.js',
     modules: {
         'cookies.js': [
-            { type: 'export', name: 'Cookies' }
+            { type: 'export', name: 'Cookies' },
+            { type: 'global-binding', name: 'Meteor', from: 'meteor/meteor', id: 0 }
         ]
     },
     packageScopeExports: {},
