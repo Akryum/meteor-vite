@@ -171,7 +171,7 @@ export default class ViteLoadRequest {
      */
     public requestedModulePath() {
         if (!this.context.file.importPath) {
-            // todo: check manifest for mainModule
+            return this.mainModulePath;
         }
         
         return this.context.file.importPath;
