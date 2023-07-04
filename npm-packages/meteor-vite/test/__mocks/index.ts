@@ -39,6 +39,9 @@ export const TsModules = prepareMock({
         'relative-module.ts': [
             { type: 'export', name: 'NamedRelativeInteger' },
         ],
+        'subdirectory/module-in-subdirectory.ts': [
+            { type: 'export', name: 'WhereAmI' }
+        ]
     } satisfies ModuleList,
     packageScopeExports: {},
     mainModulePath: '/node_modules/meteor/test:ts-modules/index.ts'
