@@ -1,5 +1,5 @@
 import { Plugin } from 'vite';
-import { parseModule } from '../Parser';
+import { ModuleExport, parseModule } from '../Parser';
 import { getModuleExports } from '../util/Serialize';
 import { stubTemplate } from './StubTemplate';
 import ViteLoadRequest from './ViteLoadRequest';
@@ -21,10 +21,16 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             const timeStarted = Date.now();
             const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
             const parserResult = await parseModule({ fileContent: request.context.file.content });
-            const moduleExports = getModuleExports({
-                importPath: request.requestedModulePath() || Object.keys(parserResult.modules)[0],
-                parserResult,
-            }).exports;
+            let moduleExports: ModuleExport[] = [];
+            
+            if (request.requestedModulePath) {
+                moduleExports = getModuleExports({
+                    importPath: request.requestedModulePath,
+                    parserResult,
+                }).exports;
+            } else { // fall back to the first parsed module in the list
+                moduleExports = parserResult.modules[0] || [];
+            }
             
             const template = stubTemplate({
                 stubId: stubId++,

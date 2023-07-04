@@ -169,7 +169,7 @@ export default class ViteLoadRequest {
      * this.context.id // meteor/ostorio:cookies/some-file -> some-file.js
      * this.context.id // meteor/ostorio:cookies/dir/some-other-file -> dir/some-other-file.js
      */
-    public requestedModulePath() {
+    public get requestedModulePath() {
         if (!this.context.file.importPath) {
             return this.mainModulePath;
         }
