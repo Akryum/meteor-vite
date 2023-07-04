@@ -1,4 +1,4 @@
-import { Check, TsModules } from '../../test/__mocks';
+import { Check, TestLazy, TsModules } from '../../test/__mocks';
 import { parseModule } from '../Parser';
 import ViteServer from './ViteServer';
 
@@ -8,11 +8,12 @@ import ViteServer from './ViteServer';
  */
 (async () => {
     
-    const mocks = [Check, TsModules];
+    const mocks = [Check, TsModules, TestLazy];
     
     for (const { fileContent } of mocks) {
         console.log(`${'--'.repeat(64)}`)
-        console.log(await parseModule({ fileContent: fileContent }));
+        const result = await parseModule({ fileContent: fileContent })
+        console.log(result.modules);
     }
     
     ViteServer.then((server) => {
