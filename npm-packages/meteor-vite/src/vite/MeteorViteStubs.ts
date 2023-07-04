@@ -2,7 +2,7 @@ import { Plugin } from 'vite';
 import { ModuleExport, parseModule } from '../Parser';
 import { getModuleExports } from '../util/Serialize';
 import { stubTemplate } from './StubTemplate';
-import ViteLoadRequest from './ViteLoadRequest';
+import ViteLoadRequest, { MeteorViteError } from './ViteLoadRequest';
 
 /**
  * Unique ID for the next stub.
@@ -20,7 +20,9 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             }
             const timeStarted = Date.now();
             const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
-            const parserResult = await parseModule({ fileContent: request.context.file.content });
+            const parserResult = await parseModule({ fileContent: request.context.file.content }).catch((error) => {
+                throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
+            });
             let moduleExports: ModuleExport[] = [];
             
             if (request.requestedModulePath) {

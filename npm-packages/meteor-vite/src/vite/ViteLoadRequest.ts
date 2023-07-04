@@ -211,9 +211,36 @@ interface ManifestResource {
     hash: string
 }
 
-class MeteorViteError extends Error {
-    constructor(message: string) {
-        super(`⚡  ${message}`);
+export class MeteorViteError extends Error {
+    public readonly viteId?: string;
+    constructor(message: string, metadata?: {
+        context?: Partial<RequestContext>;
+        cause?: Error;
+    }) {
+        let messagePrefix = '';
+        let messageSuffix = '';
+        if (metadata?.context) {
+            messagePrefix = `<${metadata.context.file?.packageId || metadata.context.id}> \n  `
+        }
+        if (metadata?.cause) {
+            messageSuffix = `: ${metadata.cause.message}`
+        }
+        
+        super(`${messagePrefix}⚡ ${message}${messageSuffix}`);
+        
+        if (metadata?.context) {
+            this.viteId = metadata.context.id;
+        }
+        
+        if (metadata?.cause) {
+            const selfStack = this.splitStack(this.stack || '');
+            const otherStack = this.splitStack(metadata.cause.stack || '')?.map((line) => `  ${line}`);
+            this.stack = [selfStack[1], selfStack[2], '  Caused by:', ...otherStack].join('\n');
+        }
+    }
+    
+    private splitStack(stack: string) {
+        return stack?.split(/[\n\r]+/);
     }
 }
 class RefreshNeeded extends MeteorViteError {}
