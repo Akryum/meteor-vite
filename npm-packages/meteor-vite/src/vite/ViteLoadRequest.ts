@@ -21,7 +21,7 @@ export default class ViteLoadRequest {
      * @example
      * '\0meteor/meteor' -> 'meteor/meteor'
      */
-    public static getStubId(viteId: string) {
+    protected static getStubId(viteId: string) {
         return viteId.slice(1);
     }
     
@@ -36,7 +36,7 @@ export default class ViteLoadRequest {
         if (!this.isStubRequest(request.id)) {
             throw new MeteorViteStubRequestError('Tried to set up file context for an unrecognized file path!');
         }
-        
+        request.id = this.getStubId(request.id);
         const file = this.loadFileData(request);
         const manifest = await this.loadManifest({ file, ...request });
         

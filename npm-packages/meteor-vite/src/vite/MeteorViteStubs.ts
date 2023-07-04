@@ -19,8 +19,7 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
                 return;
             }
             const timeStarted = Date.now();
-            const id = ViteLoadRequest.getStubId(viteId);
-            const request = await ViteLoadRequest.prepareContext({ id, pluginSettings })
+            const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
             const parserResult = await parseModule({ fileContent: request.context.file.content });
             const moduleExports = getModuleExports({
                 importPath: request.requestedModulePath(),
