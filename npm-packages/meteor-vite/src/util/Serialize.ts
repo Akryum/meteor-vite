@@ -153,7 +153,7 @@ export function getModuleExports({ parserResult, importPath }: {
     
     const [modulePath, exports] = file;
     
-    return { modulePath, exports };
+    return { modulePath, exports, packageExports: parserResult.packageScopeExports };
 }
 
 export function getMainModule(result: ParserResult): PackageModuleExports {
@@ -161,6 +161,7 @@ export function getMainModule(result: ParserResult): PackageModuleExports {
         return {
             modulePath: '',
             exports: [],
+            packageExports: result.packageScopeExports,
         }
     }
     
@@ -181,6 +182,7 @@ export function getMainModule(result: ParserResult): PackageModuleExports {
     return {
         modulePath,
         exports,
+        packageExports: result.packageScopeExports,
     }
 }
 
@@ -191,4 +193,5 @@ export interface PackageModuleExports {
      */
     modulePath: string;
     exports: ModuleExport[];
+    packageExports: PackageScopeExports;
 }
