@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "exports": {
-    "import": "./dist/index.mjs"
+    ".": "./dist/index.mjs",
+    "./client": "./dist/client/index.mjs"
   },
   "scripts": {
     "start": "ts-node-dev src/dev/debug-runner.ts",
@@ -13,7 +14,8 @@
   },
   "tsup": {
     "entry": [
-      "src/index.ts"
+      "src/index.ts",
+      "src/client/index.ts"
     ],
     "outDir": "dist",
     "format": "esm",
