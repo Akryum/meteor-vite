@@ -1,6 +1,6 @@
 import { Plugin } from 'vite';
 import { parseModule } from '../Parser';
-import { getModuleFromPath } from '../util/Serialize';
+import { getModuleExports } from '../util/Serialize';
 import { stubTemplate } from './StubTemplate';
 import ViteLoadRequest from './ViteLoadRequest';
 
@@ -22,7 +22,7 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             const id = ViteLoadRequest.getStubId(viteId);
             const request = await ViteLoadRequest.prepareContext({ id, pluginSettings })
             const parserResult = await parseModule({ fileContent: request.context.file.content });
-            const moduleExports = getModuleFromPath({
+            const moduleExports = getModuleExports({
                 importPath: request.requestedModulePath(),
                 parserResult,
             }).exports;

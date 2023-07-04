@@ -120,7 +120,7 @@ export type SerializedParserResult = {
     }
 }
 
-export function getModuleFromPath({ parserResult, importPath }: {
+export function getModuleExports({ parserResult, importPath }: {
     parserResult: ParserResult,
     importPath: string
 }) {
