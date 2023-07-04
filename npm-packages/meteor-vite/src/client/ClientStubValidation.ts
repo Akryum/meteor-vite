@@ -19,21 +19,34 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, viteId }
         exportKeys,
     });
     
+    const errors: Error[] = [];
+    
     exportKeys.forEach((key) => {
         if (!stubbedPackage) {
-            throw new MeteorViteError(`Was not able to import Meteor package: "${packageName}"`, {
+            errors.push(new MeteorViteError(`Was not able to import Meteor package: "${packageName}"`, {
                 viteId,
                 packageName,
-            })
+            }))
         }
         if (typeof stubbedPackage[key] === 'undefined') {
-            throw new MeteorViteError(`Could not import Meteor package into the client: '${key}' is undefined`, {
+            errors.push(new MeteorViteError(`Could not import Meteor package into the client: '${key}' is undefined`, {
                 viteId,
                 packageName,
                 exportName: key,
-            });
+            }))
         }
+    });
+    
+    errors.forEach((error, i) => {
+        if (settings.stubValidation?.warnOnly) {
+            return console.warn(error);
+        }
+        if (errors.length - 1 >= i) {
+            throw error;
+        }
+        console.error(error);
     })
+    
 }
 
 // @ts-ignore
@@ -67,6 +80,12 @@ interface MeteorViteSettings {
          * list of packages to ignore export validation for.
          */
         ignorePackages?: string[];
+        
+        /**
+         * Will only emit warnings in the console instead of throwing an exception that may prevent the client app
+         * from loading.
+         */
+        warnOnly?: boolean;
     }
 }
 
