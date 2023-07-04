@@ -138,7 +138,6 @@ export function isSameModulePath(options: {
         return false;
     }
     
-    
     if (options.compareExtensions && fileA.ext !== fileB.ext) {
         return false;
     }

@@ -1,6 +1,7 @@
 import { existsSync } from 'fs';
 import FS from 'fs/promises';
 import Path from 'path';
+import { isSameModulePath } from '../util/Serialize';
 import type { PluginSettings } from './MeteorViteStubs';
 import { viteAutoImportBlock } from './StubTemplate';
 
@@ -63,7 +64,9 @@ export default class ViteLoadRequest {
              * @type {string | undefined}
              */
             importPath
-        } = id.match(/(?<packageId>(meteor\/)[\w\-. ]+(:[\w\-. ]+)?)(?<importPath>\/.+)?/)?.groups || {};
+        } = id.match( // todo: maybe use the Node.js Path utility?
+            /(?<packageId>(meteor\/)[\w\-. ]+(:[\w\-. ]+)?)(?<importPath>\/.+)?/
+        )?.groups || {};
         
         const packageName = packageId.replace(/^meteor\//, '');
         const sourceName = packageName.replace(':', '_');
@@ -106,7 +109,25 @@ export default class ViteLoadRequest {
         return JSON.parse(await FS.readFile(file.manifestPath, 'utf8')) as ManifestContent;
     }
     
-    constructor(public readonly context: RequestContext ) {};
+    public mainModulePath?: string;
+    public isLazyLoaded: boolean;
+    
+    constructor(public readonly context: RequestContext ) {
+        this.isLazyLoaded = false;
+        
+        context.manifest?.resources.forEach((resource) => {
+            if (resource.fileOptions.mainModule) {
+                this.mainModulePath = resource.path
+            }
+            if (isSameModulePath({
+                filepathA: this.context.file.importPath,
+                filepathB: resource.path,
+                compareExtensions: false,
+            })) {
+                this.isLazyLoaded = resource.fileOptions.lazy;
+            }
+        })
+    };
     
     /**
      * Forces an import statement for the current module into the user's Meteor mainModule.
@@ -138,8 +159,9 @@ export default class ViteLoadRequest {
             throw new RefreshNeeded(`Auto-imported package ${this.context.id} to ${meteorClientEntryFile}, please reload`)
         }
     }
+    
     /**
-     * Relative path (to the package) for the module to yield stubs for.
+     * Relative path (for the current package) for the module to yield stubs for.
      *
      * @example formatting
      * this.context.id  // meteor/ostrio:cookies -> index.js (tries to detect mainModule)
