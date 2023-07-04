@@ -8,7 +8,7 @@ import PackageJson from '../../package.json';
  * TODO: Attempt to emit a warning directly to the server console from the client. (development environment only)
  * TODO: Import, validate, and re-export wildcard re-exports.
  */
-export function validateStub({ stubbedPackage, exportKeys, packageName, viteId }: StubValidation) {
+export function validateStub({ stubbedPackage, exportKeys, packageName, requestId }: StubValidation) {
     if (settings.stubValidation?.ignorePackages?.includes(packageName)) {
         return;
     }
@@ -24,13 +24,13 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, viteId }
     exportKeys.forEach((key) => {
         if (!stubbedPackage) {
             errors.push(new MeteorViteError(`Was not able to import Meteor package: "${packageName}"`, {
-                viteId,
+                requestId: requestId,
                 packageName,
             }))
         }
         if (typeof stubbedPackage[key] === 'undefined') {
             errors.push(new MeteorViteError(`Could not import Meteor package into the client: '${key}' is undefined`, {
-                viteId,
+                requestId: requestId,
                 packageName,
                 exportName: key,
             }))
@@ -55,11 +55,11 @@ const settings: MeteorViteSettings = meteor?.settings?.public?.vite?.meteor || {
 
 class MeteorViteError extends Error {
     public readonly name = '[meteor-vite] ⚠️ Error';
-    constructor(message: string, { packageName, viteId, exportName }: ErrorMetadata) {
+    constructor(message: string, { packageName, requestId, exportName }: ErrorMetadata) {
         const footerLines = [
             `⚡ Affected package: ${packageName}`,
             `⚡ Export name: { ${exportName} }`,
-            `⚡ Vite loader ID: ${viteId}`,
+            `⚡ Vite Request ID: ${requestId}`,
             '',
             `⚠️ Open an issue - it's likely an issue with meteor-vite rather than '${packageName}'`,
             `    ${PackageJson.bugs.url}`,
@@ -89,10 +89,10 @@ interface MeteorViteSettings {
     }
 }
 
-type ErrorMetadata = Pick<StubValidation, 'packageName' | 'viteId'> & { exportName?: string };
+type ErrorMetadata = Pick<StubValidation, 'packageName' | 'requestId'> & { exportName?: string };
 
 interface StubValidation {
-    viteId: string;
+    requestId: string;
     
     packageName: string;
     

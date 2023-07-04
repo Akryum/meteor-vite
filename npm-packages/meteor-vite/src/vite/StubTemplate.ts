@@ -5,7 +5,7 @@ export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
 export const TEMPLATE_GLOBAL_KEY = 'g';
 
-export function stubTemplate({ stubId, packageId, moduleExports, viteId, packageScopeExports }: TemplateOptions) {
+export function stubTemplate({ stubId, packageId, moduleExports, requestId, packageScopeExports }: TemplateOptions) {
     const serialized = Serialize.parseModules({
         packageName: packageId,
         modules: moduleExports,
@@ -13,7 +13,7 @@ export function stubTemplate({ stubId, packageId, moduleExports, viteId, package
     });
     // language="js"
     return`
-// viteId: ${viteId}
+// requestId: ${requestId}
 // packageId: ${packageId}
 import { validateStub } from 'meteor-vite/client';
 const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global;
@@ -26,7 +26,7 @@ const require = Package.modules.meteorInstall({
       ${METEOR_STUB_KEY} = require('${packageId}');
     
       validateStub({
-          viteId: '${viteId}',
+          requestId: '${requestId}',
           packageName: '${packageId}',
           stubbedPackage: ${METEOR_STUB_KEY},
           exportKeys: ${JSON.stringify(serialized.exportedKeys)},
@@ -82,5 +82,5 @@ interface TemplateOptions {
     moduleExports: ModuleExport[],
     packageScopeExports: PackageScopeExports,
     stubId: number;
-    viteId: string;
+    requestId: string;
 }
