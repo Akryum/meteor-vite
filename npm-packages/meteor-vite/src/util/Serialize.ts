@@ -46,7 +46,9 @@ export default new class Serialize {
         const result: {
             module: PlacementGroup,
             package: PlacementGroup,
+            exportedKeys: string[],
         } = {
+            exportedKeys: [],
             module: {
                 top: [],
                 bottom: []
@@ -85,16 +87,18 @@ export default new class Serialize {
             if (module.type === 're-export') {
                 result.module.top.push(line);
             }
-            
             if (module.type === 'export') {
                 result.module.bottom.push(line);
+                reservedKeys.add(module.name)
             }
             
             if (module.type === 'export-default') {
-                result.module.bottom.push(line)
+                result.module.bottom.push(line);
+                reservedKeys.add('default');
             }
         });
         
+        result.exportedKeys.push(...reservedKeys);
         
         return result;
     }

@@ -39,6 +39,7 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
                 packageId: request.context.file.packageId,
                 moduleExports,
                 packageScopeExports: parserResult.packageScopeExports,
+                viteId,
             })
             
             console.log(`${request.context.file.packageId}:`, {

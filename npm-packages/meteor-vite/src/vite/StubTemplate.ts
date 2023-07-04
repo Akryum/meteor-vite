@@ -1,4 +1,3 @@
-import { Serializer } from 'v8';
 import { ModuleExport, PackageScopeExports, ParserResult } from '../Parser';
 import Serialize from '../util/Serialize';
 
@@ -6,7 +5,7 @@ export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
 export const TEMPLATE_GLOBAL_KEY = 'g';
 
-export function stubTemplate({ stubId, packageId, moduleExports, packageScopeExports }: TemplateOptions) {
+export function stubTemplate({ stubId, packageId, moduleExports, viteId, packageScopeExports }: TemplateOptions) {
     const serialized = Serialize.parseModules({
         packageName: packageId,
         modules: moduleExports,
@@ -26,6 +25,7 @@ const require = Package.modules.meteorInstall({
       ${METEOR_STUB_KEY} = require('${packageId}');
     
       validateStub({
+          viteId: '${viteId}',
           packageName: '${packageId}',
           stubbedPackage: ${METEOR_STUB_KEY},
           exportKeys: ${JSON.stringify(serialized.exportedKeys)},
@@ -81,4 +81,5 @@ interface TemplateOptions {
     moduleExports: ModuleExport[],
     packageScopeExports: PackageScopeExports,
     stubId: number;
+    viteId: string;
 }
