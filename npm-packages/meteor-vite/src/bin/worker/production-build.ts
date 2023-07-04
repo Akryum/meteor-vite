@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises'
 import { RollupOutput } from 'rollup';
 import { build, resolveConfig } from 'vite';
-import { MeteorViteConfig } from '../vite/MeteorViteConfig';
-import { MeteorStubs } from '../vite';
-import MeteorVitePackage from '../../package.json';
+import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
+import { MeteorStubs } from '../../vite';
+import MeteorVitePackage from '../../../package.json';
 
 (async () => {
     const [viteOutDir, meteorPackagePath, payloadMarker] = process.argv.slice(2);

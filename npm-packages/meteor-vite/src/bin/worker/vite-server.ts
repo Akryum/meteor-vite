@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import Path from 'path';
 import { createServer, ViteDevServer } from 'vite';
-import { MeteorViteConfig } from '../vite/MeteorViteConfig';
-import { MeteorStubs } from '../vite';
+import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
+import { MeteorStubs } from '../../vite';
 
 process.on('message', async message => {
     if (message !== 'start') return;
