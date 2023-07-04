@@ -13,6 +13,7 @@ export function stubTemplate({ stubId, packageId, moduleExports, viteId, package
     });
     // language="js"
     return`
+// viteId: ${viteId}
 // packageId: ${packageId}
 import { validateStub } from 'meteor-vite/client';
 const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global;
