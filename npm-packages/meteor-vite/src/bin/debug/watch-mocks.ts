@@ -4,7 +4,7 @@ import ViteServer from './vite-server';
 
 /**
  * Parse test module on startup for debugging and development.
- * Works well with ts-node-dev. :)
+ * Works well with ts-node-debug. :)
  */
 (async () => {
     
@@ -21,4 +21,4 @@ import ViteServer from './vite-server';
     })
 })();
 
-setInterval(() => 'Keeps the ts-node-dev process running for development', 100)
+setInterval(() => 'Keeps the ts-node-debug process running for development', 100)
