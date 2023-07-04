@@ -86,6 +86,66 @@ function loadFileData({ id, meteorPackagePath }: Pick<StubContext, 'id' | 'meteo
     }
 }
 
+async function forceImport({ mainModule, id }: ForceImportOptions) {
+    if (!mainModule?.client) {
+        throw new Error(`⚡  No meteor.mainModule.client found in package.json`)
+    }
+    
+    const meteorClientEntryFile = Path.resolve(process.cwd(), mainModule.client);
+    
+    if (!existsSync(meteorClientEntryFile)) {
+        throw new Error(`⚡  meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
+    }
+    
+    const content = await FS.readFile(meteorClientEntryFile, 'utf8');
+    
+    if (!content.includes(`'${id}'`)) {
+        await FS.writeFile(meteorClientEntryFile, viteAutoImportBlock({ content, id }));
+        throw new Error(`⚡  Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
+    }
+}
+
+async function checkManifest({ id, file, projectJsonContent: projectJson }: StubContext) {
+    if (!existsSync(file.manifestPath) || !projectJson) {
+        return;
+    }
+    
+    let mainModule!: ManifestResource;
+    const manifest: ManifestContent = JSON.parse(await FS.readFile(file.manifestPath, 'utf8'));
+    
+    const resources = manifest.resources.filter((resource) => {
+        if (resource.fileOptions.mainModule) {
+            mainModule = resource;
+            return true;
+        }
+        if (file.importPath) {
+            return resource.file.includes(file.importPath);
+        }
+    });
+    
+    for (const { fileOptions } of resources) {
+        if (fileOptions.lazy) {
+            await forceImport({
+                id,
+                mainModule: projectJson.meteor.mainModule
+            });
+            break;
+        }
+    }
+    
+    return {
+        manifest,
+        mainModule,
+    };
+}
+
+
+/**
+ * Unique ID for the next stub.
+ * @type {number}
+ */
+let stubId = 0;
+
 interface ManifestContent {
     format: string;
     declaredExports: [];
@@ -112,54 +172,11 @@ type ProjectJson = {
     }
 }
 
-async function checkManifest({ id, file, projectJsonContent: projectJson }: StubContext) {
-    if (!existsSync(file.manifestPath) || !projectJson) {
-        return;
-    }
-    
-    async function autoImport() {
-        if (!projectJson.meteor?.mainModule?.client) {
-            throw new Error(`⚡  No meteor.mainModule.client found in package.json`)
-        }
-        const meteorClientEntryFile = Path.resolve(process.cwd(), projectJson.meteor.mainModule.client)
-        if (!existsSync(meteorClientEntryFile)) {
-            throw new Error(`⚡  meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
-        }
-        const content = await FS.readFile(meteorClientEntryFile, 'utf8')
-        if (!content.includes(`'${id}'`)) {
-            await FS.writeFile(meteorClientEntryFile, viteAutoImportBlock({ content, id }));
-            throw new Error(`⚡  Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
-        }
-    }
-    
-    const manifest: ManifestContent = JSON.parse(await FS.readFile(file.manifestPath, 'utf8'));
-    let mainModule;
-    const resources = manifest.resources.filter((resource) => {
-        if (resource.fileOptions.mainModule) {
-            mainModule = resource;
-            return true;
-        }
-        if (file.importPath) {
-            return resource.file.includes(file.importPath);
-        }
-    });
-    
-    for (const { fileOptions } of resources) {
-        if (fileOptions.lazy) {
-            await autoImport();
-            break;
-        }
-    }
-    
-    return manifest;
+interface ForceImportOptions {
+    id: string;
+    mainModule: Partial<ProjectJson['meteor']['mainModule']>;
 }
 
-
-/**
- * Unique ID for the next stub.
- * @type {number}
- */
-let stubId = 0;
 
 interface PluginSettings {
     /**
