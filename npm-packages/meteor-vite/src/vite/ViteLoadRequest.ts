@@ -89,7 +89,7 @@ export default class ViteLoadRequest {
      * the package's entrypoint.
      *
      * @param {FileData} file
-     * @return {Promise<any>}
+     * @return {Promise<ManifestContent>}
      * @protected
      */
     protected static async loadManifest({ file }: PreContextRequest & { file: FileData }) {
@@ -97,7 +97,7 @@ export default class ViteLoadRequest {
             return;
         }
         
-        return JSON.parse(await FS.readFile(file.manifestPath, 'utf8'));
+        return JSON.parse(await FS.readFile(file.manifestPath, 'utf8')) as ManifestContent;
     }
     
     constructor(public readonly context: RequestContext ) {};
