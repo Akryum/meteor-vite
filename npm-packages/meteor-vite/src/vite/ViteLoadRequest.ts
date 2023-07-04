@@ -90,7 +90,17 @@ export default class ViteLoadRequest {
         const sourceName = packageName.replace(':', '_');
         const sourceFile = `${sourceName}.js`;
         const sourcePath = Path.join(pluginSettings.meteorPackagePath, sourceFile);
-        const content = FS.readFile(sourcePath, 'utf-8');
+        
+        /**
+         * Raw file content for the current file request.
+         * We don't want to await it here to keep things snappy until the content is actually needed.
+         *
+         * @type {Promise<string>}
+         */
+        const content = FS.readFile(sourcePath, 'utf-8').catch((error: Error) => {
+            throw new MeteorViteStubRequestError(`Unable to read file content: ${error.message}`)
+        });
+        
         return {
             content,
             packageId,
