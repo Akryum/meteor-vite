@@ -86,7 +86,10 @@ function loadFileData({ id, meteorPackagePath }: Pick<StubContext, 'id' | 'meteo
     }
 }
 
-type ManifestContent = {
+interface ManifestContent {
+    format: string;
+    declaredExports: [];
+    uses: { 'package': string }[];
     resources: {
         path: string;
         fileOptions: { lazy: boolean; mainModule: boolean };
