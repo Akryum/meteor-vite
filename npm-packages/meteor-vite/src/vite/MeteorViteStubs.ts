@@ -1,144 +1,8 @@
-import { existsSync } from 'fs';
-import FS from 'fs/promises';
-import Path from 'path';
 import { Plugin } from 'vite';
-import { ModuleExport, parseModule, ParserResult } from '../Parser';
-import { getMainModule, getModuleFromPath } from '../util/Serialize';
-import { stubTemplate, viteAutoImportBlock } from './StubTemplate';
-
-
-export function MeteorViteStubs(settings: PluginSettings): Plugin {
-    return {
-        name: 'meteor-vite: stubs',
-        resolveId (id) {
-            if (id.startsWith('meteor/')) {
-                return `\0${id}`
-            }
-        },
-        load(id) {
-            if (!id.startsWith('\0meteor/')) {
-                return;
-            }
-            const context = { id: id.slice(1), ...settings }
-            const file = loadFileData(context);
-            
-            return createMeteorStub({ file, ...context, }).catch((error) => {
-                console.error('Encountered an error while package "%s" at path: %s!', file.packageId, file.sourcePath);
-                throw error;
-            });
-        }
-    }
-}
-
-// todo: Handle isopack auto-imports
-async function createMeteorStub(context: StubContext) {
-    const { file } = context;
-    await checkManifest(context);
-    const parserResult = await parseModule({ fileContent: file.content })
-    let requestedModule: ModuleExport[] = getMainModule(parserResult) || [];
-    
-    if (file.importPath) {
-        requestedModule = getModuleFromPath({ result: parserResult, importPath: file.importPath }).modules;
-    }
-    
-    const template = stubTemplate({
-        stubId: stubId++,
-        packageId: file.packageId,
-        moduleExports: requestedModule,
-        packageScopeExports: parserResult.packageScopeExports,
-    });
-    
-    console.log(`${file.packageId}: ${parserResult.timeSpent}`);
-    
-    return template;
-}
-
-function loadFileData({ id, meteorPackagePath }: Pick<StubContext, 'id' | 'meteorPackagePath'>) {
-    let {
-        /**
-         * Base Atmosphere package import This is usually where we find the full package content, even for packages
-         * that have multiple entry points.
-         * E.g. `meteor/ostrio:cookies`
-         * @type {string}
-         */
-        packageId,
-        
-        /**
-         * Requested file path inside the package. (/some-module)
-         * Used for packages that have multiple entry points or no mainModule specified in package.js.
-         * E.g. `import { Something } from `meteor/ostrio:cookies/some-module`
-         * @type {string | undefined}
-         */
-        importPath
-    } = id.match(/(?<packageId>(meteor\/)[\w\-. ]+(:[\w\-. ]+)?)(?<importPath>\/.+)?/)?.groups || {};
-    
-    const packageName = packageId.replace(/^meteor\//, '');
-    const sourceName = packageName.replace(':', '_');
-    const sourceFile = `${sourceName}.js`;
-    const sourcePath = Path.join(meteorPackagePath, sourceFile);
-    const content = FS.readFile(sourcePath, 'utf-8');
-    return {
-        content,
-        packageId,
-        importPath,
-        sourcePath,
-        manifestPath: Path.join('.meteor', 'local', 'isopacks', sourceName, 'web.browser.json')
-    }
-}
-
-async function forceImport({ mainModule, id }: ForceImportOptions) {
-    if (!mainModule?.client) {
-        throw new Error(`⚡  No meteor.mainModule.client found in package.json`)
-    }
-    
-    const meteorClientEntryFile = Path.resolve(process.cwd(), mainModule.client);
-    
-    if (!existsSync(meteorClientEntryFile)) {
-        throw new Error(`⚡  meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
-    }
-    
-    const content = await FS.readFile(meteorClientEntryFile, 'utf8');
-    
-    if (!content.includes(`'${id}'`)) {
-        await FS.writeFile(meteorClientEntryFile, viteAutoImportBlock({ content, id }));
-        throw new Error(`⚡  Auto-imported package ${id} to ${meteorClientEntryFile}, please reload`)
-    }
-}
-
-async function checkManifest({ id, file, projectJsonContent: projectJson }: StubContext) {
-    if (!existsSync(file.manifestPath) || !projectJson) {
-        return;
-    }
-    
-    let mainModule!: ManifestResource;
-    const manifest: ManifestContent = JSON.parse(await FS.readFile(file.manifestPath, 'utf8'));
-    
-    const resources = manifest.resources.filter((resource) => {
-        if (resource.fileOptions.mainModule) {
-            mainModule = resource;
-            return true;
-        }
-        if (file.importPath) {
-            return resource.file.includes(file.importPath);
-        }
-    });
-    
-    for (const { fileOptions } of resources) {
-        if (fileOptions.lazy) {
-            await forceImport({
-                id,
-                mainModule: projectJson.meteor.mainModule
-            });
-            break;
-        }
-    }
-    
-    return {
-        manifest,
-        mainModule,
-    };
-}
-
+import { parseModule } from '../Parser';
+import { getModuleFromPath } from '../util/Serialize';
+import { stubTemplate } from './StubTemplate';
+import ViteLoadRequest from './ViteLoadRequest';
 
 /**
  * Unique ID for the next stub.
@@ -146,39 +10,43 @@ async function checkManifest({ id, file, projectJsonContent: projectJson }: Stub
  */
 let stubId = 0;
 
-interface ManifestContent {
-    format: string;
-    declaredExports: [];
-    uses: { 'package': string }[];
-    resources: ManifestResource[]
-}
-
-interface ManifestResource {
-    path: string;
-    fileOptions: { lazy: boolean; mainModule: boolean };
-    extension: string;
-    file: string;
-    offset: number;
-    length: number;
-    type: string;
-    hash: string
-}
-
-type ProjectJson = {
-    meteor: {
-        mainModule: {
-            client: string
+export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
+    return {
+        name: 'meteor-vite: stubs',
+        resolveId: (id) => ViteLoadRequest.resolveId(id),
+        async load(viteId) {
+            if (!ViteLoadRequest.isStubRequest(viteId)) {
+                return;
+            }
+            const timeStarted = Date.now();
+            const id = ViteLoadRequest.getStubId(viteId);
+            const request = await ViteLoadRequest.prepareContext({ id, pluginSettings })
+            const parserResult = await parseModule({ fileContent: request.context.file.content });
+            const module = getModuleFromPath({
+                importPath: request.requestedModulePath(),
+                result: parserResult, // todo: rename key to parserResult
+            }).modules; // todo: refactor .modules to .exports
+            const template = stubTemplate({
+                stubId: stubId++,
+                packageId: request.context.file.packageId,
+                moduleExports: module,
+                packageScopeExports: parserResult.packageScopeExports,
+            })
+            
+            console.log(`${request.context.file.packageId}: %o`, {
+                parse: parserResult.timeSpent,
+                overall: `${Date.now() - timeStarted}ms`,
+            })
+            
+            // todo: detect lazy-loaded package and perform auto-import
+            
+           return template;
         }
     }
 }
 
-interface ForceImportOptions {
-    id: string;
-    mainModule: Partial<ProjectJson['meteor']['mainModule']>;
-}
 
-
-interface PluginSettings {
+export interface PluginSettings {
     /**
      * Path to Meteor's internal package cache.
      *
@@ -193,10 +61,14 @@ interface PluginSettings {
     projectJsonContent: ProjectJson;
 }
 
-interface StubContext extends PluginSettings {
-    /**
-     * vite file ID. This is usually a relative or absolute file path.
-     */
-    id: string;
-    file: ReturnType<typeof loadFileData>
+/**
+ * The user's Meteor project package.json content.
+ * todo: expand types
+ */
+type ProjectJson = {
+    meteor: {
+        mainModule: {
+            client: string
+        }
+    }
 }
