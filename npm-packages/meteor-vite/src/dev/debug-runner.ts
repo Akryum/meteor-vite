@@ -1,5 +1,5 @@
 import { Check, TestLazy, TsModules } from '../../test/__mocks';
-import { parseModule } from '../Parser';
+import { parseMeteorPackage } from '../Parser';
 import ViteServer from './ViteServer';
 
 /**
@@ -12,7 +12,7 @@ import ViteServer from './ViteServer';
     
     for (const { fileContent } of mocks) {
         console.log(`${'--'.repeat(64)}`)
-        const result = await parseModule({ fileContent: fileContent })
+        const result = await parseMeteorPackage({ fileContent: fileContent })
         console.log(result.modules);
     }
     

@@ -1,7 +1,7 @@
 import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
-import { ModuleExport, parseModule } from '../Parser';
+import { ModuleExport, parseMeteorPackage } from '../Parser';
 import { getMainModule, getModuleExports, PackageModuleExports } from '../util/Serialize';
 import { stubTemplate } from './StubTemplate';
 import ViteLoadRequest, { MeteorViteError } from './ViteLoadRequest';
@@ -22,7 +22,7 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
             }
             const timeStarted = Date.now();
             const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
-            const parserResult = await parseModule({ fileContent: request.context.file.content }).catch((error) => {
+            const parserResult = await parseMeteorPackage({ fileContent: request.context.file.content }).catch((error) => {
                 throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
             });
             

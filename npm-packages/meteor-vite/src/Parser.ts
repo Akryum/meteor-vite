@@ -8,7 +8,7 @@ import {
     traverse,
 } from '@babel/types';
 
-export async function parseModule(options: { fileContent: string | Promise<string> }) {
+export async function parseMeteorPackage(options: { fileContent: string | Promise<string> }) {
     const startTime = Date.now();
     return {
         ...await parseSource(await options.fileContent),

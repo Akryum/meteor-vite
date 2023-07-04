@@ -1,6 +1,6 @@
 import Path from 'path';
 import { describe, expect, it } from 'vitest';
-import { ModuleExport, parseModule } from '../src/Parser';
+import { ModuleExport, parseMeteorPackage } from '../src/Parser';
 import Serialize, { getMainModule } from '../src/util/Serialize';
 import { Check, MeteorJs, MockModule, OstrioCookies, TestLazy, TsModules } from './__mocks';
 
@@ -9,7 +9,7 @@ describe('Validate known exports for mock packages', () => {
     
     mockPackages.forEach((mockModule) => {
         describe(mockModule.packageName, async () => {
-            const parsedModule = await parseModule({ fileContent: mockModule.fileContent });
+            const parsedModule = await parseMeteorPackage({ fileContent: mockModule.fileContent });
             
             it('parsed the package name', () => {
                 expect(parsedModule.packageName).toEqual(mockModule.packageName)
