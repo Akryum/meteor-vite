@@ -165,12 +165,11 @@ interface PreContextRequest {
 }
 
 interface RequestContext extends PreContextRequest {
-    manifest?: LoadRequestManifest;
+    manifest?: ManifestContent;
     file: FileData;
 }
 
 type FileData = ReturnType<typeof ViteLoadRequest['loadFileData']>;
-type LoadRequestManifest = ReturnType<typeof ViteLoadRequest['loadManifest']>;
 
 interface ManifestContent {
     format: string;
