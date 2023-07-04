@@ -33,7 +33,7 @@ export function MeteorViteStubs(pluginSettings: PluginSettings): Plugin {
                 packageScopeExports: parserResult.packageScopeExports,
             })
             
-            console.log(`${request.context.file.packageId}: %o`, {
+            console.log(`${request.context.file.packageId}:`, {
                 parse: parserResult.timeSpent,
                 overall: `${Date.now() - timeStarted}ms`,
             })
