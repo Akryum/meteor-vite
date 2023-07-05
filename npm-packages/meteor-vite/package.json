@@ -4,7 +4,8 @@
   "description": "",
   "exports": {
     "./plugin": "./dist/vite/index.mjs",
-    "./client": "./dist/meteor/client/index.mjs"
+    "./client": "./dist/meteor/client/index.mjs",
+    "./server": "./dist/meteor/server/index.mjs"
   },
   "scripts": {
     "start": "ts-node-dev src/bin/debug/watch-mocks.ts",
@@ -17,6 +18,7 @@
       "./src/bin/worker/vite-server.ts",
       "./src/bin/worker/production-build.ts",
       "./src/meteor/client/index.ts",
+      "./src/meteor/server/index.ts",
       "./src/vite/index.ts"
     ],
     "outDir": "dist",
