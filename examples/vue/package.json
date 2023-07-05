@@ -14,6 +14,7 @@
     "@babel/runtime": "^7.20.13",
     "chalk": "^4.1.2",
     "meteor-node-stubs": "^1.2.5",
+    "meteor-vite": "file:../../npm-packages/meteor-vite",
     "safe-json-stringify": "^1.2.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6"
