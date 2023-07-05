@@ -18,8 +18,7 @@
   "tsup": [
     {
       "entry": [
-        "./src/bin/worker/vite-server.ts",
-        "./src/bin/worker/production-build.ts",
+        "./src/bin/worker/index.ts",
         "./src/meteor/client/index.ts",
         "./src/meteor/server/index.ts",
         "./src/vite/index.ts"
