@@ -5,7 +5,7 @@ import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import MeteorVitePackage from '../../../package.json';
 
-(async () => {
+export async function StartProductionBuild()  {
     const [viteOutDir, meteorPackagePath, payloadMarker] = process.argv.slice(2);
     const viteConfig: MeteorViteConfig = await resolveConfig({}, 'build');
     
@@ -59,7 +59,7 @@ import MeteorVitePackage from '../../../package.json';
             fileName: o.fileName,
         })),
     }));
-})();
+};
 
 
 

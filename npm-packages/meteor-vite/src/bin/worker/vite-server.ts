@@ -4,7 +4,7 @@ import { createServer, ViteDevServer } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 
-process.on('message', async message => {
+export const StartViteServer = () => process.on('message', async message => {
     if (message !== 'start') return;
     
     const server = await createServer({
