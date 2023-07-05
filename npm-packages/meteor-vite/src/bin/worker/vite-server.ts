@@ -5,16 +5,25 @@ import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import CreateIPCInterface from './interface';
 
-export default CreateIPCInterface({
+export default CreateIPCInterface<{
+    kind: 'viteConfig',
+    data: {
+        host?: string | boolean;
+        port?: number;
+        entryFile?: string;
+    },
+}>({
     async startViteDevServer(reply) {
-        const sendViteConfig = (config: MeteorViteConfig) => reply({
-            kind: 'viteConfig',
-            data: {
-                host: config.server?.host,
-                port: config.server?.port,
-                entryFile: config.meteor?.clientEntry,
-            },
-        });
+        const sendViteConfig = (config: MeteorViteConfig) => {
+            reply({
+                kind: 'viteConfig',
+                data: {
+                    host: config.server?.host,
+                    port: config.server?.port,
+                    entryFile: config.meteor?.clientEntry,
+                },
+            })
+        };
         
         const server = await createServer({
             plugins: [

@@ -2,12 +2,12 @@ import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { StartProductionBuild } from './production-build';
 import ViteServerWorker from './vite-server';
 
-type WorkerMessage = keyof typeof IpcMethods;
+export type WorkerMethod = keyof typeof IpcMethods;
 const IpcMethods = {
     ...ViteServerWorker,
 }
 
-process.on('message', async (message: WorkerMessage) => {
+process.on('message', async (message: WorkerMethod) => {
     if (!(message in IpcMethods)) {
         console.warn('Unrecognized worker IPC message', { message });
         return;
