@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "files": ["dist"],
+  "main": "",
   "exports": {
     "./plugin": "./dist/vite/index.mjs",
     "./client": "./dist/meteor/client/index.mjs",
@@ -14,18 +15,20 @@
     "build": "rm -rf ./dist && tsup-node",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "tsup": {
-    "entry": [
-      "./src/bin/worker/vite-server.ts",
-      "./src/bin/worker/production-build.ts",
-      "./src/meteor/client/index.ts",
-      "./src/meteor/server/index.ts",
-      "./src/vite/index.ts"
-    ],
-    "outDir": "dist",
-    "format": "esm",
-    "sourcemap": true
-  },
+  "tsup": [
+    {
+      "entry": [
+        "./src/bin/worker/vite-server.ts",
+        "./src/bin/worker/production-build.ts",
+        "./src/meteor/client/index.ts",
+        "./src/meteor/server/index.ts",
+        "./src/vite/index.ts"
+      ],
+      "outDir": "dist",
+      "format": "esm",
+      "sourcemap": true
+    }
+  ],
   "keywords": [],
   "author": "",
   "bugs": {
