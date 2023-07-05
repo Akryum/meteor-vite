@@ -1,12 +1,12 @@
 import fs from 'node:fs/promises';
 import Path from 'path';
-import { createServer, ViteDevServer } from 'vite';
+import { createServer } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 
-export const StartViteServer = () => process.on('message', async message => {
-    if (message !== 'start') return;
-    
+export async function startViteDevServer(send: {
+    viteConfig(config: MeteorViteConfig): void
+}) {
     const server = await createServer({
         plugins: [
             MeteorStubs({
@@ -17,7 +17,7 @@ export const StartViteServer = () => process.on('message', async message => {
                 name: 'meteor-handle-restart',
                 buildStart () {
                     if (!listening) {
-                        sendViteSetup(server)
+                        send.viteConfig(server.config);
                     }
                 },
             },
@@ -26,26 +26,7 @@ export const StartViteServer = () => process.on('message', async message => {
     
     let listening = false
     await server.listen().then(() => {
-        sendViteSetup(server)
+        send.viteConfig(server.config);
         listening = true
     });
-})
-
-function sendViteSetup (server: ViteDevServer) {
-    const config: MeteorViteConfig = server.config;
-    
-    if (typeof process.send !== 'function') {
-        throw new Error('Worker was not launched with an IPC channel!');
-    }
-    
-    process.send({
-        kind: 'viteSetup',
-        data: {
-            host: config.server?.host,
-            port: config.server?.port,
-            entryFile: config.meteor?.clientEntry,
-        },
-    })
 }
-
-
