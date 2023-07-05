@@ -2,7 +2,9 @@
   "name": "meteor-vite",
   "version": "1.0.0",
   "description": "",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "",
   "exports": {
     "./plugin": "./dist/vite/index.mjs",
