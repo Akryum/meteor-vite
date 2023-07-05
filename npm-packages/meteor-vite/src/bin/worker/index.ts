@@ -1,28 +1,10 @@
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
-import { startViteDevServer } from './vite-server';
 import { StartProductionBuild } from './production-build';
-
-if (typeof process.send !== 'function') {
-    throw new Error('Worker was not launched with an IPC channel!');
-}
+import ViteServerWorker from './vite-server';
 
 type WorkerMessage = keyof typeof IpcMethods;
-
 const IpcMethods = {
-    async startViteDevServer() {
-        await startViteDevServer({
-            viteConfig(config: MeteorViteConfig): void {
-                process.send({
-                    kind: 'viteConfig',
-                    data: {
-                        host: config.server?.host,
-                        port: config.server?.port,
-                        entryFile: config.meteor?.clientEntry,
-                    },
-                })
-            },
-        })
-    }
+    ...ViteServerWorker,
 }
 
 process.on('message', async (message: WorkerMessage) => {
@@ -31,5 +13,16 @@ process.on('message', async (message: WorkerMessage) => {
         return;
     }
     
-    await IpcMethods[message]();
+    
+    await IpcMethods[message]((response) => {
+        validateIpcChannel(process.send);
+        process.send(response);
+    });
 })
+
+validateIpcChannel(process.send);
+function validateIpcChannel(send: NodeJS.Process['send']): asserts send is Required<Pick<NodeJS.Process, 'send'>>['send'] {
+    if (typeof process.send !== 'function') {
+        throw new Error('Worker was not launched with an IPC channel!');
+    }
+}
