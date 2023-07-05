@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
 import { fork } from 'node:child_process'
+import Path from 'path';
 
 if (Meteor.isDevelopment) {
   const cwd = guessCwd()
@@ -24,14 +25,14 @@ if (Meteor.isDevelopment) {
 
   // Use a worker to skip reify and Fibers
   // Use a child process instead of worker to avoid WASM/archived threads error
-  const child = fork(ViteBuildPlugins.paths.workerDev, ['--enable-source-maps'], {
+  const child = fork(Path.join(cwd, 'node_modules/meteor-vite/dist/bin/worker/index.mjs'), ['--enable-source-maps'], {
     stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
     cwd,
     detached: false,
   })
   child.on('message', ({ kind, data }) => {
     switch (kind) {
-      case 'viteSetup':
+      case 'viteConfig':
         Object.assign(viteSetup, data)
         if (!viteSetup.entryFile) {
           throw new Meteor.Error(500, 'Missing `meteor.clientEntry` with path to entry file (the one you want to build with Vite) in your vite config.')
@@ -41,7 +42,7 @@ if (Meteor.isDevelopment) {
         console.log(kind, data)
     }
   })
-  child.send('start')
+  child.send('startViteDevServer')
   ;['exit', 'SIGINT', 'SIGHUP', 'SIGTERM'].forEach(event => {
     process.once(event, () => {
       child.kill()
