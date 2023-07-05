@@ -1,8 +1,11 @@
+import type { InferIpcReplies } from './interface';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { StartProductionBuild } from './production-build';
 import ViteServerWorker from './vite-server';
 
 export type WorkerMethod = keyof typeof IpcMethods;
+export type WorkerResponse = InferIpcReplies<typeof IpcMethods>;
+
 const IpcMethods = {
     ...ViteServerWorker,
 }
