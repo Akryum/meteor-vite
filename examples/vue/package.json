@@ -1,5 +1,5 @@
 {
-  "name": "meteor-vite",
+  "name": "vue-example",
   "private": true,
   "scripts": {
     "dev": "meteor run",
