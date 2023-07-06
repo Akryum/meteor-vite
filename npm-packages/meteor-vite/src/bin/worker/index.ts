@@ -6,15 +6,22 @@ import ViteServerWorker from './vite-server';
 const IpcMethods = {
     ...ViteServerWorker,
     ...ProductionBuilder,
+    // Todo: local builder for npm package
 } as const;
 
 process.on('message', async (message: WorkerMethod) => {
-    if (!message || !message.method || !(message.method in IpcMethods)) {
-        console.error('Unrecognized worker IPC message', { message });
+    if (!message || !message.method) {
+        console.error('Vite: Unrecognized worker IPC message', { message });
         return;
     }
     
-    await IpcMethods[message.method]((response) => {
+    const transmit = IpcMethods[message.method];
+    
+    if (typeof transmit !== 'function') {
+        console.error(`Vite: The provided IPC method hasn't been defined yet!`, { message });
+    }
+    
+    await transmit((response) => {
         validateIpcChannel(process.send);
         process.send(response);
     }, message.params as any);

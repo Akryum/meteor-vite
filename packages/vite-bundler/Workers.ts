@@ -21,7 +21,7 @@ export function createWorkerFork(hooks: WorkerResponseHooks) {
         const hook = hooks[message.kind];
         
         if (typeof hook !== 'function') {
-            return console.warn('Unrecognized worker message!', { message });
+            return console.warn('Meteor: Unrecognized worker message!', { message });
         }
         
         return hook(message.data as any);
