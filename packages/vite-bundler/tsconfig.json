@@ -34,7 +34,7 @@
     "typeRoots": [
       "../../examples/vue/node_modules/@types",
       "../../examples/vue/node_modules",
-      "../../npm-packages",
+      "../../npm-packages"
     ],                                  /* Specify multiple folders that act like './node_modules/@types'. */
     // "types": [],                                      /* Specify type package names to be included without being referenced in a source file. */
     // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
@@ -106,6 +106,12 @@
     // "allowUnusedLabels": true,                        /* Disable error reporting for unused labels. */
     // "allowUnreachableCode": true,                     /* Disable error reporting for unreachable code. */
 
+    "paths": {
+      "meteor/*": [
+        "../../examples/vue/node_modules/@types/meteor/*",
+        "../../examples/vue/.meteor/local/types/packages.d.ts"
+      ]
+    },
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
