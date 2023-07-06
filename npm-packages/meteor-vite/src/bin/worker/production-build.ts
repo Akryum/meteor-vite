@@ -21,9 +21,15 @@ export default CreateIPCInterface({
                 buildResult: string;
             }
         }>,
-        { viteOutDir, meteorPackagePath, payloadMarker }: BuildOptions
+        buildConfig: BuildOptions
     ) {
         const viteConfig: MeteorViteConfig = await resolveConfig({}, 'build');
+        const { viteOutDir, meteorPackagePath, payloadMarker } = buildConfig;
+        Object.entries(buildConfig).forEach(([key, value]) => {
+            if (!value) {
+                throw new Error(`Vite: Worker missing required build argument "${key}"!`)
+            }
+        })
         
         if (!viteConfig.meteor?.clientEntry) {
             throw new Error(`You need to specify an entrypoint in your Vite config! See: ${MeteorVitePackage.homepage}`);
