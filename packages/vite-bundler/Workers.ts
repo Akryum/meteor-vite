@@ -36,7 +36,7 @@ export function createWorkerFork(hooks: WorkerHooks) {
 }
 
 export const cwd = guessCwd();
-export const workerPath = Path.join(cwd, 'node_modules/meteor-vite-dist/bin/worker/index.mjs');
+export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/worker/index.mjs');
 function guessCwd () {
     let cwd = process.env.PWD ?? process.cwd()
     const index = cwd.indexOf('.meteor')
