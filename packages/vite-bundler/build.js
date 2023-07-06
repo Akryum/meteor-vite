@@ -3,11 +3,10 @@ import { performance } from 'node:perf_hooks'
 import fs from 'fs-extra'
 import { execaSync } from 'execa'
 import pc from 'picocolors'
+import { cwd } from './Workers';
 
 if (process.env.VITE_METEOR_DISABLED) return
 if (process.env.NODE_ENV !== 'production') return
-
-const cwd = guessCwd()
 
 // Not in a project (publishing the package)
 if (!fs.existsSync(path.join(cwd, 'package.json'))) return
