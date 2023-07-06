@@ -12,7 +12,7 @@ Package.registerBuildPlugin({
     'ecmascript@0.16.2',
     'caching-compiler@1.2.2',
     'babel-compiler@7.9.0',
-    'vite:build-plugins'
+    'typescript@4.0.0',
   ],
   sources: [
     'build.js',
@@ -29,6 +29,6 @@ Package.onUse(function(api) {
   api.use('zodern:types')
   api.use('ecmascript')
   api.use('webapp@1.13.1')
-  api.mainModule('server.js', 'server')
+  api.mainModule('server.ts', 'server')
 })
 
