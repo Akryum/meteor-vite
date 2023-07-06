@@ -15,13 +15,13 @@ process.on('message', async (message: WorkerMethod) => {
         return;
     }
     
-    const transmit = IpcMethods[message.method];
+    const callWorkerMethod = IpcMethods[message.method];
     
-    if (typeof transmit !== 'function') {
+    if (typeof callWorkerMethod !== 'function') {
         console.error(`Vite: The provided IPC method hasn't been defined yet!`, { message });
     }
     
-    await transmit((response) => {
+    await callWorkerMethod((response) => {
         validateIpcChannel(process.send);
         process.send(response);
     }, message.params as any).catch((error) => {
