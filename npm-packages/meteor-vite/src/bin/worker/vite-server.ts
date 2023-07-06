@@ -3,16 +3,18 @@ import Path from 'path';
 import { createServer } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
-import CreateIPCInterface from './interface';
+import CreateIPCInterface, { IPCReply } from './interface';
 
-export default CreateIPCInterface<{
-    viteConfig: {
-        host?: string | boolean;
-        port?: number;
-        entryFile?: string;
-    },
-}>({
-    async startViteDevServer(reply) {
+
+export default CreateIPCInterface({
+    async startViteDevServer(reply: IPCReply<{
+        kind: 'viteConfig',
+        data: {
+            host?: string | boolean;
+            port?: number;
+            entryFile?: string
+        }
+    }>) {
         const sendViteConfig = (config: MeteorViteConfig) => {
             reply({
                 kind: 'viteConfig',
@@ -20,9 +22,9 @@ export default CreateIPCInterface<{
                     host: config.server?.host,
                     port: config.server?.port,
                     entryFile: config.meteor?.clientEntry,
-                },
+                }
             })
-        };
+        }
         
         const server = await createServer({
             plugins: [

@@ -1,14 +1,14 @@
-import type { InferIpcReplies } from './interface';
+import { IPCInterface } from './interface';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { StartProductionBuild } from './production-build';
 import ViteServerWorker from './vite-server';
 
 export type WorkerMethod = keyof typeof IpcMethods;
-export type WorkerResponse = InferIpcReplies<typeof IpcMethods>;
+export type WorkerResponse = typeof IpcMethods extends IPCInterface<typeof IpcMethods, infer Replies> ? Replies : never;
 
 const IpcMethods = {
     ...ViteServerWorker,
-} as const;
+};
 
 process.on('message', async (message: WorkerMethod) => {
     if (!(message in IpcMethods)) {
