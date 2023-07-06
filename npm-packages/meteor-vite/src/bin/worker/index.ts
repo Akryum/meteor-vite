@@ -28,12 +28,13 @@ function validateIpcChannel(send: NodeJS.Process['send']): asserts send is Requi
         throw new Error('Worker was not launched with an IPC channel!');
     }
 }
-export type WorkerMethod = {
-                               [key in keyof IPCMethods]: [name: key, method: IPCMethods[key]]
+export type WorkerMethod = { [key in keyof IPCMethods]: [name: key, method: IPCMethods[key]]
                            } extends {
                                [key: string]: [infer Name, infer Method]
                            } ? Name extends keyof IPCMethods
-                               ? { method: Name, params: Parameters<IPCMethods[Name]> }
+                               ? { method: Name, params: Parameters<IPCMethods[Name]> extends [infer Reply, ...infer Params]
+                                                         ? Params
+                                                         : [] }
                                : never
                              : never;
 

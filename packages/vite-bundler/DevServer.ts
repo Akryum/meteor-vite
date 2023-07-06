@@ -36,7 +36,7 @@ function startViteServer() {
     
     worker.call({
         method: 'startViteDevServer',
-        params: undefined,
+        params: []
     });
 }
 
