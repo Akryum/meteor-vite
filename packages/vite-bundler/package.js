@@ -16,7 +16,7 @@ Package.registerBuildPlugin({
   ],
   sources: [
     'build.js',
-    'Workers.ts',
+    'workers.ts',
   ],
   npmDependencies: {
     execa: '6.1.0',
@@ -31,6 +31,6 @@ Package.onUse(function(api) {
   api.use('ecmascript')
   api.use('webapp@1.13.1')
   api.use('typescript@4.0.0')
-  api.mainModule('DevServer.ts', 'server')
+  api.mainModule('vite-server.ts', 'server')
 })
 

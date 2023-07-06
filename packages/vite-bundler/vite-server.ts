@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
 import type HTTP from 'http'
-import { createWorkerFork } from './Workers';
+import { createWorkerFork } from './workers';
 
 if (Meteor.isDevelopment) {
     startViteServer();
