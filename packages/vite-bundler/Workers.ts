@@ -2,10 +2,11 @@ import { fork } from 'node:child_process'
 import Path from 'path';
 import FS from 'fs';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
+import { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker';
 
 // Use a worker to skip reify and Fibers
 // Use a child process instead of worker to avoid WASM/archived threads error
-export function createWorkerFork(hooks: WorkerHooks) {
+export function createWorkerFork(hooks: WorkerResponseHooks) {
     if (!FS.existsSync(workerPath)) {
         throw new Error(`Worker entrypoint doesn't exist! You may need to run "$ npm run build" in the '/npm-packages/meteor-vite' directory`)
     }
@@ -23,7 +24,7 @@ export function createWorkerFork(hooks: WorkerHooks) {
             return console.warn('Unrecognized worker message!', { message });
         }
         
-        return hook(message.data);
+        return hook(message.data as any);
     });
     
     ['exit', 'SIGINT', 'SIGHUP', 'SIGTERM'].forEach(event => {
@@ -49,8 +50,4 @@ function guessCwd () {
         cwd = cwd.substring(0, index)
     }
     return cwd
-}
-
-type WorkerHooks = {
-    [key in keyof WorkerResponse]: (data: WorkerResponse[key]) => void;
 }
