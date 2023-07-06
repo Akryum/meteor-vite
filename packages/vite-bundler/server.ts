@@ -1,6 +1,11 @@
 import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
+import type HTTP from 'http'
 import { createWorkerFork } from './Workers';
+
+if (Meteor.isDevelopment) {
+    startViteServer();
+}
 
 function startViteServer() {
     const viteConfig = {
@@ -9,7 +14,7 @@ function startViteServer() {
         entryFile: '',
     }
     
-    WebAppInternals.registerBoilerplateDataCallback('meteor-vite', (request, data, arch) => {
+    WebAppInternals.registerBoilerplateDataCallback('meteor-vite', (request: HTTP.IncomingMessage, data: BoilerplateData) => {
         const { host, port, entryFile } = viteConfig
         if (entryFile) {
             data.dynamicBody = `${data.dynamicBody || ""}\n<script type="module" src="http://${host}:${port}/${entryFile}"></script>\n`
@@ -29,6 +34,6 @@ function startViteServer() {
     worker.call('startViteDevServer');
 }
 
-if (Meteor.isDevelopment) {
-    startViteServer();
+interface BoilerplateData {
+    dynamicBody: string;
 }
