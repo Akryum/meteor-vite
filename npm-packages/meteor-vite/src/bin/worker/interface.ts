@@ -1,8 +1,13 @@
-type IpcResponseHandler<Response extends IpcResponse = IpcResponse> = (response: Response) => void;
+type IpcResponseHandler<
+    Responses extends IpcResponse = IpcResponse
+> = (
+    response: {
+        [key in keyof Responses]: { kind: key, data: Responses[key] }
+    }[keyof Responses],
+) => void;
 
 type IpcResponse = {
-    readonly kind: string;
-    data?: any;
+    [key in string]: unknown;
 }
 
 type IpcMethods<Replies extends IpcResponse> = { [key in string]: (reply: IpcResponseHandler<Replies>) => void };

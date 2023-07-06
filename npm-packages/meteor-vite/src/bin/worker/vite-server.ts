@@ -6,8 +6,7 @@ import { MeteorStubs } from '../../vite';
 import CreateIPCInterface from './interface';
 
 export default CreateIPCInterface<{
-    kind: 'viteConfig',
-    data: {
+    viteConfig: {
         host?: string | boolean;
         port?: number;
         entryFile?: string;

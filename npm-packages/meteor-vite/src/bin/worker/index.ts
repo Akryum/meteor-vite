@@ -8,7 +8,7 @@ export type WorkerResponse = InferIpcReplies<typeof IpcMethods>;
 
 const IpcMethods = {
     ...ViteServerWorker,
-}
+} as const;
 
 process.on('message', async (message: WorkerMethod) => {
     if (!(message in IpcMethods)) {
