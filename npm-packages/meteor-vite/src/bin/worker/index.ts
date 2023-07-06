@@ -45,5 +45,5 @@ type WorkerReplies = {
 
 export type IPCMethods = typeof IpcMethods;
 export type WorkerResponseHooks = {
-    [key in WorkerResponse['kind']]: (data: Extract<WorkerResponse, { kind: key }>) => void;
+    [key in WorkerResponse['kind']]: (data: Extract<WorkerResponse, { kind: key }>['data']) => void;
 }
