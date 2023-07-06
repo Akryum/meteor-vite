@@ -17,8 +17,11 @@ export default CreateIPCInterface({
         reply: IPCReply<{
             kind: 'buildResult',
             data: {
-                payloadMarker: string;
-                buildResult: string;
+                payload: {
+                    success: boolean,
+                    meteorViteConfig: any,
+                    output?: {name?: string, type: string, fileName: string}[]
+                };
             }
         }>,
         buildConfig: BuildOptions
@@ -76,7 +79,7 @@ export default CreateIPCInterface({
         reply({
             kind: 'buildResult',
             data: {
-                buildResult: JSON.stringify({
+                payload: {
                     success: true,
                     meteorViteConfig: viteConfig.meteor,
                     output: result.output.map(o => ({
@@ -84,8 +87,7 @@ export default CreateIPCInterface({
                         type: o.type,
                         fileName: o.fileName,
                     })),
-                }),
-                payloadMarker,
+                },
             }
         })
     }
