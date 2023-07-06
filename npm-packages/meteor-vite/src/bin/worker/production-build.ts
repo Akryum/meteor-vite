@@ -65,7 +65,9 @@ export default CreateIPCInterface({
                 return;
             }
             
-            throw new Error("Error parsing rollup output!")
+            const message = 'Unexpected rollup result!';
+            console.error(message, rollupResult);
+            throw new Error(message);
         }
         
         validateOutput(result);
