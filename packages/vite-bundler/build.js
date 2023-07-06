@@ -46,7 +46,6 @@ const meteorPackagePath = path.join(tempMeteorProject, '.dist', 'bundle', 'progr
 
 const viteOutDir = path.join(cwd, 'node_modules', '.vite-meteor', 'dist')
 const workerDir = path.join(cwd, 'node_modules', '.meteor-vite-build');
-const workerEntrypoint = prepareWorkerFiles(workerDir).workerProd;
 const payloadMarker = '_vite_result_payload_'
 
 try {
@@ -230,28 +229,4 @@ try {
   throw e
 } finally {
   fs.removeSync(workerDir)
-}
-
-function guessCwd () {
-  let cwd = process.env.PWD ?? process.cwd()
-  const index = cwd.indexOf('.meteor')
-  if (index !== -1) {
-    cwd = cwd.substring(0, index)
-  }
-  return cwd
-}
-
-function prepareWorkerFiles(workerDir) {
-    const entries = Object.entries(ViteBuildPlugins.paths).map(([name, relativePath]) => {
-        const absolutePath = path.join(workerDir, relativePath);
-        const source = ViteBuildPlugins.sources[name];
-
-        fs.ensureDirSync(path.dirname(absolutePath));
-        fs.writeFileSync(absolutePath, source, 'utf8');
-
-        return [name, absolutePath];
-    });
-
-
-    return Object.fromEntries(entries);
 }
