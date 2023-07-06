@@ -61,7 +61,7 @@ export default CreateIPCInterface({
         const result = Array.isArray(results) ? results[0] : results;
         
         function validateOutput(rollupResult: typeof result): asserts rollupResult is RollupOutput {
-            if ('output' in results) {
+            if ('output' in rollupResult) {
                 return;
             }
             
