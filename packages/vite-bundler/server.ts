@@ -28,6 +28,9 @@ function startViteServer() {
     const worker = createWorkerFork({
         viteConfig(config) {
             Object.assign(viteConfig, config);
+            if (config.port) {
+                console.log(`⚡  Meteor-Vite ready for connections!`)
+            }
         }
     });
     
