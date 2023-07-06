@@ -29,7 +29,6 @@ Package.onUse(function(api) {
   api.use('zodern:types')
   api.use('ecmascript')
   api.use('webapp@1.13.1')
-  api.use('vite:build-plugins');
   api.mainModule('server.js', 'server')
 })
 
