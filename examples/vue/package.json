@@ -8,7 +8,9 @@
     "test-build": "rm -rf ../output/vue && meteor npm run build && concurrently \"meteor npm run dev\" \"meteor npm run start\"",
     "test": "meteor test --once --driver-package meteortesting:mocha",
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
-    "visualize": "meteor --production --extra-packages bundle-visualizer"
+    "visualize": "meteor --production --extra-packages bundle-visualizer",
+    "build:dependencies": "(cd ./node_modules/meteor-vite && npm run build)",
+    "postinstall": "npm run build:dependencies"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.13",
