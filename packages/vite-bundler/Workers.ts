@@ -1,5 +1,3 @@
-import { Meteor } from 'meteor/meteor'
-import { WebAppInternals } from 'meteor/webapp'
 import { fork } from 'node:child_process'
 import Path from 'path';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
