@@ -15,6 +15,9 @@ export function createWorkerFork(hooks: WorkerResponseHooks) {
         stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
         cwd,
         detached: false,
+        env: {
+            FORCE_COLOR: '3',
+        },
     });
     
     child.on('message', (message: WorkerResponse) => {
