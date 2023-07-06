@@ -1,3 +1,1 @@
-declare module 'meteor-vite/worker' {
-    export type { WorkerResponse, WorkerMethod } from './src/bin/worker/index';
-}
+export type { WorkerMethod, WorkerResponse } from './src/bin/worker/index';
