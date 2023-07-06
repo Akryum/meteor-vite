@@ -14,7 +14,13 @@ interface BuildOptions {
 
 export default CreateIPCInterface({
     async buildForProduction(
-        reply: IPCReply<{ kind: 'buildResult' | 'payloadMarker', data: string }>,
+        reply: IPCReply<{
+            kind: 'buildResult',
+            data: {
+                payloadMarker: string;
+                buildResult: string;
+            }
+        }>,
         { viteOutDir, meteorPackagePath, payloadMarker }: BuildOptions
     ) {
         const viteConfig: MeteorViteConfig = await resolveConfig({}, 'build');
@@ -60,20 +66,19 @@ export default CreateIPCInterface({
         
         // Result payload
         reply({
-            kind: 'payloadMarker',
-            data: payloadMarker,
-        });
-        reply({
             kind: 'buildResult',
-            data: JSON.stringify({
-                success: true,
-                meteorViteConfig: viteConfig.meteor,
-                output: result.output.map(o => ({
-                    name: o.name,
-                    type: o.type,
-                    fileName: o.fileName,
-                })),
-            })
+            data: {
+                buildResult: JSON.stringify({
+                    success: true,
+                    meteorViteConfig: viteConfig.meteor,
+                    output: result.output.map(o => ({
+                        name: o.name,
+                        type: o.type,
+                        fileName: o.fileName,
+                    })),
+                }),
+                payloadMarker,
+            }
         })
     }
 })
