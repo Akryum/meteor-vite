@@ -23,7 +23,7 @@ export function createWorkerFork(hooks: WorkerHooks) {
             return console.warn('Unrecognized worker message!', { message });
         }
         
-        return hooks[message.kind](message.data);
+        return hook(message.data);
     });
     
     ['exit', 'SIGINT', 'SIGHUP', 'SIGTERM'].forEach(event => {
@@ -33,7 +33,7 @@ export function createWorkerFork(hooks: WorkerHooks) {
     });
     
     return {
-        call(method: WorkerMethod) {
+        call(method: Omit<WorkerMethod, 'replies'>) {
             child.send(method);
         },
         child,
@@ -52,5 +52,5 @@ function guessCwd () {
 }
 
 type WorkerHooks = {
-    [key in WorkerResponse['kind']]: (data: WorkerResponse['data']) => void;
+    [key in keyof WorkerResponse]: (data: WorkerResponse[key]) => void;
 }

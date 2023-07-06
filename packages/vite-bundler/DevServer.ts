@@ -34,7 +34,10 @@ function startViteServer() {
         }
     });
     
-    worker.call('startViteDevServer');
+    worker.call({
+        method: 'startViteDevServer',
+        params: undefined,
+    });
 }
 
 interface BoilerplateData {

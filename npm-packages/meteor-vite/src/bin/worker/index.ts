@@ -1,4 +1,4 @@
-import { IPCInterface } from './interface';
+import { IPCReply } from './interface';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import ProductionBuilder from './production-build';
 import ViteServerWorker from './vite-server';
@@ -10,10 +10,14 @@ export type WorkerMethod<
 > = {
         method: key,
         params: Params[1];
-        replies: Parameters<Params[0]>[0];
 };
 
-export type WorkerResponse = WorkerMethod['replies'];
+export type WorkerResponse = WorkerReplies[keyof IPCMethods][1];
+type WorkerReplies = {
+    [key in keyof IPCMethods]: IPCMethods[key] extends (reply: IPCReply<infer Reply>) => any
+                               ? [Reply['kind'], Reply] : never;
+};
+
 
 const IpcMethods = {
     ...ViteServerWorker,
