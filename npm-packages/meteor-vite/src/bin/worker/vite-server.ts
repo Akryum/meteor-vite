@@ -1,10 +1,11 @@
 import fs from 'node:fs/promises';
 import Path from 'path';
-import { createServer } from 'vite';
+import { createServer, ViteDevServer } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import CreateIPCInterface, { IPCReply } from './interface';
 
+let server: ViteDevServer;
 
 export default CreateIPCInterface({
     async startViteDevServer(reply: IPCReply<{
@@ -26,22 +27,24 @@ export default CreateIPCInterface({
             })
         }
         
-        const server = await createServer({
-            plugins: [
-                MeteorStubs({
-                    meteorPackagePath: Path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages'),
-                    projectJsonContent: JSON.parse(await fs.readFile('package.json', 'utf-8')),
-                }),
-                {
-                    name: 'meteor-handle-restart',
-                    buildStart () {
-                        if (!listening) {
-                            sendViteConfig(server.config);
-                        }
+        if (!server) {
+            server = await createServer({
+                plugins: [
+                    MeteorStubs({
+                        meteorPackagePath: Path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages'),
+                        projectJsonContent: JSON.parse(await fs.readFile('package.json', 'utf-8')),
+                    }),
+                    {
+                        name: 'meteor-handle-restart',
+                        buildStart () {
+                            if (!listening) {
+                                sendViteConfig(server.config);
+                            }
+                        },
                     },
-                },
-            ],
-        });
+                ],
+            });
+        }
         
         let listening = false
         await server.listen()
