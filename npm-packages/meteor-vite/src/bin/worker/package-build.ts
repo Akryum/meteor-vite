@@ -3,18 +3,23 @@
 // Todo: Maybe trigger a reload on Meteor as well
 
 import { spawn } from 'child_process';
+import FS from 'fs/promises';
 import Path from 'path';
 import CreateIPCInterface from './IPC/interface';
 
 export default CreateIPCInterface({
     async 'tsup.watchMeteorVite'() {
         const cwd = Path.join(process.cwd(), '/node_modules/meteor-vite/');
-        const child = spawn('meteor', ['npm', 'run', 'watch'], {
+        const tsupPath = Path.join(cwd, '/node_modules/.bin/tsup');
+        
+        const child = spawn(tsupPath, ['--watch'], {
             stdio: 'inherit',
             // Relies on a symlink from npm to get into npm package source.
             cwd,
+            detached: false,
             env: {
                 FORCE_COLOR: '3',
+                PATH: process.env.PATH
             },
         });
         
@@ -26,7 +31,7 @@ export default CreateIPCInterface({
             if (!code) {
                 return;
             }
-            
+            process.exit(1);
             throw new Error('TSUp watcher exited unexpectedly!');
         });
     }
