@@ -5,6 +5,7 @@ import { getConfig, MeteorViteConfig, setConfig, ViteConnection } from './loadin
 import { createWorkerFork } from './workers';
 
 if (Meteor.isDevelopment) {
+    console.log('⚡ Starting Vite server...')
     setConfig({
         ready: false,
         host: 'localhost',
