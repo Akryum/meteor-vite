@@ -5,6 +5,12 @@ import { getConfig, ViteConnection } from './loading/vite-connection-handler';
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
+declare global {
+    interface Window {
+        __METEOR_VITE_STARTUP__?: boolean;
+    }
+}
+
 
 if (Meteor.isDevelopment) {
     Tracker.autorun(function() {
@@ -14,6 +20,11 @@ if (Meteor.isDevelopment) {
                 console.log('Received Vite configuration', getConfig());
             }
         });
+        
+        // Skip reloading if we're already in the app
+        if (window.__METEOR_VITE_STARTUP__ !== true) {
+            return;
+        }
         
         if (viteConfig.ready) {
             console.log('Vite server ready! Reloading client...');
