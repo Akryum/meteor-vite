@@ -24,7 +24,7 @@ if (Meteor.isDevelopment) {
         }
     });
     
-    const worker = createWorkerFork({
+    const viteServer = createWorkerFork({
         viteConfig(config) {
             const ready = !!config.entryFile;
             setConfig({ ...config, ready });
@@ -34,7 +34,8 @@ if (Meteor.isDevelopment) {
         },
     });
     
-    worker.call({
+    
+    viteServer.call({
         method: 'vite.startDevServer',
         params: []
     });
@@ -42,6 +43,19 @@ if (Meteor.isDevelopment) {
     Meteor.publish(ViteConnection.publication, () => {
         return MeteorViteConfig.find(ViteConnection.configSelector);
     });
+    
+    
+    /**
+     * Builds the 'meteor-vite' npm package where the worker and Vite server is kept.
+     * Primarily to ease the testing process for the Vite plugin.
+     */
+    if (process.env.BUILD_METEOR_VITE_DEPENDENCY === 'true') {
+        const packageBuilder = createWorkerFork({});
+        packageBuilder.call({
+            method: 'tsup.watchMeteorVite',
+            params: [],
+        });
+    }
 }
 
 interface BoilerplateData {
