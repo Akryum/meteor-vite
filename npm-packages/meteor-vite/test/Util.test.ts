@@ -13,7 +13,7 @@ describe('Utility functions', () => {
             })
             
             expect(file?.exports).toEqual(TsModules.modules['explicit-relative-path.ts'])
-            expect(file?.fileName).toEqual('explicit-relative-path.ts');
+            expect(file?.modulePath).toEqual('explicit-relative-path.ts');
         });
         
         test('with a file extension', () => {
@@ -24,7 +24,7 @@ describe('Utility functions', () => {
             })
             
             expect(file?.exports).toEqual(TsModules.modules['explicit-relative-path.ts'])
-            expect(file?.fileName).toEqual('explicit-relative-path.ts');
+            expect(file?.modulePath).toEqual('explicit-relative-path.ts');
         })
     })
     
