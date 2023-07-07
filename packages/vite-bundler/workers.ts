@@ -20,6 +20,13 @@ export function createWorkerFork(hooks: WorkerResponseHooks) {
         },
     });
     
+    const hookMethods = Object.keys(hooks) as unknown as (keyof typeof hooks)[];
+    hookMethods.forEach((method) => {
+        const hook = hooks[method];
+        if (typeof hook !== 'function') return;
+        hooks[method] = Meteor.bindEnvironment(hook);
+    })
+    
     child.on('message', (message: WorkerResponse) => {
         const hook = hooks[message.kind];
         
