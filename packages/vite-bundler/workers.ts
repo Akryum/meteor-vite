@@ -20,21 +20,21 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
         },
     });
     
-    const hookMethods = Object.keys(hooks) as unknown as (keyof typeof hooks)[];
+    const hookMethods = Object.keys(hooks) as (keyof typeof hooks)[];
     hookMethods.forEach((method) => {
         const hook = hooks[method];
         if (typeof hook !== 'function') return;
-        hooks[method] = Meteor.bindEnvironment(hook);
+        (hooks[method] as typeof hook) = Meteor.bindEnvironment(hook);
     })
     
-    child.on('message', (message: WorkerResponse) => {
+    child.on('message', (message: WorkerResponse & { data: any }) => {
         const hook = hooks[message.kind];
         
         if (typeof hook !== 'function') {
             return console.warn('Meteor: Unrecognized worker message!', { message });
         }
         
-        return hook(message.data as any);
+        return hook(message.data);
     });
     
     ['exit', 'SIGINT', 'SIGHUP', 'SIGTERM'].forEach(event => {

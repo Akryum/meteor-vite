@@ -31,7 +31,7 @@ if (Meteor.isDevelopment) {
             if (ready) {
                 console.log(`⚡  Meteor-Vite ready for connections!`)
             }
-        }
+        },
     });
     
     worker.call({
