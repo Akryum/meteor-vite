@@ -23,7 +23,7 @@ describe('Validate known exports for mock packages', () => {
                 const mainModuleExports = getMainModule(parsedModule);
                 const parsedPath = Path.parse(mockModule.mainModulePath);
                 const fileName = parsedPath.base as keyof typeof mockModule['modules'];
-                expect(mainModuleExports).toEqual(mockModule.modules[fileName]);
+                expect(mainModuleExports.exports).toEqual(mockModule.modules[fileName]);
             })
             
             describe('Package files', () => {
