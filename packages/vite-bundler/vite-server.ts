@@ -21,7 +21,7 @@ function startViteServer() {
         } else {
             // Vite not ready yet
             // Refresh page after some time
-            data.dynamicBody = `${data.dynamicBody || ""}\n<script>setTimeout(() => location.reload(), 500)</script>\n`
+            data.dynamicBody = `${data.dynamicBody || Assets.getText('loading/dev-server-splash.html')}\n<script>setTimeout(() => location.reload(), 1500)</script>\n`
         }
     })
     
