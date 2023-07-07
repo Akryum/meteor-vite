@@ -1,6 +1,6 @@
 export default function CreateIPCInterface<
     Methods extends {
-        [key in string]: (reply: IPCReply<{ kind: string, data: unknown }>, ...params: [params: any]) => void;
+        [key in string]: (reply: IPCReply<{ readonly kind: string, data: unknown }>, ...params: [params: any]) => void;
     },
 >(methods: Methods) {
     return methods;
