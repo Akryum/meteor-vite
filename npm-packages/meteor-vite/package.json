@@ -8,7 +8,7 @@
   "main": "",
   "exports": {
     "./plugin": "./dist/vite/index.mjs",
-    "./client": "./dist/meteor/client/index.mjs",
+    "./client": "./dist/meteor/client/index.mjs"
   },
   "scripts": {
     "start": "ts-node-dev src/bin/debug/watch-mocks.ts",
