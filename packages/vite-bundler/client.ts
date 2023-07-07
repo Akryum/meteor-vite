@@ -15,15 +15,15 @@ declare global {
 if (Meteor.isDevelopment) {
     Tracker.autorun(function() {
         const viteConfig = getConfig();
-        Meteor.subscribe(ViteConnection.publication, function() {
-            if (this.ready) {
-                console.log('Received Vite configuration', getConfig());
-            }
-        });
+        Meteor.subscribe(ViteConnection.publication);
         
         // Skip reloading if we're already in the app
         if (window.__METEOR_VITE_STARTUP__ !== true) {
             return;
+        }
+        
+        if (viteConfig) {
+            console.log('Received Vite configuration', viteConfig)
         }
         
         if (viteConfig.ready) {
