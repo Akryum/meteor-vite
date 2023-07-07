@@ -21,7 +21,6 @@
       "entry": [
         "./src/bin/worker/index.ts",
         "./src/meteor/client/index.ts",
-        "./src/meteor/server/index.ts",
         "./src/vite/index.ts"
       ],
       "outDir": "dist",
