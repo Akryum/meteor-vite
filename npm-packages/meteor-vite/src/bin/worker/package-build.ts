@@ -8,10 +8,18 @@ import CreateIPCInterface from './IPC/interface';
 
 export default CreateIPCInterface({
     async 'tsup.watchMeteorVite'() {
+        const cwd = Path.join(process.cwd(), '/node_modules/meteor-vite/');
         const child = spawn('meteor', ['npm', 'run', 'watch'], {
             stdio: 'inherit',
             // Relies on a symlink from npm to get into npm package source.
-            cwd: Path.join(process.cwd(), '/node_modules/meteor-vite')
+            cwd,
+            env: {
+                FORCE_COLOR: '3',
+            },
+        });
+        
+        child.on('error', (error) => {
+            throw new Error(`meteor-vite package build worker error: ${error.message}`, { cause: error })
         });
         
         child.on('exit', (code) => {
@@ -19,7 +27,7 @@ export default CreateIPCInterface({
                 return;
             }
             
-            throw new Error('Tsup watcher exited unexpectedly!');
+            throw new Error('TSUp watcher exited unexpectedly!');
         });
     }
 })
