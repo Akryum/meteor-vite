@@ -1,4 +1,4 @@
-import { IPCReply } from './interface';
+import { IPCReply } from './IPC/interface';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import ProductionBuilder from './production-build';
 import ViteServerWorker from './vite-server';

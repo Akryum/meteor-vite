@@ -4,7 +4,7 @@ import { build, resolveConfig } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import MeteorVitePackage from '../../../package.json';
-import CreateIPCInterface, { IPCReply } from './interface';
+import CreateIPCInterface, { IPCReply } from './IPC/interface';
 
 interface BuildOptions {
     viteOutDir: string;

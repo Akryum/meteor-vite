@@ -3,7 +3,7 @@ import Path from 'path';
 import { createServer, ViteDevServer } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
-import CreateIPCInterface, { IPCReply } from './interface';
+import CreateIPCInterface, { IPCReply } from './IPC/interface';
 
 let server: ViteDevServer;
 
