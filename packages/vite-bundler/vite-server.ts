@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
 import type HTTP from 'http'
+import { getConfig, MeteorViteConfig, setConfig, ViteConnection } from './loading/vite-connection-handler';
 import { createWorkerFork } from './workers';
 
 if (Meteor.isDevelopment) {
@@ -8,26 +9,27 @@ if (Meteor.isDevelopment) {
 }
 
 function startViteServer() {
-    const viteConfig = {
+    setConfig({
+        ready: false,
         host: 'localhost',
         port: 0,
         entryFile: '',
-    }
+    });
     
     WebAppInternals.registerBoilerplateDataCallback('meteor-vite', (request: HTTP.IncomingMessage, data: BoilerplateData) => {
-        const { host, port, entryFile } = viteConfig
-        if (entryFile) {
+        const { host, port, entryFile, ready } = getConfig();
+        if (ready) {
             data.dynamicBody = `${data.dynamicBody || ""}\n<script type="module" src="http://${host}:${port}/${entryFile}"></script>\n`
         } else {
             // Vite not ready yet
             // Refresh page after some time
-            data.dynamicBody = `${data.dynamicBody || Assets.getText('loading/dev-server-splash.html')}\n<script>setTimeout(() => location.reload(), 1500)</script>\n`
+            data.dynamicBody = `${data.dynamicBody || ""}\n${Assets.getText('loading/dev-server-splash.html')}`
         }
-    })
+    });
     
     const worker = createWorkerFork({
         viteConfig(config) {
-            Object.assign(viteConfig, config);
+            setConfig(config);
             if (config.port) {
                 console.log(`⚡  Meteor-Vite ready for connections!`)
             }
@@ -38,8 +40,14 @@ function startViteServer() {
         method: 'startViteDevServer',
         params: []
     });
+    
+    Meteor.publish(ViteConnection.publication, () => {
+        return MeteorViteConfig.find(ViteConnection.configSelector);
+    });
 }
 
 interface BoilerplateData {
-    dynamicBody: string;
+    dynamicBody?: string;
+    additionalStaticJs: [contents: string, pathname: string][];
+    inline?: string;
 }
