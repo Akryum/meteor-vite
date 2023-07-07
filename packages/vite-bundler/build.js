@@ -128,11 +128,11 @@ try {
 
     worker.call({
       method: 'buildForProduction',
-      params: {
+      params: [{
         viteOutDir,
         meteorPackagePath,
         payloadMarker,
-      },
+      }],
     })
   }))
 
