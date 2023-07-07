@@ -2,7 +2,7 @@ import PackageJson from '../../../package.json';
 
 /**
  * Validate that the provided stub export key maps to a working export.
- * This is quite important we do. If vite:meteor doesn't properly parse a given package, its exports will just
+ * This is quite important we do. If vite:bundler doesn't properly parse a given package, its exports will just
  * silently fail and remain undefined, without any clear warning or indication as to what's going on.
  *
  * TODO: Attempt to emit a warning directly to the server console from the client. (development environment only)
