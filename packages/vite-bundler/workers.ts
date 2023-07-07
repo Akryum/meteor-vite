@@ -6,7 +6,7 @@ import { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/work
 
 // Use a worker to skip reify and Fibers
 // Use a child process instead of worker to avoid WASM/archived threads error
-export function createWorkerFork(hooks: WorkerResponseHooks) {
+export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     if (!FS.existsSync(workerPath)) {
         throw new Error(`Worker entrypoint doesn't exist! You may need to run "$ npm run build" in the '/npm-packages/meteor-vite' directory`)
     }
