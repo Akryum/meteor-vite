@@ -20,10 +20,18 @@ describe('Validate known exports for mock packages', () => {
             });
             
             it('has the correct mainModule exports', () => {
-                const mainModuleExports = getMainModule(parsedModule);
+                const mainModule = getMainModule(parsedModule);
+                let mockModuleExports: ModuleExport[];
                 const parsedPath = Path.parse(mockModule.mainModulePath);
                 const fileName = parsedPath.base as keyof typeof mockModule['modules'];
-                expect(mainModuleExports.exports).toEqual(mockModule.modules[fileName]);
+                
+                if (mockModule.mainModulePath) {
+                    mockModuleExports = mockModule.modules[fileName]
+                } else {
+                    mockModuleExports = []
+                }
+                
+                expect(mainModule.exports).toEqual(mockModuleExports);
             })
             
             describe('Package files', () => {
