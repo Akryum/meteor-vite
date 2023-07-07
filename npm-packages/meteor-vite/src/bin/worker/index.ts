@@ -1,12 +1,13 @@
 import { IPCReply } from './IPC/interface';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
+import PackageBuild from './package-build';
 import ProductionBuilder from './production-build';
 import ViteServerWorker from './vite-server';
 
 const IpcMethods = {
     ...ViteServerWorker,
     ...ProductionBuilder,
-    // Todo: local builder for npm package
+    ...PackageBuild,
 } as const;
 
 process.on('message', async (message: WorkerMethod) => {

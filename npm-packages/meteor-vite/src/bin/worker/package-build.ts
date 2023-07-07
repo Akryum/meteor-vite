@@ -6,7 +6,7 @@ import { spawn } from 'child_process';
 import Path from 'path';
 import CreateIPCInterface from './IPC/interface';
 
-CreateIPCInterface({
+export default CreateIPCInterface({
     async 'tsup.watchMeteorVite'() {
         const child = spawn('meteor', ['npm', 'run', 'watch'], {
             stdio: 'inherit',
