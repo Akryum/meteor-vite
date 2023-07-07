@@ -8,7 +8,7 @@ import CreateIPCInterface, { IPCReply } from './IPC/interface';
 let server: ViteDevServer;
 
 export default CreateIPCInterface({
-    async startViteDevServer(reply: IPCReply<{
+    async 'vite.startDevServer'(reply: IPCReply<{
         kind: 'viteConfig',
         data: {
             host?: string | boolean;

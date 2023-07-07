@@ -35,7 +35,7 @@ if (Meteor.isDevelopment) {
     });
     
     worker.call({
-        method: 'startViteDevServer',
+        method: 'vite.startDevServer',
         params: []
     });
     
