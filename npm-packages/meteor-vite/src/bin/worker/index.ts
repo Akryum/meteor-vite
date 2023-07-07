@@ -25,7 +25,7 @@ process.on('message', async (message: WorkerMethod) => {
     await callWorkerMethod((response) => {
         validateIpcChannel(process.send);
         process.send(response);
-    }, message.params as any).catch((error) => {
+    }, ...message.params as [params: any]).catch((error) => {
         console.error('Vite: worker process encountered an exception!', error);
     });
 })
