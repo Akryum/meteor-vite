@@ -1,5 +1,5 @@
 import Path from 'path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import { ModuleExport, parseMeteorPackage } from '../src/meteor/package/Parser';
 import Serialize, { getMainModule } from '../src/meteor/package/Serialize';
 import { Check, MeteorJs, MockModule, OstrioCookies, TestLazy, TsModules } from './__mocks';
@@ -34,7 +34,7 @@ describe('Validate known exports for mock packages', () => {
                 expect(mainModule.exports).toEqual(mockModuleExports);
             })
             
-            describe('Package files', () => {
+            describe.runIf(mockModule.modules.length)('Package files', () => {
                 Object.entries(mockModule.modules).forEach(([filePath, mockExports]: [string, ModuleExport[]]) => {
                     describe(filePath, () => {
                         const parsedExports =  parsedModule.modules[filePath];
@@ -48,7 +48,7 @@ describe('Validate known exports for mock packages', () => {
                         });
                         
                         
-                        describe('Named exports', () => {
+                        describe.runIf(namedMockExports?.length)('Named exports', () => {
                             namedMockExports?.forEach((mockExport) => {
                                 it(`export const ${mockExport.name}`, ({ expect }) => {
                                     const expectation = expect.arrayContaining([mockExport])
@@ -57,9 +57,9 @@ describe('Validate known exports for mock packages', () => {
                             })
                         })
                         
-                        describe('Re-exports', () => {
+                        describe.runIf(mockReExports?.length)('Re-exports', () => {
                             mockReExports?.forEach((mockExport) => {
-                                it(Serialize.moduleExport(mockExport, mockModule.packageName), ({ expect }) => {
+                                test(Serialize.moduleExport(mockExport, mockModule.packageName), ({ expect }) => {
                                     expect(parsedExports).toEqual(
                                         expect.arrayContaining([mockExport])
                                     )
