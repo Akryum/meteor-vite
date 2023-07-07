@@ -5,10 +5,6 @@ import { getConfig, MeteorViteConfig, setConfig, ViteConnection } from './loadin
 import { createWorkerFork } from './workers';
 
 if (Meteor.isDevelopment) {
-    startViteServer();
-}
-
-function startViteServer() {
     setConfig({
         ready: false,
         host: 'localhost',
@@ -29,8 +25,9 @@ function startViteServer() {
     
     const worker = createWorkerFork({
         viteConfig(config) {
-            setConfig(config);
-            if (config.port) {
+            const ready = !!config.entryFile;
+            setConfig({ ...config, ready });
+            if (ready) {
                 console.log(`⚡  Meteor-Vite ready for connections!`)
             }
         }
