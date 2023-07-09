@@ -7,6 +7,8 @@ import PackageJson from '../../../package.json';
  *
  * TODO: Attempt to emit a warning directly to the server console from the client. (development environment only)
  * TODO: Import, validate, and re-export wildcard re-exports.
+ * TODO: Read expected 'typeof' value from package exports at the parser and compare against the expected type
+ * rather than just an undefined check.
  */
 export function validateStub({ stubbedPackage, exportKeys, packageName, requestId }: StubValidation) {
     if (settings.stubValidation?.ignorePackages?.includes(packageName)) {
