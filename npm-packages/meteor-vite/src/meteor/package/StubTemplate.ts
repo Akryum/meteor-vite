@@ -1,20 +1,23 @@
-import { PackageSubmodule } from './MeteorPackage';
+import MeteorPackage from './MeteorPackage';
+import { PackageSubmodule } from './PackageSubmodule';
 import Serialize from './Serialize';
 
 export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
 export const TEMPLATE_GLOBAL_KEY = 'g';
 
-export function stubTemplate({ requestId, module }: {
-    module: PackageSubmodule,
+export function stubTemplate({ requestId, submodule, meteorPackage }: {
+    submodule?: PackageSubmodule;
+    meteorPackage: MeteorPackage;
     requestId: string;
 }) {
     const stubId = getStubId();
-    const packageId = module.packageId;
+    const packageId = meteorPackage.packageId;
+    const importPath = submodule?.fullImportPath || packageId;
     const serialized = Serialize.parseModules({
         packageName: packageId,
-        modules: module.exports,
-        packageScope: module.packageExports,
+        modules: submodule?.exports || [],
+        packageScope: meteorPackage.packageScopeExports,
     });
     // language="js"
     return`
@@ -28,7 +31,7 @@ ${serialized.module.top.join('\n')}
 let ${METEOR_STUB_KEY};
 const require = Package.modules.meteorInstall({
   '__vite_stub${stubId}.js': (require, exports, module) => {
-      ${METEOR_STUB_KEY} = require('${module.importPath}');
+      ${METEOR_STUB_KEY} = require('${importPath}');
     
       validateStub({
           requestId: '${requestId}',
