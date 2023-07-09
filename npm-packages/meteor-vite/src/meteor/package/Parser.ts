@@ -20,9 +20,9 @@ interface ParseOptions {
     
     /**
      * Optionally use file content from memory instead of pulling the file content during parser setup.
-     * Used primarily to save a few milliseconds for the Vite plugin requests.
+     * Used primarily to for performance reasons in mock tests and potentially within the Vite plugin load requests.
      *
-     * We still want the filePath property to maintain good traceability for error messages.
+     * We still want the filePath property to maintain good traceability in error messages.
      */
     fileContent?: Promise<string> | string;
 }
