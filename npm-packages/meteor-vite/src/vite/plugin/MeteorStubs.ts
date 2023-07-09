@@ -2,7 +2,6 @@ import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
 import { parseMeteorPackage } from '../../meteor/package/Parser';
-import { getModuleExports } from '../../meteor/package/Serialize';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
 import ViteLoadRequest, { MeteorViteError } from '../ViteLoadRequest';
 
@@ -22,14 +21,13 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
             }
             const timeStarted = Date.now();
             const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
-            const parserResult = await parseMeteorPackage({ fileContent: request.context.file.content }).catch((error) => {
+            const meteorPackage = await parseMeteorPackage({ fileContent: request.context.file.content }).catch((error) => {
                 throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
             });
             
-            const { modulePath, exports } = getModuleExports({
-                importPath: request.requestedModulePath,
-                parserResult,
-            });
+            const { modulePath, exports } = meteorPackage.getExports({
+                importPath: request.requestedModulePath
+            })
             
             
             const template = stubTemplate({
@@ -40,12 +38,12 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
                     exports,
                     modulePath,
                     importPath: `${request.context.file.packageId}${modulePath ? `/${modulePath}` : ''}`,
-                    packageExports: parserResult.packageScopeExports,
+                    packageExports: meteorPackage.packageScopeExports,
                 },
             })
             
             console.log(`${request.context.file.packageId}:`, {
-                parse: parserResult.timeSpent,
+                parse: meteorPackage.meta.timeSpent,
                 overall: `${Date.now() - timeStarted}ms`,
             });
             

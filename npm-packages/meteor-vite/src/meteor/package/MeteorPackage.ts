@@ -8,7 +8,7 @@ export default class MeteorPackage implements ParsedPackage {
     public readonly mainModulePath?: string;
     public readonly packageScopeExports: PackageScopeExports;
     
-    constructor(public readonly parsedPackage: ParsedPackage, meta: { timeSpent: string; }) {
+    constructor(public readonly parsedPackage: ParsedPackage, public readonly meta: { timeSpent: string; }) {
         this.name = parsedPackage.name;
         this.modules = parsedPackage.modules;
         this.packageScopeExports = parsedPackage.packageScopeExports;
