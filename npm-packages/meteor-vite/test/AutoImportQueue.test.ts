@@ -14,7 +14,6 @@ describe('Package auto-imports', async () => {
                 requestId,
                 targetFile,
                 skipRestart: true,
-                write: (content) => viteAutoImportBlock({ id: requestId, content }),
             })
             const newContent = await FS.readFile(targetFile, 'utf-8');
             
@@ -27,7 +26,6 @@ describe('Package auto-imports', async () => {
                 requestId,
                 targetFile,
                 skipRestart: true,
-                write: (content) => viteAutoImportBlock({ id: requestId, content }),
             })
             const newContent = await FS.readFile(targetFile, 'utf-8');
             
