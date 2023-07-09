@@ -70,6 +70,7 @@ function parseSource(code: string) {
             modules: {},
             packageScopeExports: {},
             mainModulePath: '',
+            packageId: '',
         }
         
         traverse(source, {
