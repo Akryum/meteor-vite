@@ -8,7 +8,7 @@ describe('Validate known exports for mock packages', () => {
     const mockPackages: MockModule[] = [Check, TsModules, MeteorJs, TestLazy, OstrioCookies];
     
     mockPackages.forEach((mockModule) => {
-        describe(mockModule.packageName, async () => {
+        describe(`meteor/${mockModule.packageName}`, async () => {
             const parsedPackage = await parseMeteorPackage({
                 filePath: mockModule.filePath,
                 fileContent: mockModule.fileContent,
