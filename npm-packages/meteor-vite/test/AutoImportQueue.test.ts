@@ -42,6 +42,27 @@ describe('Package auto-imports', async () => {
             expect(newContent).toContain(template);
         });
         
+        it('does not add the same import twice', async (context) => {
+            const importString = 'meteor/test:duplicate-import';
+            const matchRegex = /meteor\/test:duplicate-import/;
+            const importStrings = [importString, importString];
+            
+            const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
+                testName: context.task.name,
+                entrypoint: 'withUnrelatedImports',
+            });
+            
+            const importRequests = importStrings.map((importString) => AutoImportQueue.write({
+                importString,
+                meteorEntrypoint,
+                skipRestart: true,
+            }));
+            await Promise.all(importRequests);
+            const newContent = await readContent();
+            
+            expect(newContent.match(matchRegex)?.length).toEqual(1);
+        })
+        
         it('adds import lines one by one during concurrent import requests', async (context) => {
             type AutoImportResult = { index: number, lastResolvedIndex: number, importString: string };
             let lastResolvedIndex = -1;
