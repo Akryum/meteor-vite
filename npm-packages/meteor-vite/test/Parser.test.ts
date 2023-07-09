@@ -9,7 +9,10 @@ describe('Validate known exports for mock packages', () => {
     
     mockPackages.forEach((mockModule) => {
         describe(mockModule.packageName, async () => {
-            const parsedPackage = await parseMeteorPackage({ fileContent: mockModule.fileContent });
+            const parsedPackage = await parseMeteorPackage({
+                filePath: mockModule.filePath,
+                fileContent: mockModule.fileContent,
+            });
             
             it('parsed the package name', () => {
                 expect(parsedPackage.name).toEqual(mockModule.packageName)

@@ -10,9 +10,9 @@ import ViteServer from './vite-server';
     
     const mocks = [Check, TsModules, TestLazy];
     
-    for (const { fileContent } of mocks) {
+    for (const { filePath, fileContent } of mocks) {
         console.log(`${'--'.repeat(64)}`)
-        const result = await parseMeteorPackage({ fileContent: fileContent })
+        const result = await parseMeteorPackage({ filePath, fileContent })
         console.log(result.modules);
     }
     

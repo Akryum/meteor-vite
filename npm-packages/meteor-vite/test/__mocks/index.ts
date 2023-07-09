@@ -110,8 +110,10 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
     packageScopeExports: PackageScopeExports,
     mainModulePath: string;
 }) {
+    const filePath = Path.join(__dirname, `meteor-bundle/${fileName}`);
     return {
-        fileContent: FS.readFile(Path.join(__dirname, `meteor-bundle/${fileName}`), 'utf-8'),
+        filePath,
+        fileContent: FS.readFile(filePath, 'utf-8'),
         meteorPackage: new MeteorPackage({
             name: details.packageName,
             ...details

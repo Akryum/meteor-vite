@@ -21,7 +21,10 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
             }
             const timeStarted = Date.now();
             const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
-            const meteorPackage = await parseMeteorPackage({ fileContent: request.context.file.content }).catch((error) => {
+            const meteorPackage = await parseMeteorPackage({
+                filePath: request.context.file.sourcePath,
+                fileContent: request.context.file.content,
+            }).catch((error) => {
                 throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
             });
             
