@@ -24,7 +24,7 @@ export default new class AutoImportQueue {
             const content = await FS.readFile(meteorEntrypoint, 'utf-8')
             
             if (content.includes(`'${importString}'`)) {
-                Logger.info('Skipping auto-import for "%s" as it already has all the necessary imports', importString);
+                Logger.debug('Skipping auto-import for "%s" as it already has all the necessary imports', importString);
                 return;
             }
             
@@ -73,7 +73,7 @@ export default new class AutoImportQueue {
         }
         
         if (existingRequest) {
-            Logger.warn('Detected multiple import requests for "%s" - skipping import', importString);
+            Logger.debug('Detected multiple import requests for "%s" - skipping import', importString);
             return;
         }
         
@@ -84,7 +84,7 @@ export default new class AutoImportQueue {
         });
         
         if (threadId !== this.workerId) {
-            Logger.warn(
+            Logger.debug(
                 'Detected concurrent auto-import requests for the same module. Waiting on other imports...',
                 { importString, existingRequest, threadId: this.workerId },
             )
