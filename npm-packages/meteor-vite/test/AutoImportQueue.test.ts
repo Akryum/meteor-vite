@@ -7,8 +7,11 @@ import { AutoImportMock } from './__mocks';
 describe('Package auto-imports', async () => {
     describe('With existing, unrelated content', async () => {
         
-        it('can add imports', async () => {
-            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint('withUnrelatedImports');
+        it('can add imports', async (context) => {
+            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint({
+                testName: context.task.name,
+                entrypoint: 'withUnrelatedImports',
+            });
             const importString = 'meteor/test:auto-imports';
             
             await AutoImportQueue.write({
@@ -21,8 +24,11 @@ describe('Package auto-imports', async () => {
             expect(newContent).toContain(`'${importString}'`);
         });
         
-        it('does not modify original content', async () => {
-            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint('withUnrelatedImports');
+        it('does not modify original content', async (context) => {
+            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint({
+                testName: context.task.name,
+                entrypoint: 'withUnrelatedImports',
+            });
             const importString = 'meteor/test:auto-imports';
             
             await AutoImportQueue.write({
@@ -36,12 +42,15 @@ describe('Package auto-imports', async () => {
             expect(newContent).toContain(template);
         });
         
-        it('adds import lines one by one during concurrent import requests', async () => {
+        it('adds import lines one by one during concurrent import requests', async (context) => {
             type AutoImportResult = { index: number, lastResolvedIndex: number, importString: string };
             let lastResolvedIndex = -1;
             const MOCK_IMPORT_COUNT = 25;
             const pendingImports: Promise<AutoImportResult>[] = [];
-            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint('withUnrelatedImports');
+            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint({
+                testName: context.task.name,
+                entrypoint: 'withUnrelatedImports',
+            });
             
             for (let index = 0; index < MOCK_IMPORT_COUNT; index++) {
                 const importString = `meteor/test:auto-imports-${index}`

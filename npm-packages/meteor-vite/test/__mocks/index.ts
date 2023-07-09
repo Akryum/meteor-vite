@@ -132,26 +132,29 @@ export const AutoImportMock = new class {
     public readonly outDir = Path.join(this.sourceDir, '.temp');
     
     protected readonly entrypoints = {
-        empty: this.mockEntrypoint('empty.js'),
-        withExistingAutoImports: this.mockEntrypoint('with-existing-auto-imports.js'),
-        withUnrelatedImports: this.mockEntrypoint('with-unrelated-imports.js'),
+        empty: 'empty.js',
+        withExistingAutoImports: 'with-existing-auto-imports.js',
+        withUnrelatedImports: 'with-unrelated-imports.js',
     }
     
-    public async useEntrypoint(fileName: keyof typeof this.entrypoints) {
-        const meteorEntrypoint = Path.join(this.outDir, `${fileName}.js`);
-        const template = await this.entrypoints[fileName];
-        await FS.mkdir(Path.dirname(meteorEntrypoint), { recursive: true });
-        await FS.writeFile(meteorEntrypoint, template);
+    public async useEntrypoint({ testName, entrypoint }: {
+        testName: string;
+        entrypoint: keyof typeof AutoImportMock.entrypoints,
+    }) {
+        const outPath = Path.join(this.outDir, testName, `${entrypoint}.js`);
+        const sourcePath = Path.join(this.sourceDir, this.entrypoints[entrypoint]);
+        
+        const template = await FS.readFile(sourcePath, 'utf-8');
+        
+        await FS.mkdir(Path.dirname(outPath), { recursive: true });
+        await FS.writeFile(outPath, template);
         
         return {
             template,
-            meteorEntrypoint,
+            meteorEntrypoint: outPath,
         }
     }
     
-    protected async mockEntrypoint(fileName: string) {
-        return FS.readFile(Path.join(this.sourceDir, fileName), 'utf-8');
-    }
 }
 
 interface PrepareMockModule<Modules extends ModuleList> {
