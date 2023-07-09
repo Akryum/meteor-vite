@@ -19,7 +19,7 @@ export default new class AutoImportQueue {
         targetFile: string;
         requestId: string;
         write: (mainModuleContent: string) => string | undefined;
-        skipRestart: boolean; // Skip restart when module is added to Meteor entrypoint
+        skipRestart?: boolean; // Skip restart when module is added to Meteor entrypoint
     }) {
         await this.prepareThread(requestId, async () => {
             const newContent = prepareContent(await FS.readFile(targetFile, 'utf-8'));
