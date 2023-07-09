@@ -315,7 +315,7 @@ class ModuleExportsError extends ParserError {
 
 /**
  * Meteor package-level exports.
- * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
+ * {@link https://docs.meteor.com/api/packagejs.html#PackageAPI-export}
  */
 export type PackageScopeExports = Record<string, string[]>;
 export type ModuleList = { [key in string]: ModuleExport[] };
@@ -366,13 +366,13 @@ export interface ParsedPackage {
     
     /**
      * Path to the package's mainModule as defined with `api.mainModule(...)`
-     * @link https://docs.meteor.com/api/packagejs.html
+     * {@link https://docs.meteor.com/api/packagejs.html}
      */
     mainModulePath?: string;
     
     /**
      * Meteor package-level exports.
-     * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
+     * {@link https://docs.meteor.com/api/packagejs.html#PackageAPI-export}
      */
     packageScopeExports: PackageScopeExports;
 }

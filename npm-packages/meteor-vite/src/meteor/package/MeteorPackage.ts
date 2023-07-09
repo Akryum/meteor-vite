@@ -114,7 +114,7 @@ export interface PackageSubmodule {
     
     /**
      * Meteor package-scope exports.
-     * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
+     * {@link https://docs.meteor.com/api/packagejs.html#PackageAPI-export}
      * @example
      * Package.export('...')
      */
