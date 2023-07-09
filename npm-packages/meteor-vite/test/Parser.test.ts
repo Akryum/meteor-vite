@@ -37,7 +37,7 @@ describe('Validate known exports for mock packages', () => {
                     mockModuleExports = []
                 }
                 
-                expect(mainModule.exports).toEqual(mockModuleExports);
+                expect(mainModule?.exports).toEqual(mockModuleExports);
             })
             
             const exportedModules = Object.entries(mockPackage.modules);
