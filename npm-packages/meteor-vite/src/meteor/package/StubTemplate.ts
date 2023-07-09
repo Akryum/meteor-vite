@@ -5,12 +5,12 @@ export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
 export const TEMPLATE_GLOBAL_KEY = 'g';
 
-export function stubTemplate({ stubId, packageId, requestId, module }: {
-    packageId: string;
+export function stubTemplate({ requestId, module }: {
     module: PackageSubmodule,
-    stubId: number;
     requestId: string;
 }) {
+    const stubId = getStubId();
+    const packageId = module.packageId;
     const serialized = Serialize.parseModules({
         packageName: packageId,
         modules: module.exports,
@@ -71,4 +71,13 @@ ${imports}
 /** End of vite:bundler auto-imports **/
 
 ${content}`;
+}
+
+/**
+ * Unique ID for the next stub.
+ * @type {number}
+ */
+let nextStubId = 0;
+function getStubId() {
+    return nextStubId++;
 }

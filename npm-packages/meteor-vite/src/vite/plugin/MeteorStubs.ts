@@ -5,12 +5,6 @@ import MeteorPackage from '../../meteor/package/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
 import ViteLoadRequest, { MeteorViteError } from '../ViteLoadRequest';
 
-/**
- * Unique ID for the next stub.
- * @type {number}
- */
-let stubId = 0;
-
 export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
     return {
         name: 'meteor-vite: stubs',
@@ -29,8 +23,6 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
             });
             
             const template = stubTemplate({
-                stubId: stubId++,
-                packageId: request.context.file.packageId,
                 requestId: request.context.id,
                 module: meteorPackage.getSubmodule({
                     importPath: request.requestedModulePath,
