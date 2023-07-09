@@ -28,21 +28,14 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
                 throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
             });
             
-            const { modulePath, exports } = meteorPackage.getExports({
-                importPath: request.requestedModulePath
-            })
-            
-            
             const template = stubTemplate({
                 stubId: stubId++,
                 packageId: request.context.file.packageId,
                 requestId: request.context.id,
-                module: {
-                    exports,
-                    modulePath,
-                    importPath: `${request.context.file.packageId}${modulePath ? `/${modulePath}` : ''}`,
-                    packageExports: meteorPackage.packageScopeExports,
-                },
+                module: meteorPackage.getSubmodule({
+                    importPath: request.requestedModulePath,
+                    packageId: request.context.file.packageId,
+                }),
             })
             
             console.log(`${request.context.file.packageId}:`, {

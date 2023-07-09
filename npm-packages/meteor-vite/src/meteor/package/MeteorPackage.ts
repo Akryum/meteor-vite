@@ -1,3 +1,4 @@
+import ViteLoadRequest, { FileRequestData } from '../../vite/ViteLoadRequest';
 import { parseMeteorPackage } from './Parser';
 import type { ModuleList, ParsedPackage, ModuleExport, PackageScopeExports } from './Parser';
 import { isSameModulePath } from './Serialize';
@@ -71,6 +72,21 @@ export default class MeteorPackage implements ParsedPackage {
             exports,
         }
     }
+    
+    public getSubmodule({ packageId, importPath }: GetSubmodule): PackageSubmodule {
+        const { exports, modulePath } = this.getExports({ importPath });
+        return {
+            exports,
+            modulePath,
+            importPath: `${packageId}${modulePath ? `/${modulePath}` : ''}`,
+            packageExports: this.packageScopeExports,
+        }
+    }
+}
+
+interface GetSubmodule {
+    packageId: FileRequestData['packageId'];
+    importPath: ViteLoadRequest['requestedModulePath'];
 }
 
 export interface PackageSubmodule {
