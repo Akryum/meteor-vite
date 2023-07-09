@@ -138,7 +138,7 @@ export const AutoImportMock = new class {
     }
     
     public async useEntrypoint(fileName: keyof typeof this.entrypoints) {
-        const filePath = Path.join(this.outDir, fileName);
+        const filePath = Path.join(this.outDir, `${fileName}.js`);
         const template = await this.entrypoints[fileName];
         await FS.mkdir(Path.dirname(filePath), { recursive: true });
         await FS.writeFile(filePath, template);
