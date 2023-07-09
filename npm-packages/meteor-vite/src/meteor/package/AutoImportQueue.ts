@@ -7,12 +7,10 @@ const wait = (waitMs: number) => new Promise<void>((resolve) => setTimeout(() =>
 
 export default new class AutoImportQueue {
     protected readonly requests = new Map<string, { threadId: string }>();
-    protected readonly queue: Promise<void>[] = [];
-    protected restartTimeout?: ReturnType<typeof setTimeout>
-    
-    protected getPromiseChain() {
-        return Promise.all(this.queue);
-    }
+    protected readonly queue: (() => Promise<void>)[] = [];
+    protected restartTimeout?: ReturnType<typeof setTimeout>;
+    protected workerId?: string;
+    protected currentJob = Promise.resolve();
     
     /**
      * Queues auto-imports for writing to disk to avoid race-conditions with concurrent write requests to the same file.
@@ -65,39 +63,43 @@ export default new class AutoImportQueue {
         })
     }
     
-    protected async prepareThread(requestId: string, run: () => Promise<void>)  {
+    protected async prepareThread(importString: string, run: () => Promise<void>)  {
+        await this.currentJob;
         const threadId = Math.random().toString();
-        this.requests.set(requestId, { threadId });
+        const existingRequest = this.requests.get(importString);
         
-        await this.getPromiseChain();
+        if (!this.workerId) {
+            this.workerId = threadId;
+        }
         
-        this.queue.push(wait(150).then(() => {
-            if (this.hasDuplicate({ threadId, requestId })) {
-                return;
-            }
-            
-            return run();
-        }));
+        if (existingRequest) {
+            Logger.warn('Detected multiple import requests for "%s" - skipping import', importString);
+            return;
+        }
         
-        await this.getPromiseChain()
+        this.requests.set(importString, { threadId: this.workerId });
+        await wait(150);
+        this.queue.push(run);
+        
+        if (threadId !== this.workerId) {
+            Logger.warn(
+                'Detected concurrent auto-import requests for the same module. Waiting on other imports...',
+                { importString, existingRequest, threadId: this.workerId },
+            )
+            return;
+        }
+        
+        Logger.debug('Worker: %s - Processing import queue...', this.workerId);
+        
+        this.currentJob = this.processQueuedImports();
+        await this.currentJob;
     }
     
-    protected hasDuplicate({ threadId, requestId }: { threadId: string, requestId: string }) {
-        const existingRequest = this.requests.get(requestId);
-        
-        if (!existingRequest) {
-            throw new Error('You need to add request to queue before checking for duplicates!');
+    protected async processQueuedImports() {
+        for (const addImport of this.queue) {
+            await addImport();
         }
-        
-        if (threadId !== existingRequest.threadId) {
-            Logger.warn(
-                'Detected multiple auto-import requests for the same threadId. Skipping write request',
-                { requestId, existingRequest, threadId },
-            )
-            return true;
-        }
-        
-        return false;
+        this.workerId = undefined;
     }
     
 }
