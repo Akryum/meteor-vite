@@ -16,7 +16,7 @@ export default class MeteorPackage implements ParsedPackage {
         this.modules = parsedPackage.modules;
         this.packageScopeExports = parsedPackage.packageScopeExports;
         this.mainModulePath = parsedPackage.mainModulePath;
-        this.packageId = `meteor/${this.name}`;
+        this.packageId = parsedPackage.packageId;
     }
     
     public static async parse(...options: Parameters<typeof parseMeteorPackage>) {
