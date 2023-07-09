@@ -147,7 +147,7 @@ function parsePackageScope(node: Node) {
     return packageExport;
 }
 
-function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name'> | undefined {
+function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' | 'packageId'> | undefined {
     if (node.type !== 'CallExpression') return;
     if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
     
@@ -183,6 +183,7 @@ function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name'>
     return {
         name: packageName.key.value,
         modules,
+        packageId: `${meteor.key.value}/${packageName.key.value}`
     };
 }
 
@@ -375,6 +376,13 @@ export interface ParsedPackage {
      * {@link https://docs.meteor.com/api/packagejs.html#PackageAPI-export}
      */
     packageScopeExports: PackageScopeExports;
+    
+    /**
+     * Base Atmosphere package import This is usually where we find the full package content, even for packages
+     * that have multiple entry points.
+     * E.g. `meteor/ostrio:cookies`, `meteor/meteor`, `meteor/vite:bundler`
+     */
+    packageId: string;
 }
 
 

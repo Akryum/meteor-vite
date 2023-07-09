@@ -52,8 +52,7 @@ export default class ViteLoadRequest {
             /**
              * Base Atmosphere package import This is usually where we find the full package content, even for packages
              * that have multiple entry points.
-             * E.g. `meteor/ostrio:cookies`
-             * @type {string}
+             * {@link ParsedPackage.packageId}
              */
             packageId,
             
