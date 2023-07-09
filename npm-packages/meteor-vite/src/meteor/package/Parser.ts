@@ -34,16 +34,17 @@ export async function parseMeteorPackage(parse: ParseOptions) {
     })
 }
 
-function parseSource({ fileContent, filePath }: ParseOptions) {
-    return new Promise<ParsedPackage>(async (resolve, reject) => {
-        const source = parse(await (fileContent || FS.readFile(filePath, 'utf-8')));
+async function parseSource({ fileContent, filePath }: ParseOptions) {
+    const code = await (fileContent || FS.readFile(filePath, 'utf-8'));
+    
+    const result: ParsedPackage = await new Promise<ParsedPackage>((resolve, reject) => {
+        const source = parse(code);
         const result: ParsedPackage = {
             name: '',
             modules: {},
             packageScopeExports: {},
             mainModulePath: '',
         }
-        
         
         traverse(source, {
             enter(node) {
@@ -62,27 +63,32 @@ function parseSource({ fileContent, filePath }: ParseOptions) {
             }
         });
         
-        if (!result.name) {
-            throw new ParserError(`Could not extract name from package in: ${filePath}`);
-        }
-        
-        if (!Object.keys({ ...result.modules, ...result.packageScopeExports }).length) {
-            console.warn(
-                'Unable to retrieve any metadata from the provided source code!',
-                { result }
-            );
-            
-            throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
-        }
-        
         resolve(result);
     }).catch((error: Error) => {
         if (error instanceof ModuleExportsError) {
             console.error(error);
-            throw new Error('Failed to parse source code. See previous error.')
+            throw new ParserError('Failed to parse source code. See previous error.')
         }
         throw error;
     })
+    
+    
+    if (!result.name) {
+        throw new ParserError(`Could not extract name from package in: ${filePath}`);
+    }
+    
+    const moduleExports = Object.keys(result.modules);
+    const packageExports = Object.keys(result.packageScopeExports);
+    
+    if (!moduleExports.length && !packageExports.length) {
+        console.warn(
+            'Unable to retrieve any metadata from the provided source code!',
+            { result }
+        );
+        throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
+    }
+    
+    return result;
 }
 
 function readMainModulePath(node: Node) {
