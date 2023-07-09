@@ -107,12 +107,16 @@ export const OstrioCookies = prepareMock({
 
 function prepareMock<Modules extends ModuleList>({ fileName, ...details }: PrepareMockModule<Modules>): MockModule<Modules> {
     const filePath = Path.join(__dirname, `meteor-bundle/${fileName}`);
+    const packageId = `meteor/${details.packageName}`;
+    
     const mock = {
         fileName,
         filePath,
+        packageId,
         fileContent: FS.readFile(filePath, 'utf-8'),
         meteorPackage: new MeteorPackage({
             name: details.packageName,
+            packageId,
             ...details
         }, { timeSpent: 'none' }),
         ...details,
@@ -133,6 +137,7 @@ interface PrepareMockModule<Modules extends ModuleList> {
 
 interface MockModule<Modules extends ModuleList> extends PrepareMockModule<Modules> {
     filePath: string;
-    fileContent: Promise<string>,
-    meteorPackage: MeteorPackage,
+    fileContent: Promise<string>;
+    meteorPackage: MeteorPackage;
+    packageId: string;
 }
