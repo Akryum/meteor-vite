@@ -59,6 +59,7 @@ describe('Package auto-imports', async () => {
                     meteorEntrypoint,
                     skipRestart: true,
                 }).then(() => {
+                    console.log('Import completed for %s', importString);
                     const result: AutoImportResult = {
                         importString,
                         lastResolvedIndex,
