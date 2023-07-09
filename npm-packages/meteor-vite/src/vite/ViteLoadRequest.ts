@@ -181,6 +181,12 @@ export default class ViteLoadRequest {
     
 }
 
+/**
+ * Load request file metadata. See linked method for documentation for the associated properties.
+ * {@link ViteLoadRequest.loadFileData}
+ */
+export type FileRequestData = ReturnType<typeof ViteLoadRequest['loadFileData']>
+
 interface PreContextRequest {
     id: string;
     pluginSettings: PluginSettings;
