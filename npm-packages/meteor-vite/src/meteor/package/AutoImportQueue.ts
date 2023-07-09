@@ -16,26 +16,26 @@ export default new class AutoImportQueue {
     /**
      * Queues auto-imports for writing to disk to avoid race-conditions with concurrent write requests to the same file.
      */
-    public async write({ requestId, targetFile, skipRestart }: {
-        targetFile: string;
-        requestId: string;
+    public async write({ importString, meteorEntrypoint, skipRestart }: {
+        meteorEntrypoint: string;
+        importString: string;
         skipRestart?: boolean; // Skip restart when module is added to Meteor entrypoint
     }) {
-        await this.prepareThread(requestId, async () => {
-            const content = await FS.readFile(targetFile, 'utf-8')
+        await this.prepareThread(importString, async () => {
+            const content = await FS.readFile(meteorEntrypoint, 'utf-8')
             
-            if (content.includes(`'${requestId}'`)) {
-                console.log('Skipping auto-import for "%s" as it already has all the necessary imports', requestId);
+            if (content.includes(`'${importString}'`)) {
+                console.log('Skipping auto-import for "%s" as it already has all the necessary imports', importString);
                 return;
             }
             
             const newContent = viteAutoImportBlock({
-                id: requestId,
+                id: importString,
                 content,
             });
             
-            await FS.writeFile(targetFile, newContent);
-            console.log('Added auto-import for "%s" - server will restart shortly with an error message', requestId);
+            await FS.writeFile(meteorEntrypoint, newContent);
+            console.log('Added auto-import for "%s" - server will restart shortly with an error message', importString);
             
             if (!skipRestart) {
                 await this.scheduleRestart();

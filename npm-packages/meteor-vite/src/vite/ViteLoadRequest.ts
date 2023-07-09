@@ -152,8 +152,8 @@ export default class ViteLoadRequest {
         // todo: Look into whether we just need an import for the package mainModule or need one for each possible
         //  import path
         await AutoImportQueue.write({
-            targetFile: meteorClientEntryFile,
-            requestId: this.context.id,
+            meteorEntrypoint: meteorClientEntryFile,
+            importString: this.context.id,
         });
     }
     

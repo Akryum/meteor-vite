@@ -11,8 +11,8 @@ describe('Package auto-imports', async () => {
         it('can add imports', async () => {
             const requestId = 'meteor/test:auto-imports';
             await AutoImportQueue.write({
-                requestId,
-                targetFile,
+                importString: requestId,
+                meteorEntrypoint: targetFile,
                 skipRestart: true,
             })
             const newContent = await FS.readFile(targetFile, 'utf-8');
@@ -23,8 +23,8 @@ describe('Package auto-imports', async () => {
         it('does not modify original content', async () => {
             const requestId = 'meteor/test:auto-imports';
             await AutoImportQueue.write({
-                requestId,
-                targetFile,
+                importString: requestId,
+                meteorEntrypoint: targetFile,
                 skipRestart: true,
             })
             const newContent = await FS.readFile(targetFile, 'utf-8');
