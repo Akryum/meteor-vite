@@ -40,7 +40,7 @@ export default new class AutoImportQueue {
                     'Added auto-import for "%s" - server will restart shortly with an error message',
                     importString
                 );
-                await this.scheduleRestart();
+                await this.scheduleRestart(importString);
             } else {
                 Logger.info(
                     'Added auto-import for "%s" - you need to restart the server for the package to be usable',
@@ -50,7 +50,7 @@ export default new class AutoImportQueue {
         });
     }
     
-    protected scheduleRestart() {
+    protected scheduleRestart(forPackage: string) {
         if (this.restartTimeout) {
             clearTimeout(this.restartTimeout);
         }
@@ -58,7 +58,7 @@ export default new class AutoImportQueue {
         return new Promise((resolve, reject) => {
             this.restartTimeout = setTimeout(() => {
                 // Todo: Look into a better way for forcing a restart without needing a potentially confusing error
-                reject(new RefreshNeeded(`Terminating Vite server to load new Meteor modules`));
+                reject(new RefreshNeeded(`Terminating Vite server to load isopacks for "${forPackage}"`));
             }, 2500);
         })
     }
