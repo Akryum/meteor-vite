@@ -272,7 +272,8 @@ function formatExports({ expression, packageName, id }: {
     
 }
 
-class ModuleExportsError extends Error {
+class ParserError extends Error {}
+class ModuleExportsError extends ParserError {
     constructor(
         public readonly message: string,
         public readonly node: Node
