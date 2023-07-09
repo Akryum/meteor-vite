@@ -1,6 +1,6 @@
-import ViteLoadRequest, { FileRequestData } from '../../vite/ViteLoadRequest';
+import { PackageSubmodule } from './PackageSubmodule';
 import { parseMeteorPackage } from './Parser';
-import type { ModuleList, ParsedPackage, ModuleExport, PackageScopeExports } from './Parser';
+import type { ModuleList, ParsedPackage, PackageScopeExports } from './Parser';
 import { isSameModulePath } from './Serialize';
 
 export default class MeteorPackage implements ParsedPackage {
@@ -22,7 +22,7 @@ export default class MeteorPackage implements ParsedPackage {
         return new MeteorPackage(result, { timeSpent });
     }
     
-    public getExports({ importPath }: { importPath?: string }): PackageModuleExports {
+    public getModule({ importPath }: { importPath?: string }): PackageSubmodule | undefined {
         if (!importPath) {
             return this.mainModule;
         }
@@ -42,15 +42,12 @@ export default class MeteorPackage implements ParsedPackage {
         
         const [modulePath, exports] = file;
         
-        return { modulePath, exports };
+        return new PackageSubmodule({ modulePath, exports, meteorPackage: this });
     }
     
-    public get mainModule(): PackageModuleExports {
+    public get mainModule(): PackageSubmodule | undefined {
         if (!this.mainModulePath) {
-            return {
-                modulePath: '',
-                exports: [],
-            }
+            return;
         }
         
         const [
@@ -67,63 +64,10 @@ export default class MeteorPackage implements ParsedPackage {
             throw new Error(`Could not locate '${this.mainModulePath}' in parsed '${this.name}' exports`);
         }
         
-        return {
+        return new PackageSubmodule({
+            meteorPackage: this,
             modulePath,
             exports,
-        }
-    }
-    
-    public getSubmodule({ packageId, importPath }: GetSubmodule): PackageSubmodule {
-        const { exports, modulePath } = this.getExports({ importPath });
-        return {
-            exports,
-            packageId,
-            modulePath,
-            importPath: `${packageId}${modulePath ? `/${modulePath}` : ''}`,
-            packageExports: this.packageScopeExports,
-        }
+        });
     }
 }
-
-interface GetSubmodule {
-    packageId: FileRequestData['packageId'];
-    importPath: ViteLoadRequest['requestedModulePath'];
-}
-
-export interface PackageSubmodule {
-    /**
-     * Full import path for the package's requested module.
-     * @example
-     * 'ostrio:cookies/cookie-store.js'
-     */
-    importPath: string;
-    
-    /**
-     * Relative path from the package name to the module containing these exports.
-     * @example
-     * 'cookie-store.js'
-     */
-    modulePath: string;
-    
-    /**
-     * ESM exports from the Meteor package module.
-     * @example
-     * export const foo = '...'
-     */
-    exports: ModuleExport[];
-    
-    /**
-     * Meteor package-scope exports.
-     * {@link https://docs.meteor.com/api/packagejs.html#PackageAPI-export}
-     * @example
-     * Package.export('...')
-     */
-    packageExports: PackageScopeExports;
-    
-    /**
-     * {@link FileRequestData}
-     */
-    packageId: FileRequestData['packageId'];
-}
-
-type PackageModuleExports = Pick<PackageSubmodule, 'modulePath' | 'exports'>

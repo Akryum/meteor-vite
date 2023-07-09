@@ -6,7 +6,7 @@ describe('MeteorPackage', () => {
         describe('get module exports from path', () => {
             
             test('without a file extension', () => {
-                const file = TsModules.meteorPackage.getExports({
+                const file = TsModules.meteorPackage.getModule({
                     importPath: '/explicit-relative-path'
                 });
                 
@@ -15,7 +15,7 @@ describe('MeteorPackage', () => {
             });
             
             test('with a file extension', () => {
-                const file = TsModules.meteorPackage.getExports({
+                const file = TsModules.meteorPackage.getModule({
                     importPath: '/explicit-relative-path.ts'
                 });
                 
