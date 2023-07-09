@@ -58,15 +58,22 @@ ${serialized.module.bottom.join('\n')}
 `
 }
 
+/**
+ * Find the vite:bundler auto-import notice block to add more imports within it.
+ *
+ * {@link https://regex101.com/r/shKDPE/1}
+ * @type {RegExp}
+ */
+const REGEX_AUTO_IMPORT_BLOCK = /(?<startBlock>\*\*\/[\r\n\s]+)(?<imports>(?:.*[\r\n])*)(?<endBlock>[\s\r\n]*\/\*\* End of vite:bundler auto-imports \*\*\/)/
+
 export function viteAutoImportBlock({ content, id }: { content: string, id: string }) {
-    const importRegex = /(?<startBlock>\*\*\/[\r\n\s]+)(?<imports>.*[\r\n])(?<endBlock>[\s\r\n]*\/\*\* End of vite:bundler auto-imports \*\*\/)/;
-    let { startBlock, imports, endBlock } = content.match(importRegex)?.groups || { imports: '' };
+    let { startBlock, imports, endBlock } = content.match(REGEX_AUTO_IMPORT_BLOCK)?.groups || { imports: '' };
     
     imports += `import '${id}';\n`;
     imports = imports.trim();
     
     if (endBlock && startBlock) {
-        return content.replace(importRegex, `${startBlock.trim()}\n${imports}\n${endBlock.trim()}`);
+        return content.replace(REGEX_AUTO_IMPORT_BLOCK, `${startBlock.trim()}\n${imports}\n${endBlock.trim()}`);
     }
     
     return `/**
