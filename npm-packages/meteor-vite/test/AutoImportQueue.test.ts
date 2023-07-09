@@ -8,7 +8,7 @@ describe('Package auto-imports', async () => {
     describe('With existing, unrelated content', async () => {
         
         it('can add imports', async (context) => {
-            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint({
+            const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
                 testName: context.task.name,
                 entrypoint: 'withUnrelatedImports',
             });
@@ -19,13 +19,13 @@ describe('Package auto-imports', async () => {
                 meteorEntrypoint,
                 skipRestart: true,
             })
-            const newContent = await FS.readFile(meteorEntrypoint, 'utf-8');
+            const newContent = await readContent();
             
             expect(newContent).toContain(`'${importString}'`);
         });
         
         it('does not modify original content', async (context) => {
-            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint({
+            const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
                 testName: context.task.name,
                 entrypoint: 'withUnrelatedImports',
             });
@@ -36,7 +36,7 @@ describe('Package auto-imports', async () => {
                 meteorEntrypoint,
                 skipRestart: true,
             })
-            const newContent = await FS.readFile(meteorEntrypoint, 'utf-8');
+            const newContent = await readContent();
             
             expect(newContent).toContain(`'${importString}'`);
             expect(newContent).toContain(template);
@@ -47,7 +47,7 @@ describe('Package auto-imports', async () => {
             let lastResolvedIndex = -1;
             const MOCK_IMPORT_COUNT = 25;
             const pendingImports: Promise<AutoImportResult>[] = [];
-            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint({
+            const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
                 testName: context.task.name,
                 entrypoint: 'withUnrelatedImports',
             });
@@ -70,7 +70,7 @@ describe('Package auto-imports', async () => {
             }
             
             const imports = await Promise.all(pendingImports);
-            const newContent = await FS.readFile(meteorEntrypoint, 'utf-8');
+            const newContent = await readContent()
             
             expect(lastResolvedIndex).toEqual(MOCK_IMPORT_COUNT - 1);
             

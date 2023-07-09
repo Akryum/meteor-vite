@@ -152,6 +152,7 @@ export const AutoImportMock = new class {
         return {
             template,
             meteorEntrypoint: outPath,
+            readContent: () => FS.readFile(outPath, 'utf-8'),
         }
     }
     
