@@ -37,8 +37,10 @@ describe('Validate known exports for mock packages', () => {
                 expect(mainModule.exports).toEqual(mockModuleExports);
             })
             
-            describe.runIf(mockModule.modules.length)('Package files', () => {
-                Object.entries(mockModule.modules).forEach(([filePath, mockExports]: [string, ModuleExport[]]) => {
+            const exportedModules = Object.entries(mockModule.modules);
+            
+            describe.runIf(exportedModules.length)('Exported modules', () => {
+                exportedModules.forEach(([filePath, mockExports]: [string, ModuleExport[]]) => {
                     describe(filePath, () => {
                         const parsedExports =  parsedPackage.modules[filePath];
                         const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
