@@ -16,8 +16,9 @@ export default class MeteorPackage implements ParsedPackage {
         this.mainModulePath = parsedPackage.mainModulePath;
     }
     
-    public static parse(...options: Parameters<typeof parseMeteorPackage>) {
-        return parseMeteorPackage(...options)
+    public static async parse(...options: Parameters<typeof parseMeteorPackage>) {
+        const { result, timeSpent } = await parseMeteorPackage(...options);
+        return new MeteorPackage(result, { timeSpent });
     }
     
     public getExports({ importPath }: { importPath?: string }): PackageModuleExports {

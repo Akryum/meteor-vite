@@ -55,9 +55,10 @@ export async function parseMeteorPackage({ fileContent, filePath }: ParseOptions
         throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
     }
     
-    return new MeteorPackage(result, {
-        timeSpent: `${Date.now() - startTime}ms`
-    })
+    return {
+        result,
+        timeSpent: `${Date.now() - startTime}ms`,
+    }
 }
 
 
