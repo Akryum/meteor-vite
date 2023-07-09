@@ -5,10 +5,10 @@ import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubT
 
 export default new class Serialize {
     
-    public moduleExport(module: ModuleExport, packageName: string) {
+    public moduleExport(module: ModuleExport, packageId: string) {
         if (module.type === 're-export') {
             let from = module.from?.startsWith('.')
-                       ? `${packageName}/${module.from?.replace(/^[./]+/, '')}`
+                       ? `${packageId}/${module.from?.replace(/^[./]+/, '')}`
                        : module.from;
             
             if (module.name?.trim() === '*' && !module.as) {
@@ -37,8 +37,8 @@ export default new class Serialize {
         return `const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${packageName}']`;
     }
     
-    public parseModules({ packageName, packageScope, modules }: {
-        packageName: string;
+    public parseModules({ packageId, packageScope, modules }: {
+        packageId: string;
         packageScope: PackageScopeExports,
         modules: ModuleExport[]
     }) {
@@ -75,14 +75,14 @@ export default new class Serialize {
             if (module.type === 'global-binding') return;
             if (reservedKeys.has(module.name)) {
                 console.warn('Detected duplicate export keys from module!', {
-                    packageName,
+                    packageId,
                     packageScope,
                     modules
                 })
                 return;
             }
             
-            const line = this.moduleExport(module, packageName);
+            const line = this.moduleExport(module, packageId);
             
             if (module.type === 're-export') {
                 result.module.top.push(line);

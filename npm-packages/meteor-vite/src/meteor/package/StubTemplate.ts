@@ -15,7 +15,7 @@ export function stubTemplate({ requestId, submodule, meteorPackage }: {
     const packageId = meteorPackage.packageId;
     const importPath = submodule?.fullImportPath || packageId;
     const serialized = Serialize.parseModules({
-        packageName: packageId,
+        packageId: packageId,
         modules: submodule?.exports || [],
         packageScope: meteorPackage.packageScopeExports,
     });
