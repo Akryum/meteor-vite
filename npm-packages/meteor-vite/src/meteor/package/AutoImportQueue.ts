@@ -1,5 +1,5 @@
 import FS from 'fs/promises';
-import { MeteorViteError } from '../../vite/ViteLoadRequest';
+import { RefreshNeeded } from '../../vite/ViteLoadRequest';
 
 const wait = (waitMs: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), waitMs));
 
@@ -81,5 +81,3 @@ export default new class AutoImportQueue {
     }
     
 }
-
-class RefreshNeeded extends MeteorViteError {}

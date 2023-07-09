@@ -253,5 +253,5 @@ export class MeteorViteError extends Error {
         return stack?.split(/[\n\r]+/);
     }
 }
-class RefreshNeeded extends MeteorViteError {}
+export class RefreshNeeded extends MeteorViteError {}
 class MeteorViteStubRequestError extends MeteorViteError {}
