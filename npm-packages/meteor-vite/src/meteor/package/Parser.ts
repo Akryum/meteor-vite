@@ -27,17 +27,42 @@ interface ParseOptions {
     fileContent?: Promise<string> | string;
 }
 
-export async function parseMeteorPackage(parse: ParseOptions) {
+export async function parseMeteorPackage({ fileContent, filePath }: ParseOptions) {
     const startTime = Date.now();
-    return new MeteorPackage(await parseSource(parse), {
+    
+    const result: ParsedPackage = await parseSource(
+        await (fileContent || FS.readFile(filePath, 'utf-8'))
+    ).catch((error: Error) => {
+        if (error instanceof ModuleExportsError) {
+            console.error(error);
+            throw new ParserError('Failed to parse source code. See previous error.')
+        }
+        throw error;
+    })
+    
+    if (!result.name) {
+        throw new ParserError(`Could not extract name from package in: ${filePath}`);
+    }
+    
+    const moduleExports = Object.keys(result.modules);
+    const packageExports = Object.keys(result.packageScopeExports);
+    
+    if (!moduleExports.length && !packageExports.length) {
+        console.warn(
+            'Unable to retrieve any metadata from the provided source code!',
+            { result }
+        );
+        throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
+    }
+    
+    return new MeteorPackage(result, {
         timeSpent: `${Date.now() - startTime}ms`
     })
 }
 
-async function parseSource({ fileContent, filePath }: ParseOptions) {
-    const code = await (fileContent || FS.readFile(filePath, 'utf-8'));
-    
-    const result: ParsedPackage = await new Promise<ParsedPackage>((resolve, reject) => {
+
+function parseSource(code: string) {
+    return new Promise<ParsedPackage>((resolve, reject) => {
         const source = parse(code);
         const result: ParsedPackage = {
             name: '',
@@ -64,31 +89,7 @@ async function parseSource({ fileContent, filePath }: ParseOptions) {
         });
         
         resolve(result);
-    }).catch((error: Error) => {
-        if (error instanceof ModuleExportsError) {
-            console.error(error);
-            throw new ParserError('Failed to parse source code. See previous error.')
-        }
-        throw error;
     })
-    
-    
-    if (!result.name) {
-        throw new ParserError(`Could not extract name from package in: ${filePath}`);
-    }
-    
-    const moduleExports = Object.keys(result.modules);
-    const packageExports = Object.keys(result.packageScopeExports);
-    
-    if (!moduleExports.length && !packageExports.length) {
-        console.warn(
-            'Unable to retrieve any metadata from the provided source code!',
-            { result }
-        );
-        throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
-    }
-    
-    return result;
 }
 
 function readMainModulePath(node: Node) {
