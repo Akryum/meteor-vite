@@ -153,7 +153,7 @@ export default class ViteLoadRequest {
         //  import path
         await AutoImportQueue.write({
             meteorEntrypoint: meteorClientEntryFile,
-            importString: this.context.id,
+            importString: this.context.file.packageId,
         });
     }
     
