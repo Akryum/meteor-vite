@@ -127,13 +127,27 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: Prepa
     return mock;
 }
 
+/**
+ * A lazy-loaded package before we've forced an import into the Meteor entrypoint.
+ */
 export const LazyLoadedPackage = new class {
-    protected readonly package = {
-        TestLazy: 'test_lazy.js',
+    public readonly packages = {
+        TestLazy: this.prepareMock({
+            fileName: 'test_lazy.js',
+            packageName: 'test:lazy',
+        }),
     }
     
-    public getContent(packageName: keyof typeof LazyLoadedPackage.package) {
-        return FS.readFile(Path.join(__dirname, 'meteor-bundle/pre-auto-import/', this.package[packageName]), 'utf-8')
+    protected prepareMock(lazyMock: {
+        fileName: string;
+        packageName: string;
+    }) {
+        const filePath = Path.join(__dirname, 'meteor-bundle/pre-auto-import/', lazyMock.fileName);
+        return {
+            filePath,
+            fileContent: FS.readFile(filePath, 'utf-8'),
+            ...lazyMock,
+        }
     }
 }
 
@@ -181,11 +195,4 @@ interface MockModule<Modules extends ModuleList> extends PrepareMockModule<Modul
     fileContent: Promise<string>;
     meteorPackage: MeteorPackage;
     packageId: string;
-}
-
-/**
- * A lazy-loaded package before we've forced an import into the Meteor entrypoint.
- */
-interface LazyLoadedPackage {
-    packageName: string;
 }
