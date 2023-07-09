@@ -35,10 +35,13 @@ export default new class AutoImportQueue {
             });
             
             await FS.writeFile(meteorEntrypoint, newContent);
-            console.log('Added auto-import for "%s" - server will restart shortly with an error message', importString);
             
             if (!skipRestart) {
+                console.log('Added auto-import for "%s" - server will restart shortly with an error message', importString);
                 await this.scheduleRestart();
+            } else {
+                console.log(
+                    'Added auto-import for "%s" - you need to restart the server for the package to be usable', importString);
             }
         });
     }
