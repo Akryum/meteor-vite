@@ -1,9 +1,9 @@
 import Path from 'path';
 import { describe, expect, it, test } from 'vitest';
-import MeteorPackage from '../src/meteor/package/MeteorPackage';
-import { ModuleExport, parseMeteorPackage } from '../src/meteor/package/Parser';
-import Serialize from '../src/meteor/package/Serialize';
-import { AllMockPackages, LazyLoadedPackage } from './__mocks';
+import MeteorPackage from '../../src/meteor/package/MeteorPackage';
+import { ModuleExport, parseMeteorPackage } from '../../src/meteor/package/Parser';
+import Serialize from '../../src/meteor/package/Serialize';
+import { AllMockPackages, LazyLoadedPackage } from '../__mocks';
 
 describe('Validate known exports for mock packages', () => {
     AllMockPackages.forEach((mockPackage) => {
@@ -74,17 +74,3 @@ describe('Validate known exports for mock packages', () => {
         })
     })
 });
-
-describe('Lazy-loaded packages', () => {
-    describe('before being auto-imported', async () => {
-        Object.entries(LazyLoadedPackage.packages).forEach(([key, lazyMock]) => {
-            describe(lazyMock.packageName, async () => {
-                const { result: parserResult } = await parseMeteorPackage(lazyMock);
-                
-                it('parsed the package name', () => {
-                    expect(parserResult.name).toEqual(lazyMock.packageName);
-                })
-            })
-        })
-    })
-})
