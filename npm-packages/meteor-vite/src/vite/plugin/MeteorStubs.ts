@@ -14,7 +14,12 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
                 return;
             }
             const timeStarted = Date.now();
-            const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
+            const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings });
+            
+            if (request.isLazyLoaded) {
+                await request.forceImport();
+            }
+            
             const meteorPackage = await MeteorPackage.parse({
                 filePath: request.context.file.sourcePath,
                 fileContent: request.context.file.content,
