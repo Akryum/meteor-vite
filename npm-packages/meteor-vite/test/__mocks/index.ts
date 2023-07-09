@@ -127,6 +127,16 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: Prepa
     return mock;
 }
 
+export const LazyLoadedPackage = new class {
+    protected readonly package = {
+        TestLazy: 'test_lazy.js',
+    }
+    
+    public getContent(packageName: keyof typeof LazyLoadedPackage.package) {
+        return FS.readFile(Path.join(__dirname, 'meteor-bundle/pre-auto-import/', this.package[packageName]), 'utf-8')
+    }
+}
+
 export const AutoImportMock = new class {
     protected readonly sourceDir = Path.join(__dirname, '/auto-imports/entrypoint');
     public readonly outDir = Path.join(this.sourceDir, '.temp');
@@ -171,4 +181,11 @@ interface MockModule<Modules extends ModuleList> extends PrepareMockModule<Modul
     fileContent: Promise<string>;
     meteorPackage: MeteorPackage;
     packageId: string;
+}
+
+/**
+ * A lazy-loaded package before we've forced an import into the Meteor entrypoint.
+ */
+interface LazyLoadedPackage {
+    packageName: string;
 }
