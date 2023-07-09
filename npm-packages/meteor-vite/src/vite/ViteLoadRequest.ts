@@ -1,6 +1,7 @@
 import { existsSync } from 'fs';
 import FS from 'fs/promises';
 import Path from 'path';
+import AutoImportQueue from '../meteor/package/AutoImportQueue';
 import { isSameModulePath } from '../meteor/package/Serialize';
 import { viteAutoImportBlock } from '../meteor/package/StubTemplate';
 import type { PluginSettings } from './plugin/MeteorStubs';
@@ -148,15 +149,20 @@ export default class ViteLoadRequest {
             throw new MeteorViteError(`meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
         }
         
-        const content = await FS.readFile(meteorClientEntryFile, 'utf8');
-        
-        if (!content.includes(`'${this.context.id}'`)) {
-            await FS.writeFile(meteorClientEntryFile, viteAutoImportBlock({
-                id: this.context.id,
-                content,
-            }));
-            throw new RefreshNeeded(`Auto-imported package ${this.context.id} to ${meteorClientEntryFile}, please reload`)
-        }
+        await AutoImportQueue.write({
+            targetFile: meteorClientEntryFile,
+            requestId: this.context.id,
+            write: (content) => {
+                if (content.includes(`'${this.context.id}'`)) {
+                    return;
+                }
+                
+                return viteAutoImportBlock({
+                    id: this.context.id,
+                    content,
+                });
+            },
+        });
     }
     
     /**
@@ -176,9 +182,8 @@ export default class ViteLoadRequest {
         return this.context.file.importPath;
     }
     
-    
-    
 }
+
 
 /**
  * Load request file metadata. See linked method for documentation for the associated properties.
