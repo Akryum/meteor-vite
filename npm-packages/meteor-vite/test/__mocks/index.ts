@@ -1,6 +1,5 @@
 import FS from 'fs/promises';
 import Path from 'path';
-import MeteorPackage from '../../src/meteor/package/MeteorPackage';
 import { ModuleList, PackageScopeExports } from '../../src/meteor/package/Parser';
 
 export const AllMockPackages: MockModule<ModuleList>[] = [];
@@ -114,11 +113,6 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: Prepa
         filePath,
         packageId,
         fileContent: FS.readFile(filePath, 'utf-8'),
-        meteorPackage: new MeteorPackage({
-            name: details.packageName,
-            packageId,
-            ...details
-        }, { timeSpent: 'none' }),
         ...details,
     }
     
@@ -193,6 +187,5 @@ interface PrepareMockModule<Modules extends ModuleList> {
 interface MockModule<Modules extends ModuleList> extends PrepareMockModule<Modules> {
     filePath: string;
     fileContent: Promise<string>;
-    meteorPackage: MeteorPackage;
     packageId: string;
 }
