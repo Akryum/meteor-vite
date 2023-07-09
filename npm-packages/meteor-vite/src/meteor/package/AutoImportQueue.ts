@@ -15,10 +15,11 @@ export default new class AutoImportQueue {
     /**
      * Queues auto-imports for writing to disk to avoid race-conditions with concurrent write requests to the same file.
      */
-    public async write({ requestId, write: prepareContent, targetFile }: {
+    public async write({ requestId, write: prepareContent, targetFile, skipRestart }: {
         targetFile: string;
         requestId: string;
         write: (mainModuleContent: string) => string | undefined;
+        skipRestart: boolean; // Skip restart when module is added to Meteor entrypoint
     }) {
         await this.prepareThread(requestId, async () => {
             const newContent = prepareContent(await FS.readFile(targetFile, 'utf-8'));
@@ -31,7 +32,9 @@ export default new class AutoImportQueue {
             
             await FS.writeFile(targetFile, newContent);
             console.log('Added auto-import for "%s" - server will restart shortly with an error message', requestId);
-            await this.scheduleRestart();
+            if (!skipRestart) {
+                await this.scheduleRestart();
+            }
         });
     }
     
