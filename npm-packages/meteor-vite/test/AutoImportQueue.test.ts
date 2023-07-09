@@ -61,7 +61,7 @@ describe('Package auto-imports', async () => {
             }
             
             const imports = await Promise.all(pendingImports);
-            const newContent = FS.readFile(meteorEntrypoint, 'utf-8');
+            const newContent = await FS.readFile(meteorEntrypoint, 'utf-8');
             
             expect(lastResolvedIndex).toEqual(MOCK_IMPORT_COUNT - 1);
             
