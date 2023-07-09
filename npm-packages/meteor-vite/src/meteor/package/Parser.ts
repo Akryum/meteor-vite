@@ -18,10 +18,10 @@ export async function parseMeteorPackage(options: { fileContent: string | Promis
 }
 
 function parseSource(code: string) {
-    return new Promise<ParserResult>((resolve, reject) => {
+    return new Promise<ParsedPackage>((resolve, reject) => {
         const source = parse(code);
-        const result: ParserResult = {
-            packageName: '',
+        const result: ParsedPackage = {
+            name: '',
             modules: {},
             packageScopeExports: {},
             mainModulePath: '',
@@ -39,13 +39,13 @@ function parseSource(code: string) {
                 }
                 
                 if (packageScope) {
-                    result.packageName = result.packageName || packageScope.name;
+                    result.name = result.name || packageScope.name;
                     result.packageScopeExports[packageScope.name] = packageScope.exports;
                 }
             }
         });
         
-        if (!result.packageName || !Object.keys({ ...result.modules, ...result.packageScopeExports }).length) {
+        if (!result.name || !Object.keys({ ...result.modules, ...result.packageScopeExports }).length) {
             console.warn(
                 'Unable to retrieve any metadata from the provided source code!',
                 { result }
@@ -321,11 +321,29 @@ export type ModuleExport = {
     as?: string;
 };
 
-export type ParserResult = {
-    packageName: string;
+export interface ParsedPackage {
+    /**
+     * Meteor Atmosphere package name.
+     * E.g. ostrio:cookies, accounts-base, ddp
+     */
+    name: string;
+    
+    /**
+     * List of ES modules included in this package.
+     */
     modules: ModuleList;
+    
+    /**
+     * Path to the package's mainModule as defined with `api.mainModule(...)`
+     * @link https://docs.meteor.com/api/packagejs.html
+     */
+    mainModulePath?: string;
+    
+    /**
+     * Meteor package-level exports.
+     * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
+     */
     packageScopeExports: PackageScopeExports;
-    mainModulePath: string;
 }
 
 

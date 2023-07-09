@@ -1,6 +1,6 @@
 import Path from 'path';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubTemplate';
-import { ModuleExport, PackageScopeExports, ParserResult } from './Parser';
+import { ModuleExport, PackageScopeExports, ParsedPackage } from './Parser';
 
 
 export default new class Serialize {
@@ -131,7 +131,7 @@ export function isSameModulePath(options: {
 
 
 export function getModuleExports({ parserResult, importPath }: {
-    parserResult: ParserResult,
+    parserResult: ParsedPackage,
     importPath?: string
 }): PackageModuleExports {
     if (!importPath) {
@@ -156,7 +156,7 @@ export function getModuleExports({ parserResult, importPath }: {
     return { modulePath, exports };
 }
 
-export function getMainModule(result: ParserResult): PackageModuleExports {
+export function getMainModule(result: ParsedPackage): PackageModuleExports {
     if (!result.mainModulePath) {
         return {
             modulePath: '',
@@ -175,7 +175,7 @@ export function getMainModule(result: ParserResult): PackageModuleExports {
     const exports = result.modules[modulePath];
     
     if (!exports) {
-        throw new Error(`Could not locate '${result.mainModulePath}' in parsed '${result.packageName}' exports`);
+        throw new Error(`Could not locate '${result.mainModulePath}' in parsed '${result.name}' exports`);
     }
     
     return {
