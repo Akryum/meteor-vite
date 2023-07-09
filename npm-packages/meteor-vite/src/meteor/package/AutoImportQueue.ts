@@ -40,9 +40,12 @@ export default new class AutoImportQueue {
             clearTimeout(this.restartTimeout);
         }
         
-        setTimeout(() => {
-            throw new RefreshNeeded(`Terminating Vite server to load new Meteor modules.`);
-        }, 2500);
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                // Todo: Look into a better way for forcing a restart without needing a potentially confusing error
+                reject(new RefreshNeeded(`Terminating Vite server to load new Meteor modules`));
+            }, 2500);
+        })
     }
     
     protected async prepareThread(requestId: string, run: () => Promise<void>)  {
