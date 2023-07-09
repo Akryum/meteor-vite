@@ -127,6 +127,18 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: Prepa
     return mock;
 }
 
+export const AutoImports = {
+    entrypoints: {
+        empty: mockEntrypoint('empty.js'),
+        withExistingAutoImports: mockEntrypoint('with-existing-auto-imports.js'),
+        withUnrelatedImports: mockEntrypoint('with-unrelated-imports.js'),
+    },
+}
+
+function mockEntrypoint(fileName: string) {
+    return FS.readFile(Path.join(__dirname, '/auto-imports', fileName), 'utf-8');
+}
+
 interface PrepareMockModule<Modules extends ModuleList> {
     fileName: string;
     packageName: string;
