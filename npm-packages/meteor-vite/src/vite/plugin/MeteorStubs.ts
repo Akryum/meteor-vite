@@ -24,10 +24,7 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
             
             const template = stubTemplate({
                 requestId: request.context.id,
-                module: meteorPackage.getSubmodule({
-                    importPath: request.requestedModulePath,
-                    packageId: request.context.file.packageId,
-                }),
+                module: meteorPackage.getModule({ importPath: request.requestedModulePath })
             })
             
             console.log(`${request.context.file.packageId}:`, {
