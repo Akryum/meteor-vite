@@ -127,16 +127,26 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: Prepa
     return mock;
 }
 
-export const AutoImports = {
-    entrypoints: {
-        empty: mockEntrypoint('empty.js'),
-        withExistingAutoImports: mockEntrypoint('with-existing-auto-imports.js'),
-        withUnrelatedImports: mockEntrypoint('with-unrelated-imports.js'),
-    },
-}
-
-function mockEntrypoint(fileName: string) {
-    return FS.readFile(Path.join(__dirname, '/auto-imports', fileName), 'utf-8');
+export const AutoImports = new class {
+    protected readonly sourceDir = Path.join(__dirname, '/auto-imports');
+    public readonly outDir = Path.join(this.sourceDir, '.temp');
+    
+    protected readonly entrypoints = {
+        empty: this.mockEntrypoint('empty.js'),
+        withExistingAutoImports: this.mockEntrypoint('with-existing-auto-imports.js'),
+        withUnrelatedImports: this.mockEntrypoint('with-unrelated-imports.js'),
+    }
+    
+    public async useEntrypoint(fileName: keyof typeof this.entrypoints) {
+        const destinationFile = Path.join(this.outDir, fileName);
+        const template = await this.entrypoints[fileName];
+        await FS.mkdir(Path.dirname(destinationFile), { recursive: true });
+        await FS.writeFile(destinationFile, template);
+    }
+    
+    protected async mockEntrypoint(fileName: string) {
+        return FS.readFile(Path.join(__dirname, '/auto-imports', fileName), 'utf-8');
+    }
 }
 
 interface PrepareMockModule<Modules extends ModuleList> {
