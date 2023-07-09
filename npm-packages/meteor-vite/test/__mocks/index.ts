@@ -1,5 +1,6 @@
 import FS from 'fs/promises';
 import Path from 'path';
+import MeteorPackage from '../../src/meteor/package/MeteorPackage';
 import { ModuleList, PackageScopeExports } from '../../src/meteor/package/Parser';
 
 export const TsModules = prepareMock({
@@ -111,6 +112,10 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
 }) {
     return {
         fileContent: FS.readFile(Path.join(__dirname, `meteor-bundle/${fileName}`), 'utf-8'),
+        meteorPackage: new MeteorPackage({
+            name: details.packageName,
+            ...details
+        }, { timeSpent: 'none' }),
         ...details,
     }
 }
