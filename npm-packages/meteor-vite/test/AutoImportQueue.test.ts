@@ -8,11 +8,11 @@ describe('Package auto-imports', async () => {
     describe('With existing, unrelated content', async () => {
         
         it('can add imports', async (context) => {
+            const importString = 'meteor/test:can-add-imports';
             const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
                 testName: context.task.name,
                 entrypoint: 'withUnrelatedImports',
             });
-            const importString = 'meteor/test:auto-imports';
             
             await AutoImportQueue.write({
                 importString,
@@ -25,11 +25,11 @@ describe('Package auto-imports', async () => {
         });
         
         it('does not modify original content', async (context) => {
+            const importString = 'meteor/test:does-not-modify-original-content';
             const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
                 testName: context.task.name,
                 entrypoint: 'withUnrelatedImports',
             });
-            const importString = 'meteor/test:auto-imports';
             
             await AutoImportQueue.write({
                 importString,
