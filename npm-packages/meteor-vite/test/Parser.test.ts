@@ -27,15 +27,9 @@ describe('Validate known exports for mock packages', () => {
             
             it('has the correct mainModule exports', () => {
                 const mainModule = new MeteorPackage(parsedPackage, { timeSpent: 'none' }).mainModule;
-                let mockModuleExports: ModuleExport[];
                 const parsedPath = Path.parse(mockPackage.mainModulePath);
                 const fileName = parsedPath.base as keyof typeof mockPackage['modules'];
-                
-                if (mockPackage.mainModulePath) {
-                    mockModuleExports = mockPackage.modules[fileName]
-                } else {
-                    mockModuleExports = []
-                }
+                const mockModuleExports = mockPackage.modules[fileName];
                 
                 expect(mainModule?.exports).toEqual(mockModuleExports);
             })
