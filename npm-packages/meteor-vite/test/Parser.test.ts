@@ -1,14 +1,14 @@
 import Path from 'path';
 import { describe, expect, it, test } from 'vitest';
 import MeteorPackage from '../src/meteor/package/MeteorPackage';
-import { ModuleExport } from '../src/meteor/package/Parser';
+import { ModuleExport, parseMeteorPackage } from '../src/meteor/package/Parser';
 import Serialize from '../src/meteor/package/Serialize';
 import { AllMockPackages } from './__mocks';
 
 describe('Validate known exports for mock packages', () => {
     AllMockPackages.forEach((mockPackage) => {
         describe(`meteor/${mockPackage.packageName}`, async () => {
-            const parsedPackage = await MeteorPackage.parse({
+            const { result: parsedPackage } = await parseMeteorPackage({
                 filePath: mockPackage.filePath,
                 fileContent: mockPackage.fileContent,
             });
@@ -22,7 +22,7 @@ describe('Validate known exports for mock packages', () => {
             });
             
             it('has the correct mainModule exports', () => {
-                const mainModule = parsedPackage.mainModule;
+                const mainModule = new MeteorPackage(parsedPackage, { timeSpent: 'none' }).mainModule;
                 let mockModuleExports: ModuleExport[];
                 const parsedPath = Path.parse(mockPackage.mainModulePath);
                 const fileName = parsedPath.base as keyof typeof mockPackage['modules'];
