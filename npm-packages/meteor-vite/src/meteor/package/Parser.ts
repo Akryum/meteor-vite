@@ -146,7 +146,7 @@ function parsePackageScope(node: Node) {
     return packageExport;
 }
 
-function parseMeteorInstall(node: Node) {
+function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name'> | undefined {
     if (node.type !== 'CallExpression') return;
     if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
     
@@ -180,7 +180,7 @@ function parseMeteorInstall(node: Node) {
     traverseModules(packageModules, '');
 
     return {
-        packageName: packageName.key.value,
+        name: packageName.key.value,
         modules,
     };
 }
