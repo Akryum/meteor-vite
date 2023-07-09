@@ -77,6 +77,7 @@ export default class MeteorPackage implements ParsedPackage {
         const { exports, modulePath } = this.getExports({ importPath });
         return {
             exports,
+            packageId,
             modulePath,
             importPath: `${packageId}${modulePath ? `/${modulePath}` : ''}`,
             packageExports: this.packageScopeExports,
@@ -118,6 +119,11 @@ export interface PackageSubmodule {
      * Package.export('...')
      */
     packageExports: PackageScopeExports;
+    
+    /**
+     * {@link FileRequestData}
+     */
+    packageId: FileRequestData['packageId'];
 }
 
 type PackageModuleExports = Pick<PackageSubmodule, 'modulePath' | 'exports'>
