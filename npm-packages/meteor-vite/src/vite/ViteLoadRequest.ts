@@ -149,6 +149,8 @@ export default class ViteLoadRequest {
             throw new MeteorViteError(`meteor.mainModule.client file not found: ${meteorClientEntryFile}`)
         }
         
+        // todo: Look into whether we just need an import for the package mainModule or need one for each possible
+        //  import path
         await AutoImportQueue.write({
             targetFile: meteorClientEntryFile,
             requestId: this.context.id,
