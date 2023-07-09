@@ -62,12 +62,17 @@ function parseSource({ fileContent, filePath }: ParseOptions) {
             }
         });
         
-        if (!result.name || !Object.keys({ ...result.modules, ...result.packageScopeExports }).length) {
+        if (!result.name) {
+            throw new ParserError(`Could not extract name from package in: ${filePath}`);
+        }
+        
+        if (!Object.keys({ ...result.modules, ...result.packageScopeExports }).length) {
             console.warn(
                 'Unable to retrieve any metadata from the provided source code!',
                 { result }
             );
-            return reject(new Error('Unable to parse Meteor package!'));
+            
+            throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
         }
         
         resolve(result);
