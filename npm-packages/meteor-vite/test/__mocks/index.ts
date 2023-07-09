@@ -128,7 +128,7 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: Prepa
 }
 
 export const AutoImportMock = new class {
-    protected readonly sourceDir = Path.join(__dirname, '/auto-imports');
+    protected readonly sourceDir = Path.join(__dirname, '/auto-imports/entrypoint');
     public readonly outDir = Path.join(this.sourceDir, '.temp');
     
     protected readonly entrypoints = {
@@ -150,7 +150,7 @@ export const AutoImportMock = new class {
     }
     
     protected async mockEntrypoint(fileName: string) {
-        return FS.readFile(Path.join(__dirname, '/auto-imports', fileName), 'utf-8');
+        return FS.readFile(Path.join(this.sourceDir, fileName), 'utf-8');
     }
 }
 
