@@ -1,7 +1,7 @@
 import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
-import { parseMeteorPackage } from '../../meteor/package/Parser';
+import MeteorPackage from '../../meteor/package/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
 import ViteLoadRequest, { MeteorViteError } from '../ViteLoadRequest';
 
@@ -21,7 +21,7 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
             }
             const timeStarted = Date.now();
             const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings })
-            const meteorPackage = await parseMeteorPackage({
+            const meteorPackage = await MeteorPackage.parse({
                 filePath: request.context.file.sourcePath,
                 fileContent: request.context.file.content,
             }).catch((error) => {

@@ -1,5 +1,5 @@
 import { Check, TestLazy, TsModules } from '../../../test/__mocks';
-import { parseMeteorPackage } from '../../meteor/package/Parser';
+import MeteorPackage from '../../meteor/package/MeteorPackage';
 import ViteServer from './vite-server';
 
 /**
@@ -12,7 +12,7 @@ import ViteServer from './vite-server';
     
     for (const { filePath, fileContent } of mocks) {
         console.log(`${'--'.repeat(64)}`)
-        const result = await parseMeteorPackage({ filePath, fileContent })
+        const result = await MeteorPackage.parse({ filePath, fileContent })
         console.log(result.modules);
     }
     

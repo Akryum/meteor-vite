@@ -1,3 +1,4 @@
+import { parseMeteorPackage } from './Parser';
 import type { ModuleList, ParsedPackage, ModuleExport, PackageScopeExports } from './Parser';
 import { isSameModulePath } from './Serialize';
 
@@ -13,6 +14,10 @@ export default class MeteorPackage implements ParsedPackage {
         this.modules = parsedPackage.modules;
         this.packageScopeExports = parsedPackage.packageScopeExports;
         this.mainModulePath = parsedPackage.mainModulePath;
+    }
+    
+    public static parse(...options: Parameters<typeof parseMeteorPackage>) {
+        return parseMeteorPackage(...options)
     }
     
     public getExports({ importPath }: { importPath?: string }): PackageModuleExports {
