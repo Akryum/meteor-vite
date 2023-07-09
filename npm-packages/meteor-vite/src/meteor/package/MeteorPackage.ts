@@ -9,12 +9,14 @@ export default class MeteorPackage implements ParsedPackage {
     public readonly modules: ModuleList;
     public readonly mainModulePath?: string;
     public readonly packageScopeExports: PackageScopeExports;
+    public readonly packageId: string;
     
     constructor(public readonly parsedPackage: ParsedPackage, public readonly meta: { timeSpent: string; }) {
         this.name = parsedPackage.name;
         this.modules = parsedPackage.modules;
         this.packageScopeExports = parsedPackage.packageScopeExports;
         this.mainModulePath = parsedPackage.mainModulePath;
+        this.packageId = `meteor/${this.name}`;
     }
     
     public static async parse(...options: Parameters<typeof parseMeteorPackage>) {
