@@ -5,17 +5,34 @@ import { viteAutoImportBlock } from '../src/meteor/package/StubTemplate';
 import { AutoImportMock } from './__mocks';
 
 describe('Package auto-imports', async () => {
-    it('can add auto-imports to a module with existing content', async () => {
-        const requestId = 'meteor/test:auto-imports';
-        const { filePath: targetFile } = await AutoImportMock.useEntrypoint('withUnrelatedImports');
-        await AutoImportQueue.write({
-            requestId,
-            targetFile,
-            skipRestart: true,
-            write: (content) => viteAutoImportBlock({ id: requestId, content }),
-        })
-        const newContent = await FS.readFile(targetFile, 'utf-8');
+    describe('With existing, unrelated content', async () => {
+        const { filePath: targetFile, template } = await AutoImportMock.useEntrypoint('withUnrelatedImports');
         
-        expect(newContent).toContain(`'${requestId}'`);
+        it('can add imports', async () => {
+            const requestId = 'meteor/test:auto-imports';
+            await AutoImportQueue.write({
+                requestId,
+                targetFile,
+                skipRestart: true,
+                write: (content) => viteAutoImportBlock({ id: requestId, content }),
+            })
+            const newContent = await FS.readFile(targetFile, 'utf-8');
+            
+            expect(newContent).toContain(`'${requestId}'`);
+        });
+        
+        it('does not modify original content', async () => {
+            const requestId = 'meteor/test:auto-imports';
+            await AutoImportQueue.write({
+                requestId,
+                targetFile,
+                skipRestart: true,
+                write: (content) => viteAutoImportBlock({ id: requestId, content }),
+            })
+            const newContent = await FS.readFile(targetFile, 'utf-8');
+            
+            expect(newContent).toContain(`'${requestId}'`);
+            expect(newContent).toContain(template);
+        })
     })
 })
