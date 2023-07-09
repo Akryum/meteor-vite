@@ -6,30 +6,32 @@ import { AutoImportMock } from './__mocks';
 
 describe('Package auto-imports', async () => {
     describe('With existing, unrelated content', async () => {
-        const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint('withUnrelatedImports');
         
         it('can add imports', async () => {
-            const requestId = 'meteor/test:auto-imports';
+            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint('withUnrelatedImports');
+            const importString = 'meteor/test:auto-imports';
+            
             await AutoImportQueue.write({
-                importString: requestId,
+                importString,
                 meteorEntrypoint,
                 skipRestart: true,
             })
             const newContent = await FS.readFile(meteorEntrypoint, 'utf-8');
             
-            expect(newContent).toContain(`'${requestId}'`);
+            expect(newContent).toContain(`'${importString}'`);
         });
         
         it('does not modify original content', async () => {
-            const requestId = 'meteor/test:auto-imports';
+            const { meteorEntrypoint, template } = await AutoImportMock.useEntrypoint('withUnrelatedImports');
+            const importString = 'meteor/test:auto-imports';
             await AutoImportQueue.write({
-                importString: requestId,
+                importString,
                 meteorEntrypoint,
                 skipRestart: true,
             })
             const newContent = await FS.readFile(meteorEntrypoint, 'utf-8');
             
-            expect(newContent).toContain(`'${requestId}'`);
+            expect(newContent).toContain(`'${importString}'`);
             expect(newContent).toContain(template);
         })
     })
