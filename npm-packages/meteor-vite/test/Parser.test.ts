@@ -2,34 +2,32 @@ import Path from 'path';
 import { describe, expect, it, test } from 'vitest';
 import { ModuleExport, parseMeteorPackage } from '../src/meteor/package/Parser';
 import Serialize from '../src/meteor/package/Serialize';
-import { Check, MeteorJs, MockModule, OstrioCookies, TestLazy, TsModules } from './__mocks';
+import { AllMockPackages } from './__mocks';
 
 describe('Validate known exports for mock packages', () => {
-    const mockPackages: MockModule[] = [Check, TsModules, MeteorJs, TestLazy, OstrioCookies];
-    
-    mockPackages.forEach((mockModule) => {
-        describe(`meteor/${mockModule.packageName}`, async () => {
+    AllMockPackages.forEach((mockPackage) => {
+        describe(`meteor/${mockPackage.packageName}`, async () => {
             const parsedPackage = await parseMeteorPackage({
-                filePath: mockModule.filePath,
-                fileContent: mockModule.fileContent,
+                filePath: mockPackage.filePath,
+                fileContent: mockPackage.fileContent,
             });
             
             it('parsed the package name', () => {
-                expect(parsedPackage.name).toEqual(mockModule.packageName)
+                expect(parsedPackage.name).toEqual(mockPackage.packageName)
             });
             
             it('detected the correct main module path', () => {
-                expect(parsedPackage.mainModulePath).toEqual(mockModule.mainModulePath);
+                expect(parsedPackage.mainModulePath).toEqual(mockPackage.mainModulePath);
             });
             
             it('has the correct mainModule exports', () => {
                 const mainModule = parsedPackage.mainModule;
                 let mockModuleExports: ModuleExport[];
-                const parsedPath = Path.parse(mockModule.mainModulePath);
-                const fileName = parsedPath.base as keyof typeof mockModule['modules'];
+                const parsedPath = Path.parse(mockPackage.mainModulePath);
+                const fileName = parsedPath.base as keyof typeof mockPackage['modules'];
                 
-                if (mockModule.mainModulePath) {
-                    mockModuleExports = mockModule.modules[fileName]
+                if (mockPackage.mainModulePath) {
+                    mockModuleExports = mockPackage.modules[fileName]
                 } else {
                     mockModuleExports = []
                 }
@@ -37,7 +35,7 @@ describe('Validate known exports for mock packages', () => {
                 expect(mainModule.exports).toEqual(mockModuleExports);
             })
             
-            const exportedModules = Object.entries(mockModule.modules);
+            const exportedModules = Object.entries(mockPackage.modules);
             
             describe.runIf(exportedModules.length)('Files', () => {
                 exportedModules.forEach(([filePath, mockExports]: [string, ModuleExport[]]) => {
@@ -64,7 +62,7 @@ describe('Validate known exports for mock packages', () => {
                         
                         describe.runIf(mockReExports?.length)('Re-exports', () => {
                             mockReExports?.forEach((mockExport) => {
-                                test(Serialize.moduleExport(mockExport, mockModule.packageName), ({ expect }) => {
+                                test(Serialize.moduleExport(mockExport, mockPackage.packageName), ({ expect }) => {
                                     expect(parsedExports).toEqual(
                                         expect.arrayContaining([mockExport])
                                     )

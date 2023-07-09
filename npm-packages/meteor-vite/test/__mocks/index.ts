@@ -3,6 +3,8 @@ import Path from 'path';
 import MeteorPackage from '../../src/meteor/package/MeteorPackage';
 import { ModuleList, PackageScopeExports } from '../../src/meteor/package/Parser';
 
+export const AllMockPackages: MockModule<ModuleList>[] = [];
+
 export const TsModules = prepareMock({
     packageName: 'test:ts-modules',
     fileName: 'test_ts-modules.js',
@@ -103,15 +105,10 @@ export const OstrioCookies = prepareMock({
     mainModulePath: '/node_modules/meteor/ostrio:cookies/cookies.js',
 })
 
-function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
-    fileName: string;
-    packageName: string;
-    modules: Modules;
-    packageScopeExports: PackageScopeExports,
-    mainModulePath: string;
-}) {
+function prepareMock<Modules extends ModuleList>({ fileName, ...details }: PrepareMockModule<Modules>): MockModule<Modules> {
     const filePath = Path.join(__dirname, `meteor-bundle/${fileName}`);
-    return {
+    const mock = {
+        fileName,
         filePath,
         fileContent: FS.readFile(filePath, 'utf-8'),
         meteorPackage: new MeteorPackage({
@@ -120,6 +117,22 @@ function prepareMock<Modules extends ModuleList>({ fileName, ...details }: {
         }, { timeSpent: 'none' }),
         ...details,
     }
+    
+    AllMockPackages.push(mock);
+    
+    return mock;
 }
 
-export type MockModule = ReturnType<typeof prepareMock>;
+interface PrepareMockModule<Modules extends ModuleList> {
+    fileName: string;
+    packageName: string;
+    modules: Modules;
+    packageScopeExports: PackageScopeExports,
+    mainModulePath: string;
+}
+
+interface MockModule<Modules extends ModuleList> extends PrepareMockModule<Modules> {
+    filePath: string;
+    fileContent: Promise<string>,
+    meteorPackage: MeteorPackage,
+}
