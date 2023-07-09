@@ -96,7 +96,9 @@ export default defineConfig({
 
 You can then write your code from this entry point and it will be handled by Vite! ⚡️
 
-## Lazy Loaded Meteor Packages
+## Features
+
+### Lazy Loaded Meteor Packages
 Meteor-Vite will automatically detect lazy loaded Meteor packages and import them into your Meteor client's entrypoint.
 This is necessary to ensure that the Vite bundler has access to your Meteor packages.
 
@@ -116,3 +118,33 @@ entrypoint as specified in the `meteor.mainModule.client` field of your `package
 }
 ```
 
+### Stub validation
+Runtime validation at the client is performed for Meteor packages that are compiled by Vite. This is done to avoid a 
+situation where Meteor-Vite incorrectly exports undefined values from a Meteor Package. Which can lead to silently 
+broken Meteor packages.
+
+The validation is done simply through verifying that package exports do not have a `typeof` value of `undefined`.
+If you do have a package that intentionally has `undefined` exports, you can disable the warning message for this 
+package by excluding it in your Meteor settings.json file;
+```json5
+{
+  "public": {
+    "vite": {
+      "bundler": {
+        "stubValidation": {
+          /**
+           * list of packages to ignore export validation for.
+           */
+          "ignorePackages": ["ostrio:cookies"],
+
+          /**
+           * Will only emit warnings in the console instead of throwing an exception that may prevent the client app
+           * from loading.
+           */
+          "warnOnly": true,
+        }
+      }
+    }
+  },
+}
+```

@@ -53,7 +53,7 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
 
 // @ts-ignore
 const meteor = typeof window !== 'undefined' ? window.Meteor : global.Meteor
-const settings: MeteorViteSettings = meteor?.settings?.public?.vite?.meteor || {};
+const settings: MeteorViteSettings = meteor?.settings?.public?.vite?.bundler || {};
 
 class MeteorViteError extends Error {
     public readonly name = '[meteor-vite] ⚠️ Error';
@@ -68,7 +68,7 @@ class MeteorViteError extends Error {
             '',
             `🔓  At your own risk, you can disable validation for the '${packageName}' package`,
             `    This may allow the app to continue running, but can lead to other things breaking.`,
-            `    ${PackageJson.homepage}#disable-stub-validation`,
+            `    ${PackageJson.homepage}#stub-validation`,
         ].join('\n')
         
         super(message);
