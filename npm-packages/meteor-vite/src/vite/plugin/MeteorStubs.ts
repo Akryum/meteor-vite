@@ -42,8 +42,6 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
                 await storeDebugSnippet({ request, stubTemplate: template })
             }
             
-            // todo: detect lazy-loaded package and perform auto-import
-            
            return template;
         }
     }
