@@ -7,18 +7,36 @@ import {
     ObjectProperty, shallowEqual, StringLiteral,
     traverse,
 } from '@babel/types';
+import FS from 'fs/promises';
 import MeteorPackage from './MeteorPackage';
 
-export async function parseMeteorPackage(options: { fileContent: string | Promise<string> }) {
+interface ParseOptions {
+    /**
+     * Absolute file path to the package's JavaScript file.
+     * This file needs to have been built by Meteor.
+     * The package source code is not handled by the parser.
+     */
+    filePath: string;
+    
+    /**
+     * Optionally use file content from memory instead of pulling the file content during parser setup.
+     * Used primarily to save a few milliseconds for the Vite plugin requests.
+     *
+     * We still want the filePath property to maintain good traceability for error messages.
+     */
+    fileContent?: Promise<string> | string;
+}
+
+export async function parseMeteorPackage(parse: ParseOptions) {
     const startTime = Date.now();
-    return new MeteorPackage(await parseSource(await options.fileContent), {
+    return new MeteorPackage(await parseSource(parse), {
         timeSpent: `${Date.now() - startTime}ms`
     })
 }
 
-function parseSource(code: string) {
-    return new Promise<ParsedPackage>((resolve, reject) => {
-        const source = parse(code);
+function parseSource({ fileContent, filePath }: ParseOptions) {
+    return new Promise<ParsedPackage>(async (resolve, reject) => {
+        const source = parse(await (fileContent || FS.readFile(filePath, 'utf-8')));
         const result: ParsedPackage = {
             name: '',
             modules: {},
