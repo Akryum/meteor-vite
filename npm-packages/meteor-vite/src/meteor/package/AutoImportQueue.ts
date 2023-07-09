@@ -63,7 +63,7 @@ export default new class AutoImportQueue {
         })
     }
     
-    protected async prepareThread(importString: string, run: () => Promise<void>)  {
+    protected async prepareThread(importString: string, write: () => Promise<void>)  {
         await this.currentJob;
         const threadId = Math.random().toString();
         const existingRequest = this.requests.get(importString);
@@ -79,8 +79,8 @@ export default new class AutoImportQueue {
         
         this.requests.set(importString, { threadId: this.workerId });
         await wait(150);
-        const waitForQueue = new Promise((resolve, reject) => {
-            this.queue.push(() => run().then(resolve).catch(reject));
+        const writePromise = new Promise((resolve, reject) => {
+            this.queue.push(() => write().then(resolve).catch(reject));
         });
         
         if (threadId !== this.workerId) {
@@ -88,14 +88,13 @@ export default new class AutoImportQueue {
                 'Detected concurrent auto-import requests for the same module. Waiting on other imports...',
                 { importString, existingRequest, threadId: this.workerId },
             )
-            return waitForQueue;
+            return writePromise;
         }
         
         Logger.debug('Worker: %s - Processing import queue...', this.workerId);
         
-        this.currentJob = this.processQueuedImports();
-        await this.currentJob;
-        return waitForQueue;
+        this.currentJob = this.currentJob.then(() => this.processQueuedImports());
+        return writePromise;
     }
     
     protected async processQueuedImports() {
