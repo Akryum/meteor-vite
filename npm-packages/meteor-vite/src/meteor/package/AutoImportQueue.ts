@@ -1,5 +1,6 @@
 import FS from 'fs/promises';
 import { RefreshNeeded } from '../../vite/ViteLoadRequest';
+import { viteAutoImportBlock } from './StubTemplate';
 
 const wait = (waitMs: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), waitMs));
 
@@ -15,23 +16,27 @@ export default new class AutoImportQueue {
     /**
      * Queues auto-imports for writing to disk to avoid race-conditions with concurrent write requests to the same file.
      */
-    public async write({ requestId, write: prepareContent, targetFile, skipRestart }: {
+    public async write({ requestId, targetFile, skipRestart }: {
         targetFile: string;
         requestId: string;
-        write: (mainModuleContent: string) => string | undefined;
         skipRestart?: boolean; // Skip restart when module is added to Meteor entrypoint
     }) {
         await this.prepareThread(requestId, async () => {
-            const newContent = prepareContent(await FS.readFile(targetFile, 'utf-8'));
+            const content = await FS.readFile(targetFile, 'utf-8')
             
-            if (!newContent) {
+            if (content.includes(`'${requestId}'`)) {
                 console.log('Skipping auto-import for "%s" as it already has all the necessary imports', requestId);
                 return;
             }
             
+            const newContent = viteAutoImportBlock({
+                id: requestId,
+                content,
+            });
             
             await FS.writeFile(targetFile, newContent);
             console.log('Added auto-import for "%s" - server will restart shortly with an error message', requestId);
+            
             if (!skipRestart) {
                 await this.scheduleRestart();
             }

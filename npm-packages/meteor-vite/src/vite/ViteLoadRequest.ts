@@ -154,16 +154,6 @@ export default class ViteLoadRequest {
         await AutoImportQueue.write({
             targetFile: meteorClientEntryFile,
             requestId: this.context.id,
-            write: (content) => {
-                if (content.includes(`'${this.context.id}'`)) {
-                    return;
-                }
-                
-                return viteAutoImportBlock({
-                    id: this.context.id,
-                    content,
-                });
-            },
         });
     }
     
