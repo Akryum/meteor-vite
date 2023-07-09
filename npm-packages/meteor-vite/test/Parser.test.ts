@@ -1,7 +1,7 @@
 import Path from 'path';
 import { describe, expect, it, test } from 'vitest';
 import { ModuleExport, parseMeteorPackage } from '../src/meteor/package/Parser';
-import Serialize, { getMainModule } from '../src/meteor/package/Serialize';
+import Serialize from '../src/meteor/package/Serialize';
 import { Check, MeteorJs, MockModule, OstrioCookies, TestLazy, TsModules } from './__mocks';
 
 describe('Validate known exports for mock packages', () => {
@@ -9,18 +9,18 @@ describe('Validate known exports for mock packages', () => {
     
     mockPackages.forEach((mockModule) => {
         describe(mockModule.packageName, async () => {
-            const parsedModule = await parseMeteorPackage({ fileContent: mockModule.fileContent });
+            const parsedPackage = await parseMeteorPackage({ fileContent: mockModule.fileContent });
             
             it('parsed the package name', () => {
-                expect(parsedModule.packageName).toEqual(mockModule.packageName)
+                expect(parsedPackage.name).toEqual(mockModule.packageName)
             });
             
             it('detected the correct main module path', () => {
-                expect(parsedModule.mainModulePath).toEqual(mockModule.mainModulePath);
+                expect(parsedPackage.mainModulePath).toEqual(mockModule.mainModulePath);
             });
             
             it('has the correct mainModule exports', () => {
-                const mainModule = getMainModule(parsedModule);
+                const mainModule = parsedPackage.mainModule;
                 let mockModuleExports: ModuleExport[];
                 const parsedPath = Path.parse(mockModule.mainModulePath);
                 const fileName = parsedPath.base as keyof typeof mockModule['modules'];
@@ -37,13 +37,13 @@ describe('Validate known exports for mock packages', () => {
             describe.runIf(mockModule.modules.length)('Package files', () => {
                 Object.entries(mockModule.modules).forEach(([filePath, mockExports]: [string, ModuleExport[]]) => {
                     describe(filePath, () => {
-                        const parsedExports =  parsedModule.modules[filePath];
+                        const parsedExports =  parsedPackage.modules[filePath];
                         const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
                         const mockReExports = mockExports?.filter(({ type }) => type === 're-export')
                         
                         
                         it('has parsed exports', () => {
-                            expect(Object.keys(parsedModule.modules)).toContain(filePath);
+                            expect(Object.keys(parsedPackage.modules)).toContain(filePath);
                             expect(parsedExports).toBeDefined();
                         });
                         

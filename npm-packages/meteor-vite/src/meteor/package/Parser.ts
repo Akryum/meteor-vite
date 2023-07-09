@@ -7,14 +7,13 @@ import {
     ObjectProperty, shallowEqual, StringLiteral,
     traverse,
 } from '@babel/types';
+import MeteorPackage from './MeteorPackage';
 
-// todo: Yield instance of class that implements the same result format.
 export async function parseMeteorPackage(options: { fileContent: string | Promise<string> }) {
     const startTime = Date.now();
-    return {
-        ...await parseSource(await options.fileContent),
+    return new MeteorPackage(await parseSource(await options.fileContent), {
         timeSpent: `${Date.now() - startTime}ms`
-    }
+    })
 }
 
 function parseSource(code: string) {
