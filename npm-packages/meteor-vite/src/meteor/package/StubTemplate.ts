@@ -6,6 +6,11 @@ export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
 export const TEMPLATE_GLOBAL_KEY = 'g';
 
+/**
+ * Creates a stub for the provided Meteor package and requested submodule.
+ * Used to bridge imports for Meteor code that Vite doesn't have access to, to the below template that acts as a
+ * proxy between Vite and Meteor's modules.
+ */
 export function stubTemplate({ requestId, submodule, meteorPackage }: {
     submodule?: PackageSubmodule;
     meteorPackage: MeteorPackage;
@@ -15,10 +20,11 @@ export function stubTemplate({ requestId, submodule, meteorPackage }: {
     const packageId = meteorPackage.packageId;
     const importPath = submodule?.fullImportPath || packageId;
     const serialized = Serialize.parseModules({
-        packageId: packageId,
+        packageId,
         modules: submodule?.exports || [],
         packageScope: meteorPackage.packageScopeExports,
     });
+    
     // language="js"
     return`
 // requestId: ${requestId}
