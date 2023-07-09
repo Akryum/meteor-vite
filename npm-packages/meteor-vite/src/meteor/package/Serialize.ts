@@ -1,6 +1,6 @@
 import Path from 'path';
+import { ModuleExport, PackageScopeExports } from './Parser';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubTemplate';
-import { ModuleExport, PackageScopeExports, ParsedPackage } from './Parser';
 
 
 export default new class Serialize {
@@ -130,89 +130,3 @@ export function isSameModulePath(options: {
 }
 
 
-export function getModuleExports({ parserResult, importPath }: {
-    parserResult: ParsedPackage,
-    importPath?: string
-}): PackageModuleExports {
-    if (!importPath) {
-        return getMainModule(parserResult);
-    }
-    
-    const entries = Object.entries(parserResult.modules);
-    const file = entries.find(
-        ([fileName, modules]) => isSameModulePath({
-            filepathA: importPath,
-            filepathB: fileName,
-            compareExtensions: false,
-        }),
-    );
-    
-    if (!file) {
-        throw new Error(`Could not locate module for path: ${importPath}!`);
-    }
-    
-    const [modulePath, exports] = file;
-    
-    return { modulePath, exports };
-}
-
-export function getMainModule(result: ParsedPackage): PackageModuleExports {
-    if (!result.mainModulePath) {
-        return {
-            modulePath: '',
-            exports: [],
-        }
-    }
-    
-    const [
-        node_modules,
-        meteor,
-        packageName,
-        ...filePath
-    ] = result.mainModulePath.replace(/^\/+/g, '').split('/');
-    
-    const modulePath = filePath.join('/');
-    const exports = result.modules[modulePath];
-    
-    if (!exports) {
-        throw new Error(`Could not locate '${result.mainModulePath}' in parsed '${result.name}' exports`);
-    }
-    
-    return {
-        modulePath,
-        exports,
-    }
-}
-
-type PackageModuleExports = Pick<PackageSubmodule, 'modulePath' | 'exports'>
-
-export interface PackageSubmodule {
-    /**
-     * Full import path for the package's requested module.
-     * @example
-     * 'ostrio:cookies/cookie-store.js'
-     */
-    importPath: string;
-    
-    /**
-     * Relative path from the package name to the module containing these exports.
-     * @example
-     * 'cookie-store.js'
-     */
-    modulePath: string;
-    
-    /**
-     * ESM exports from the Meteor package module.
-     * @example
-     * export const foo = '...'
-     */
-    exports: ModuleExport[];
-    
-    /**
-     * Meteor package-scope exports.
-     * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
-     * @example
-     * Package.export('...')
-     */
-    packageExports: PackageScopeExports;
-}

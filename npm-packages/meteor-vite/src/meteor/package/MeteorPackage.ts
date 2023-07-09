@@ -1,5 +1,5 @@
-import type { ModuleList, PackageScopeExports, ParsedPackage } from './Parser';
-import { isSameModulePath, PackageSubmodule } from './Serialize';
+import type { ModuleList, ParsedPackage, ModuleExport, PackageScopeExports } from './Parser';
+import { isSameModulePath } from './Serialize';
 
 export default class MeteorPackage implements ParsedPackage {
     
@@ -65,6 +65,37 @@ export default class MeteorPackage implements ParsedPackage {
             exports,
         }
     }
+}
+
+export interface PackageSubmodule {
+    /**
+     * Full import path for the package's requested module.
+     * @example
+     * 'ostrio:cookies/cookie-store.js'
+     */
+    importPath: string;
+    
+    /**
+     * Relative path from the package name to the module containing these exports.
+     * @example
+     * 'cookie-store.js'
+     */
+    modulePath: string;
+    
+    /**
+     * ESM exports from the Meteor package module.
+     * @example
+     * export const foo = '...'
+     */
+    exports: ModuleExport[];
+    
+    /**
+     * Meteor package-scope exports.
+     * @link https://docs.meteor.com/api/packagejs.html#PackageAPI-export
+     * @example
+     * Package.export('...')
+     */
+    packageExports: PackageScopeExports;
 }
 
 type PackageModuleExports = Pick<PackageSubmodule, 'modulePath' | 'exports'>
