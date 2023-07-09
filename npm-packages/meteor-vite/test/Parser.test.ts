@@ -17,6 +17,10 @@ describe('Validate known exports for mock packages', () => {
                 expect(parsedPackage.name).toEqual(mockPackage.packageName)
             });
             
+            it('has a packageId', () => {
+                expect(parsedPackage.packageId).toEqual(mockPackage.packageId);
+            })
+            
             it('detected the correct main module path', () => {
                 expect(parsedPackage.mainModulePath).toEqual(mockPackage.mainModulePath);
             });
