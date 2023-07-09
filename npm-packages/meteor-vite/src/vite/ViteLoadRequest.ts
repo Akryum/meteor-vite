@@ -236,7 +236,7 @@ export class MeteorViteError extends Error {
             messageSuffix = `: ${metadata.cause.message}`
         }
         
-        super(`${messagePrefix}⚡ ${message}${messageSuffix}`);
+        super(`${messagePrefix}⚡  ${message}${messageSuffix}`);
         
         if (metadata?.context) {
             this.viteId = metadata.context.id;
