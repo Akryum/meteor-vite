@@ -1,4 +1,5 @@
 import FS from 'fs/promises';
+import Logger from '../../Logger';
 import { RefreshNeeded } from '../../vite/ViteLoadRequest';
 import { viteAutoImportBlock } from './StubTemplate';
 
@@ -25,7 +26,7 @@ export default new class AutoImportQueue {
             const content = await FS.readFile(meteorEntrypoint, 'utf-8')
             
             if (content.includes(`'${importString}'`)) {
-                console.log('Skipping auto-import for "%s" as it already has all the necessary imports', importString);
+                Logger.info('Skipping auto-import for "%s" as it already has all the necessary imports', importString);
                 return;
             }
             
@@ -37,11 +38,16 @@ export default new class AutoImportQueue {
             await FS.writeFile(meteorEntrypoint, newContent);
             
             if (!skipRestart) {
-                console.log('Added auto-import for "%s" - server will restart shortly with an error message', importString);
+                Logger.info(
+                    'Added auto-import for "%s" - server will restart shortly with an error message',
+                    importString
+                );
                 await this.scheduleRestart();
             } else {
-                console.log(
-                    'Added auto-import for "%s" - you need to restart the server for the package to be usable', importString);
+                Logger.info(
+                    'Added auto-import for "%s" - you need to restart the server for the package to be usable',
+                    importString
+                );
             }
         });
     }
@@ -84,7 +90,7 @@ export default new class AutoImportQueue {
         }
         
         if (threadId !== existingRequest.threadId) {
-            console.warn(
+            Logger.warn(
                 'Detected multiple auto-import requests for the same threadId. Skipping write request',
                 { requestId, existingRequest, threadId },
             )
