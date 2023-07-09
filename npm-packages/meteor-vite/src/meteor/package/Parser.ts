@@ -44,6 +44,10 @@ export async function parseMeteorPackage({ fileContent, filePath }: ParseOptions
         throw new ParserError(`Could not extract name from package in: ${filePath}`);
     }
     
+    if (!result.packageId) {
+        result.packageId = `meteor/${result.name}`;
+    }
+    
     const moduleExports = Object.keys(result.modules);
     const packageExports = Object.keys(result.packageScopeExports);
     
