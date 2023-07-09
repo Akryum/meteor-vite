@@ -53,6 +53,7 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
 
 // @ts-ignore
 const meteor = typeof window !== 'undefined' ? window.Meteor : global.Meteor
+// Todo: Move settings into private namespace
 const settings: MeteorViteSettings = meteor?.settings?.public?.vite?.bundler || {};
 
 class MeteorViteError extends Error {
