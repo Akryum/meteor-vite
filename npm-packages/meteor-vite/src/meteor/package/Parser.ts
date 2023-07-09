@@ -8,6 +8,8 @@ import {
     traverse,
 } from '@babel/types';
 import FS from 'fs/promises';
+import { inspect } from 'util';
+import Logger from '../../Logger';
 import MeteorPackage from './MeteorPackage';
 
 interface ParseOptions {
@@ -29,35 +31,39 @@ interface ParseOptions {
 
 export async function parseMeteorPackage({ fileContent, filePath }: ParseOptions) {
     const startTime = Date.now();
+    const content = (fileContent || FS.readFile(filePath, 'utf-8'))
     
     const result: ParsedPackage = await parseSource(
-        await (fileContent || FS.readFile(filePath, 'utf-8'))
-    ).catch((error: Error) => {
-        if (error instanceof ModuleExportsError) {
-            console.error(error);
-            throw new ParserError('Failed to parse source code. See previous error.')
+        await content,
+    ).then((result) => {
+        if (!result.name) {
+            throw new ParserError(`Could not extract name from package in: ${filePath}`, {
+                parseOptions: { fileContent, filePath },
+            });
+        }
+        
+        if (!result.packageId) {
+            result.packageId = `meteor/${result.name}`;
+        }
+        
+        const moduleExports = Object.keys(result.modules);
+        const packageExports = Object.keys(result.packageScopeExports);
+        
+        if (!moduleExports.length && !packageExports.length) {
+            console.warn(
+                'Unable to retrieve any metadata from the provided source code!',
+                { result }
+            );
+            throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
+        }
+        
+        return result;
+    }).catch(async (error: Error) => {
+        if (error instanceof ParserError) {
+            await error.formatLog();
         }
         throw error;
     })
-    
-    if (!result.name) {
-        throw new ParserError(`Could not extract name from package in: ${filePath}`);
-    }
-    
-    if (!result.packageId) {
-        result.packageId = `meteor/${result.name}`;
-    }
-    
-    const moduleExports = Object.keys(result.modules);
-    const packageExports = Object.keys(result.packageScopeExports);
-    
-    if (!moduleExports.length && !packageExports.length) {
-        console.warn(
-            'Unable to retrieve any metadata from the provided source code!',
-            { result }
-        );
-        throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
-    }
     
     return {
         result,
@@ -309,13 +315,42 @@ function formatExports({ expression, packageName, id }: {
     
 }
 
-class ParserError extends Error {}
+class ParserError extends Error {
+    constructor(
+        public originalMessage: string,
+        public readonly metadata?: {
+            parseOptions?: ParseOptions,
+            node?: Node,
+        }) {
+        super(originalMessage);
+    }
+    
+    protected addMetadataLines(lines: string[]) {
+        const whitespace = '\n    '
+        this.message = `${this.message}${whitespace}${lines.join(whitespace)}\n  ${this.constructor.name}: ${this.originalMessage}`
+    }
+    
+    public async formatLog() {
+        const { parseOptions, node } = await this.metadata || {};
+        if (parseOptions?.fileContent) {
+            this.addMetadataLines([
+                `// File content for: ${this.metadata?.parseOptions?.filePath}`,
+                '',
+                ...(await parseOptions.fileContent).split(/[\r\n]+/)
+            ]);
+        }
+        if (node) {
+            this.addMetadataLines([inspect(node)]);
+        }
+    }
+}
+
 class ModuleExportsError extends ParserError {
     constructor(
         public readonly message: string,
         public readonly node: Node
     ) {
-        super(message);
+        super(message, { node });
     }
 }
 
