@@ -1,4 +1,5 @@
 import Path from 'path';
+import Logger from '../../Logger';
 import { ModuleExport, PackageScopeExports } from './Parser';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubTemplate';
 
@@ -70,11 +71,12 @@ export default new class Serialize {
             });
         });
         
-        modules.forEach((module) => {
-            if (!module.name) return;
-            if (module.type === 'global-binding') return;
-            if (reservedKeys.has(module.name)) {
-                console.warn('Detected duplicate export keys from module!', {
+        modules.forEach((moduleExport) => {
+            if (!moduleExport.name) return;
+            if (moduleExport.type === 'global-binding') return;
+            if (reservedKeys.has(moduleExport.name)) {
+                Logger.warn('Detected duplicate export keys from module!', {
+                    duplicateExport: moduleExport.name,
                     packageId,
                     packageScope,
                     modules
@@ -82,17 +84,17 @@ export default new class Serialize {
                 return;
             }
             
-            const line = this.moduleExport(module, packageId);
+            const line = this.moduleExport(moduleExport, packageId);
             
-            if (module.type === 're-export') {
+            if (moduleExport.type === 're-export') {
                 result.module.top.push(line);
             }
-            if (module.type === 'export') {
+            if (moduleExport.type === 'export') {
                 result.module.bottom.push(line);
-                reservedKeys.add(module.name)
+                reservedKeys.add(moduleExport.name)
             }
             
-            if (module.type === 'export-default') {
+            if (moduleExport.type === 'export-default') {
                 result.module.bottom.push(line);
                 reservedKeys.add('default');
             }
