@@ -47,12 +47,12 @@ changesetStatus.then(async ({ releases }) => {
     packageJsContent = packageJsContent.replace(PACKAGE_VERSION_REGEX, `version: '${release.newVersion}',`);
     await FS.writeFile(meteorPackage.packageJsPath, packageJsContent);
 
-    console.log(`✅  Changed version in package.js from v${currentVersion} to v${release.newVersion}\n\n`);
+    console.log(`✅  Changed version in package.js from v${currentVersion} to v${release.newVersion}\n`);
 
     shell(`git add ${meteorPackage.packageJsPath}`);
     shell(`git commit -m 'Bump ${meteorPackage.releaseName} version to ${release.newVersion}'`);
 
-    console.log(`⚡  Publishing ${meteorPackage.releaseName}...\n`);
+    console.log(`⚡  Publishing ${meteorPackage.releaseName}...`);
 
     shell('meteor publish', {
         async: true,
