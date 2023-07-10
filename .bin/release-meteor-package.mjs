@@ -2,17 +2,19 @@ import { execSync } from 'child_process';
 import Path from 'path';
 import FS from 'fs/promises';
 
+// Assuming this is launched from the repository root for now.
+const repoPath = process.cwd();
 const meteorPackage = {
     releaseName: 'vite-bundler',
-    packageJsPath: Path.join('./packages/vite-bundler/package.js'),
+    packageJsPath: Path.join(repoPath, './packages/vite-bundler/package.js'),
 }
 
 const PACKAGE_VERSION_REGEX = /version:\s*'(?<version>[\d.]+)'\s*,/;
 
-function shell(command) {
+function shell(command, options) {
     console.log(`$ ${command}`);
     console.log(
-        execSync(command).toString('utf-8'),
+        execSync(command, options).toString('utf-8'),
     )
 }
 
@@ -43,4 +45,10 @@ changesetStatus.then(async ({ releases }) => {
 
     shell(`git add ${meteorPackage.packageJsPath}`);
     shell(`git commit -m 'Bump ${meteorPackage.releaseName} version to ${release.newVersion}'`);
-})
+    shell('meteor publish', {
+        cwd: Path.dirname(meteorPackage.packageJsPath),
+        env: {
+            METEOR_SESSION_FILE: process.env.METEOR_SESSION_FILE,
+        }
+    })
+});
