@@ -1,11 +1,7 @@
 {
   "name": "meteor-vite-repository",
   "version": "1.0.0",
-  "description": "See the package [README](./packages/vite-bundler/README.md) for more information.",
   "private": true,
-  "directories": {
-    "example": "examples"
-  },
   "workspaces": [
     "packages/vite-bundler",
     "npm-packages/meteor-vite"
@@ -16,16 +12,9 @@
   "devDependencies": {},
   "scripts": {
     "install:workspace": "cd npm-packages/meteor-vite && meteor npm install",
-    "release": "changeset publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/JorgenVatle/meteor-vite.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/JorgenVatle/meteor-vite/issues"
-  },
-  "homepage": "https://github.com/JorgenVatle/meteor-vite#readme"
+    "version:vite-bundler": "meteor node .bin/release-meteor-package.mjs version",
+    "publish:vite-bundler": "meteor node .bin/release-meteor-package.mjs publish",
+    "version": "npm run version:vite-bundler && changeset version",
+    "release": "npm run publish:vite-bundler && changeset publish"
+  }
 }

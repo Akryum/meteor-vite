@@ -1,6 +1,6 @@
 Package.describe({
-  name: 'jorgenvatle:vite',
-  version: '0.1.10',
+  name: 'jorgenvatle:vite-bundler',
+  version: '1.0.1',
   summary: 'Integrate the Vite.js bundler with Meteor',
   git: 'https://github.com/JorgenVatle/meteor-vite',
   documentation: 'README.md',
@@ -27,7 +27,6 @@ Package.registerBuildPlugin({
 
 Package.onUse(function(api) {
   api.use('isobuild:compiler-plugin@1.0.0')
-  api.use('zodern:types')
   api.use('ecmascript')
   api.use('webapp@1.13.1')
   api.use('typescript@4.0.0')
