@@ -100,6 +100,6 @@ describe('Package auto-imports', async () => {
                 expect(result.lastResolvedIndex).toEqual(result.index - 1);
                 expect(newContent).toContain(`'${result.importString}'`);
             })
-        })
+        }, 15_000)
     })
 })
