@@ -116,8 +116,12 @@ export default class ViteLoadRequest {
         this.isLazyLoaded = false;
         
         context.manifest?.resources.forEach((resource) => {
-            if (resource.fileOptions.mainModule) {
+            const isMainModule = resource.fileOptions.mainModule;
+            if (isMainModule) {
                 this.mainModulePath = resource.path
+            }
+            if (!this.context.file.importPath && isMainModule) {
+                this.isLazyLoaded = resource.fileOptions.lazy;
             }
             if (isSameModulePath({
                 filepathA: this.context.file.importPath || '',
