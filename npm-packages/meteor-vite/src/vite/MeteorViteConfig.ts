@@ -6,7 +6,7 @@ export declare interface MeteorViteConfig extends ResolvedConfig {
          * Vite client entry into Meteor.
          * Not to be confused with your Meteor mainModule.
          *
-         * {@link https://github.com/Akryum/meteor-vite/blob/main/packages/vite-bundler/README.md}
+         * {@link https://github.com/JorgenVatle/meteor-vite/blob/main/packages/vite-bundler/README.md}
          */
         clientEntry?: string;
     };
