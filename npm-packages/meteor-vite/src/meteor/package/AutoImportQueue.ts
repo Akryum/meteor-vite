@@ -7,7 +7,7 @@ const wait = (waitMs: number) => new Promise<void>((resolve) => setTimeout(() =>
 
 export default new class AutoImportQueue {
     protected readonly requests = new Map<string, { threadId: string }>();
-    protected readonly queue: (() => Promise<void>)[] = [];
+    protected queue: (() => Promise<void>)[] = [];
     protected restartTimeout?: ReturnType<typeof setTimeout>;
     protected workerId?: string;
     protected currentJob = Promise.resolve();
@@ -60,12 +60,16 @@ export default new class AutoImportQueue {
             clearTimeout(this.restartTimeout);
         }
         
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
+            let rejected = false;
+            setTimeout(() => !rejected && resolve(), 2550);
+            
             this.restartTimeout = setTimeout(() => {
+                rejected = true;
+                this.requests.clear();
                 
                 // Todo: Look into a better way for forcing a restart without needing a potentially confusing error
-                reject(new RefreshNeeded(`Terminating Vite server to load isopacks for new packages`, this.addedPackages))
-                
+                this.processQueuedImports().then(() => reject(new RefreshNeeded(`Terminating Vite server to load isopacks for new packages`, this.addedPackages)))
             }, 2500);
         })
     }
@@ -107,9 +111,13 @@ export default new class AutoImportQueue {
     }
     
     protected async processQueuedImports() {
-        for (const addImport of this.queue) {
+        const queue = this.queue;
+        this.queue = [];
+        
+        for (const addImport of queue) {
             await addImport();
         }
+        
         this.workerId = undefined;
     }
     
