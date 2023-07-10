@@ -3,11 +3,7 @@ import ViteLoadRequest, { RequestContext } from '../ViteLoadRequest';
 
 export class MeteorViteError extends Error {
     public viteId?: string;
-    constructor(public readonly originalMessage: string, metadata?: {
-        package?: Pick<MeteorPackage, 'packageId'>;
-        context?: Pick<RequestContext, 'id'>;
-        cause?: Error;
-    }) {
+    constructor(public readonly originalMessage: string, metadata?: ErrorMetadata) {
         let messagePrefix = '';
         let messageSuffix = '';
         
@@ -48,4 +44,10 @@ export class MeteorViteError extends Error {
     public async formatLog() {
         // Used for errors that extend MeteorViteError to add additional data to the error's stack trace.
     }
+}
+
+export interface ErrorMetadata {
+    package?: Pick<MeteorPackage, 'packageId'>;
+    context?: Pick<RequestContext, 'id'>;
+    cause?: Error;
 }

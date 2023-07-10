@@ -1,5 +1,7 @@
 import Path from 'path';
+import { inspect } from 'util';
 import Logger from '../../Logger';
+import { ErrorMetadata, MeteorViteError } from '../../vite/error/MeteorViteError';
 import { ModuleExport, PackageScopeExports } from './Parser';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubTemplate';
 
@@ -75,12 +77,16 @@ export default new class Serialize {
             if (!moduleExport.name) return;
             if (moduleExport.type === 'global-binding') return;
             if (reservedKeys.has(moduleExport.name)) {
-                Logger.warn('Detected duplicate export keys from module!', {
-                    duplicateExport: moduleExport.name,
-                    packageId,
-                    packageScope,
-                    modules
-                })
+                Logger.warn(new ConflictingExportKeys('Detected duplicate export keys from module!', {
+                    conflict: {
+                        key: moduleExport.name,
+                        packageScope,
+                        moduleExports: modules,
+                    },
+                    package: {
+                        packageId,
+                    },
+                }));
                 return;
             }
             
@@ -129,6 +135,33 @@ export function isSameModulePath(options: {
     }
     
     return fileA.name === fileB.name;
+}
+
+class ConflictingExportKeys extends MeteorViteError {
+    constructor(
+        message: string,
+        public readonly meta: ErrorMetadata & {
+            conflict: {
+                key: string,
+                moduleExports: ModuleExport[],
+                packageScope: PackageScopeExports
+            }}
+    ) {
+        super(message, meta);
+    }
+    
+    async formatLog() {
+        const { key, packageScope, moduleExports } = this.meta.conflict;
+        this.addMetadataLines([
+            `Conflicting export: ${key}`,
+            '',
+            '// Package exports',
+            inspect(packageScope),
+            '',
+            '// Module exports:',
+            inspect(moduleExports),
+        ])
+    }
 }
 
 
