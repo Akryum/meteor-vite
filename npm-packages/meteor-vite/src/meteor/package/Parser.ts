@@ -125,22 +125,25 @@ function parsePackageScope(node: Node) {
     if (property.type !== 'Identifier') return;
     if (property.name !== '_define') return;
     
-    const packageName = node.arguments[0];
-    const moduleExports = node.arguments[1];
-    let packageScopeExports = node.arguments[2];
-    
-    // Deals with the meteor/meteor core packages that don't use the module system.
-    if (!packageScopeExports && node.arguments[1]?.type === 'ObjectExpression') {
-        packageScopeExports = moduleExports;
+    const args = {
+        packageName: node.arguments[0],
+        moduleExports: node.arguments[1],
+        packageExports: node.arguments[2],
     }
     
-    
-    if (packageName.type !== 'StringLiteral') {
-        throw new ModuleExportsError('Unexpected type received for package name!', packageName);
+    if (args.packageName.type !== 'StringLiteral') {
+        throw new ModuleExportsError('Unexpected type received for package name!', args.packageName);
     }
     
-    const packageExports = {
-        name: packageName.value,
+    /**
+     * Deals with the meteor/meteor core packages that don't use the module system.
+     */
+    if (!args.packageExports && args.moduleExports?.type === 'ObjectExpression') {
+        args.packageExports = args.moduleExports;
+    }
+    
+    const packageExport = {
+        name: args.packageName.value,
         exports: [] as string[],
     };
     
@@ -148,23 +151,23 @@ function parsePackageScope(node: Node) {
      * Module is likely a lazy-loaded package or one that only provides side effects as there are no exports in any
      * form.
      */
-    if (!packageScopeExports && !moduleExports) {
-        return packageExports;
+    if (!args.packageExports) {
+        return packageExport;
     }
     
-    if (packageScopeExports.type !== 'ObjectExpression') {
-        throw new ModuleExportsError('Unexpected type received for package-scope exports argument!', packageScopeExports);
+    if (args.packageExports.type !== 'ObjectExpression') {
+        throw new ModuleExportsError('Unexpected type received for package-scope exports argument!', args.packageExports);
     }
     
-    packageScopeExports.properties.forEach((property) => {
+    args.packageExports.properties.forEach((property) => {
         if (property.type === 'SpreadElement') {
             throw new ModuleExportsError('Unexpected property type received for package-scope exports!', property)
         }
         
-        packageExports.exports.push(propParser.getKey(property));
+        packageExport.exports.push(propParser.getKey(property));
     })
     
-    return packageExports;
+    return packageExport;
 }
 
 function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' | 'packageId'> | undefined {
@@ -199,7 +202,7 @@ function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' 
     
     const modules: ModuleList = {};
     traverseModules(packageModules, '');
-
+    
     return {
         name: packageName.key.value,
         modules,
@@ -216,7 +219,7 @@ function readModuleExports(node: Node) {
     const { callee, arguments: args } = node.expression;
     if (callee.type !== 'MemberExpression') return;
     if (callee.object.type !== 'Identifier') return;
-
+    
     // Meteor's module declaration object. `module.`
     if (!callee.object.name.match(/^module\d*$/)) return;
     if (callee.property.type !== 'Identifier') return;
@@ -231,7 +234,7 @@ function readModuleExports(node: Node) {
         // todo: test for default exports with `export default { foo: 'bar' }`
         return [{ type: 'export-default', name: args[0].name, } satisfies ModuleExport];
     }
-
+    
     // Meteor's module declaration method. `module.export(...)`
     if (methodName === 'export') {
         if (args[0].type !== 'ObjectExpression') throw new ModuleExportsError('Unexpected export type!', exports)
@@ -245,7 +248,7 @@ function readModuleExports(node: Node) {
     if (args[0].type !== 'StringLiteral') throw new ModuleExportsError('Expected string as the first argument in module.link()!', args[0]);
     if (args[1].type !== 'ObjectExpression') throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
     if (args[2].type !== 'NumericLiteral') throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0]);
-
+    
     return formatExports({
         packageName: args[0],
         expression: args[1],
