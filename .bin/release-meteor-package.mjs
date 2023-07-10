@@ -82,5 +82,5 @@ function shell(command, options) {
     throw new Error(`The provided argument is not recognized: "${action}"`)
 
 })().catch((error) => {
-    throw error;
+    console.error(error);
 });
