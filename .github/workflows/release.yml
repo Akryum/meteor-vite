@@ -7,8 +7,6 @@ on:
       - release
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
-env:
-  METEOR_SESSION_FILE_PATH: /opt/.meteor-session.json
 
 jobs:
   release:
@@ -18,29 +16,9 @@ jobs:
       - name: 'Checkout Repo'
         uses: actions/checkout@v3
 
-      - name: 'Configure Git'
-        run: | 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: 'Setup Meteor'
-        uses: meteorengineer/setup-meteor@v1
-        with:
-          meteor-release: '2.10.0'
-
-      - name: 'Install Dependencies'
-        run: meteor npm run install:workspace
-
-      - name: Prepare Meteor Session
-        run: echo '${{ secrets.METEOR_SESSION }}' > ${{ env.METEOR_SESSION_FILE_PATH }}
-
       - name: 'Create Release'
         id: changesets
         uses: changesets/action@v1
-        with:
-          version: meteor npm run version
-          publish: meteor npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          METEOR_SESSION_FILE: ${{ env.METEOR_SESSION_FILE_PATH }}
