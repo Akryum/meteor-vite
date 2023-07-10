@@ -7,6 +7,8 @@ on:
       - release
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
+env:
+  METEOR_SESSION_FILE_PATH: '/opt/.meteor-session.json'
 
 jobs:
   release:
@@ -34,3 +36,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          METEOR_SESSION_FILE: ${{ env.METEOR_SESSION_FILE_PATH }}
