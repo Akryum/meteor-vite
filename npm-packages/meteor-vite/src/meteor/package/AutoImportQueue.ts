@@ -84,12 +84,12 @@ export default new class AutoImportQueue {
         }
         
         this.requests.set(importString, { threadId: this.workerId });
-        await wait(150);
         const writePromise = new Promise((resolve, reject) => {
             this.queue.push(() => write().then(resolve)
                                          .catch(reject)
                                          .finally(() => this.requests.delete(importString)));
         });
+        await wait(150);
         
         if (threadId !== this.workerId) {
             Logger.debug(
