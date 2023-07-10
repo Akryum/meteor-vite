@@ -5,7 +5,7 @@
   "fixed": [],
   "linked": [],
   "access": "public",
-  "baseBranch": "pre-release",
+  "baseBranch": "release",
   "updateInternalDependencies": "patch",
   "ignore": []
 }
