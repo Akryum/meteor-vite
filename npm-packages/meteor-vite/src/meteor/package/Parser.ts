@@ -10,6 +10,7 @@ import {
 import FS from 'fs/promises';
 import { inspect } from 'util';
 import Logger from '../../Logger';
+import { MeteorViteError } from '../../vite/error/MeteorViteError';
 import MeteorPackage from './MeteorPackage';
 
 interface ParseOptions {
@@ -327,7 +328,7 @@ function formatExports({ expression, packageName, id }: {
     
 }
 
-class ParserError extends Error {
+class ParserError extends MeteorViteError {
     constructor(
         public originalMessage: string,
         public readonly metadata?: {
@@ -335,11 +336,6 @@ class ParserError extends Error {
             node?: Node,
         }) {
         super(originalMessage);
-    }
-    
-    protected addMetadataLines(lines: string[]) {
-        const whitespace = '\n    '
-        this.message = `${this.message}${whitespace}${lines.join(whitespace)}\n  ${this.constructor.name}: ${this.originalMessage}`
     }
     
     public async formatLog() {
