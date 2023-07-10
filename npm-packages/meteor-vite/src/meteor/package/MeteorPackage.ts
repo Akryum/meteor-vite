@@ -1,3 +1,4 @@
+import { MeteorViteError } from '../../vite/error/MeteorViteError';
 import { PackageSubmodule } from './PackageSubmodule';
 import { parseMeteorPackage } from './Parser';
 import type { ModuleList, ParsedPackage, PackageScopeExports } from './Parser';
@@ -39,7 +40,7 @@ export default class MeteorPackage implements ParsedPackage {
         );
         
         if (!file) {
-            throw new Error(`Could not locate module for path: ${importPath}!`);
+            throw new MeteorPackageError(`Could not locate module for path: ${importPath}!`, this);
         }
         
         const [modulePath, exports] = file;
@@ -63,7 +64,7 @@ export default class MeteorPackage implements ParsedPackage {
         const exports = this.modules[modulePath];
         
         if (!exports) {
-            throw new Error(`Could not locate '${this.mainModulePath}' in parsed '${this.name}' exports`);
+            throw new MeteorPackageError(`Could not locate '${this.mainModulePath}' in package!`, this);
         }
         
         return new PackageSubmodule({
@@ -71,5 +72,11 @@ export default class MeteorPackage implements ParsedPackage {
             modulePath,
             exports,
         });
+    }
+}
+
+class MeteorPackageError extends MeteorViteError {
+    constructor(message: string, public readonly meteorPackage: MeteorPackage) {
+        super(message, { package: meteorPackage });
     }
 }
