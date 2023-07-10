@@ -4,32 +4,18 @@ import FS from 'fs/promises';
 
 // Assuming this is launched from the repository root for now.
 const repoPath = process.cwd();
+const PACKAGE_VERSION_REGEX = /version:\s*'(?<version>[\d.]+)'\s*,/;
 const meteorPackage = {
     releaseName: 'vite-bundler',
     packageJsPath: Path.join(repoPath, './packages/vite-bundler/package.js'),
 }
 
-const PACKAGE_VERSION_REGEX = /version:\s*'(?<version>[\d.]+)'\s*,/;
+async function applyVersion() {
+    shell('changeset status --output changeset-status.json');
 
-function shell(command, options) {
-    console.log(`$ ${command}`);
-    if (!options?.async) {
-        console.log(execSync(command, options).toString('utf-8'))
-        return;
-    }
-    const [bin, ...args] = command.split(' ');
-    spawn(bin, args, {
-        ...options,
-        stdio: 'inherit',
-    });
-}
+    const { releases } = await FS.readFile('changeset-status.json', 'utf-8')
+                                 .then((content) => JSON.parse(content));
 
-shell('changeset status --output changeset-status.json');
-const changesetStatus = FS.readFile('changeset-status.json', 'utf-8').then((content) => {
-    return JSON.parse(content);
-});
-
-changesetStatus.then(async ({ releases }) => {
     const release = releases.find(({ name }) => meteorPackage.releaseName);
 
     if (!release) {
@@ -51,7 +37,9 @@ changesetStatus.then(async ({ releases }) => {
 
     shell(`git add ${meteorPackage.packageJsPath}`);
     shell(`git commit -m 'Bump ${meteorPackage.releaseName} version to ${release.newVersion}'`);
+}
 
+async function publish() {
     console.log(`⚡  Publishing ${meteorPackage.releaseName}...`);
 
     shell('meteor publish', {
@@ -63,4 +51,34 @@ changesetStatus.then(async ({ releases }) => {
             ...process.env,
         }
     })
+}
+
+function shell(command, options) {
+    console.log(`$ ${command}`);
+    if (!options?.async) {
+        console.log(execSync(command, options).toString('utf-8'))
+        return;
+    }
+    const [bin, ...args] = command.split(' ');
+    spawn(bin, args, {
+        ...options,
+        stdio: 'inherit',
+    });
+}
+
+(async () => {
+    const [binPath, modulePath, action] = process.argv;
+
+    if (action === 'publish') {
+        await publish();
+    }
+
+    if (action === 'version') {
+        await applyVersion();
+    }
+
+    throw new Error(`The provided argument is not recognized: "${action}"`)
+
+})().catch((error) => {
+    throw error;
 });
