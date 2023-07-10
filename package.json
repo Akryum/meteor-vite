@@ -14,6 +14,7 @@
     "install:workspace": "cd npm-packages/meteor-vite && meteor npm install",
     "version:vite-bundler": "meteor node .bin/release-meteor-package.mjs version",
     "publish:vite-bundler": "meteor node .bin/release-meteor-package.mjs publish",
-    "release": "changeset publish"
+    "version": "npm run version:vite-bundler && changeset version",
+    "release": "npm run publish:vite-bundler && changeset publish"
   }
 }
