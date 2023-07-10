@@ -8,6 +8,7 @@ import CreateIPCInterface, { IPCReply } from './IPC/interface';
 let server: ViteDevServer;
 
 export default CreateIPCInterface({
+    // todo: Add reply for triggering a server restart
     async 'vite.startDevServer'(reply: IPCReply<{
         kind: 'viteConfig',
         data: {
