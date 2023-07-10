@@ -58,7 +58,7 @@ changesetStatus.then(async ({ releases }) => {
         async: true,
         cwd: Path.dirname(meteorPackage.packageJsPath),
         env: {
-            METEOR_SESSION_FILE: process.env.METEOR_SESSION_FILE,
+            METEOR_SESSION_FILE: process.env.METEOR_SESSION_FILE, // Authenticate using auth token stored as file.
             VITE_METEOR_DISABLED: 'true', // Prevents vite:bundler from trying to compile itself on publish
             ...process.env,
         }
