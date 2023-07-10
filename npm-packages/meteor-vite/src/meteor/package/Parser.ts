@@ -127,35 +127,44 @@ function parsePackageScope(node: Node) {
     
     const packageName = node.arguments[0];
     const moduleExports = node.arguments[1];
-    let packageExports = node.arguments[2];
+    let packageScopeExports = node.arguments[2];
     
     // Deals with the meteor/meteor core packages that don't use the module system.
-    if (!packageExports && node.arguments[1]?.type === 'ObjectExpression') {
-        packageExports = moduleExports;
+    if (!packageScopeExports && node.arguments[1]?.type === 'ObjectExpression') {
+        packageScopeExports = moduleExports;
     }
     
-    if (!packageExports) return;
-    if (packageExports.type !== 'ObjectExpression') {
-        throw new ModuleExportsError('Unexpected type received for package-scope exports argument!', packageExports);
-    }
+    
     if (packageName.type !== 'StringLiteral') {
         throw new ModuleExportsError('Unexpected type received for package name!', packageName);
     }
     
-    const packageExport = {
+    const packageExports = {
         name: packageName.value,
         exports: [] as string[],
     };
     
-    packageExports.properties.forEach((property) => {
+    /**
+     * Module is likely a lazy-loaded package or one that only provides side effects as there are no exports in any
+     * form.
+     */
+    if (!packageScopeExports && !moduleExports) {
+        return packageExports;
+    }
+    
+    if (packageScopeExports.type !== 'ObjectExpression') {
+        throw new ModuleExportsError('Unexpected type received for package-scope exports argument!', packageScopeExports);
+    }
+    
+    packageScopeExports.properties.forEach((property) => {
         if (property.type === 'SpreadElement') {
             throw new ModuleExportsError('Unexpected property type received for package-scope exports!', property)
         }
         
-        packageExport.exports.push(propParser.getKey(property));
+        packageExports.exports.push(propParser.getKey(property));
     })
     
-    return packageExport;
+    return packageExports;
 }
 
 function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' | 'packageId'> | undefined {
