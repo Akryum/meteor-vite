@@ -1,6 +1,7 @@
 import FS from 'fs/promises';
 import Path from 'path';
 import { Plugin } from 'vite';
+import Logger from '../../Logger';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
 import { MeteorViteError } from '../error/MeteorViteError';
@@ -39,7 +40,7 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
                 meteorPackage,
             })
             
-            console.log(`${request.context.file.packageId}:`, {
+            Logger.debug(`${request.context.file.packageId}:`, {
                 parse: meteorPackage.meta.timeSpent,
                 overall: `${Date.now() - timeStarted}ms`,
             });
