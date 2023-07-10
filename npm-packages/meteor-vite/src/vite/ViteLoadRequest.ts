@@ -215,5 +215,9 @@ interface ManifestResource {
     hash: string
 }
 
-export class RefreshNeeded extends MeteorViteError {}
+export class RefreshNeeded extends MeteorViteError {
+    constructor(message: string, public readonly loadedPackages: string[]) {
+        super(message);
+    }
+}
 class MeteorViteStubRequestError extends MeteorViteError {}

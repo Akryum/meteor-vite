@@ -11,6 +11,7 @@ export default new class AutoImportQueue {
     protected restartTimeout?: ReturnType<typeof setTimeout>;
     protected workerId?: string;
     protected currentJob = Promise.resolve();
+    protected addedPackages: string[] = [];
     
     /**
      * Queues auto-imports for writing to disk to avoid race-conditions with concurrent write requests to the same file.
@@ -20,6 +21,7 @@ export default new class AutoImportQueue {
         importString: string;
         skipRestart?: boolean; // Skip restart when module is added to Meteor entrypoint
     }) {
+        const lastPackageCount = this.addedPackages.length;
         await this.prepareThread(importString, async () => {
             const content = await FS.readFile(meteorEntrypoint, 'utf-8')
             
@@ -34,13 +36,13 @@ export default new class AutoImportQueue {
             });
             
             await FS.writeFile(meteorEntrypoint, newContent);
+            this.addedPackages.push(importString);
             
             if (!skipRestart) {
                 Logger.info(
                     'Added auto-import for "%s" - server will restart shortly with an error message',
                     importString
                 );
-                await this.scheduleRestart(importString);
             } else {
                 Logger.info(
                     'Added auto-import for "%s" - you need to restart the server for the package to be usable',
@@ -48,17 +50,22 @@ export default new class AutoImportQueue {
                 );
             }
         });
+        if (this.addedPackages.length > lastPackageCount) {
+            await this.scheduleRestart()
+        }
     }
     
-    protected scheduleRestart(forPackage: string) {
+    protected scheduleRestart() {
         if (this.restartTimeout) {
             clearTimeout(this.restartTimeout);
         }
         
         return new Promise((resolve, reject) => {
             this.restartTimeout = setTimeout(() => {
+                
                 // Todo: Look into a better way for forcing a restart without needing a potentially confusing error
-                reject(new RefreshNeeded(`Terminating Vite server to load isopacks for "${forPackage}"`));
+                reject(new RefreshNeeded(`Terminating Vite server to load isopacks for new packages`, this.addedPackages))
+                
             }, 2500);
         })
     }
@@ -80,7 +87,9 @@ export default new class AutoImportQueue {
         this.requests.set(importString, { threadId: this.workerId });
         await wait(150);
         const writePromise = new Promise((resolve, reject) => {
-            this.queue.push(() => write().then(resolve).catch(reject));
+            this.queue.push(() => write().then(resolve)
+                                         .catch(reject)
+                                         .finally(() => this.requests.delete(importString)));
         });
         
         if (threadId !== this.workerId) {
