@@ -12,7 +12,7 @@ const PACKAGE_VERSION_REGEX = /version:\s*'(?<version>[\d.]+)'\s*,/;
 function shell(command) {
     console.log(`$ ${command}`);
     console.log(
-        execSync(command),
+        execSync(command).toString('utf-8'),
     )
 }
 
