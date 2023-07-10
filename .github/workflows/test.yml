@@ -18,7 +18,7 @@ jobs:
       - name: 'Setup Node'
         uses: actions/setup-node@v3
       - name: 'Install dependencies'
-        run: cd "$NPM_PACKAGE_PATH" && npm ci
+        run: cd "$NPM_PACKAGE_PATH" && npm i
       - name: 'Run tests'
         run: cd "$NPM_PACKAGE_PATH" && npm test
 
