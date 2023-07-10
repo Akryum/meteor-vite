@@ -48,6 +48,7 @@ if (Meteor.isDevelopment) {
         
         if (viteConfig.ready) {
             console.log('Vite server ready! Reloading client...');
+            // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
             window.location.reload();
             return;
         }
