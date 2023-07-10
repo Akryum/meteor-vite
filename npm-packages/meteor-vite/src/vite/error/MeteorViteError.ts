@@ -3,7 +3,7 @@ import ViteLoadRequest, { RequestContext } from '../ViteLoadRequest';
 
 export class MeteorViteError extends Error {
     public viteId?: string;
-    constructor(public readonly originalMessage: string, metadata?: ErrorMetadata) {
+    constructor(protected readonly originalMessage: string, metadata?: ErrorMetadata) {
         let messagePrefix = '';
         let messageSuffix = '';
         
