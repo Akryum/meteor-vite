@@ -22,7 +22,7 @@ jobs:
           meteor-release: '2.10.0'
 
       - name: Install Dependencies
-        run: meteor npm run install:dependencies
+        run: meteor npm install && meteor npm run install:dependencies
 
       - name: Create Release
         id: changesets

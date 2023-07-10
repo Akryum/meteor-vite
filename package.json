@@ -16,9 +16,7 @@
   "devDependencies": {},
   "scripts": {
     "install:dependencies": "cd npm-packages/meteor-vite && meteor npm install",
-    "publish:vite-bundler": "cd packages/vite-bundler && meteor publish",
-    "publish:meteor-vite": "cd npm-packages/meteor-vite && npm publish",
-    "release": "npm run publish:meteor-vite && npm run publish:vite-bundler"
+    "release": "changeset publish"
   },
   "repository": {
     "type": "git",
