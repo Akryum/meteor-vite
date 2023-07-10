@@ -34,13 +34,12 @@ jobs:
       - name: Prepare Meteor Session
         run: echo '${{ secrets.METEOR_SESSION }}' > ${{ env.METEOR_SESSION_FILE_PATH }}
 
-
       - name: 'Create Release'
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: meteor npm run release
           version: meteor npm run version
+          publish: meteor npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
