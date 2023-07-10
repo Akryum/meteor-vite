@@ -56,7 +56,7 @@ async function publish() {
 function shell(command, options) {
     console.log(`$ ${command}`);
     if (!options?.async) {
-        console.log(execSync(command, options).toString('utf-8'))
+        console.log(execSync(command, { ...options, encoding: 'utf-8' }));
         return;
     }
     const [bin, ...args] = command.split(' ');
