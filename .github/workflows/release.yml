@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - release
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: 'Setup Meteor'
+        uses: meteorengineer/setup-meteor@v1
+        with:
+          meteor-release: '2.10.0'
+
+      - name: Install Dependencies
+        run: |
+          meteor npm install
+          meteor npm run install:workspace
+
+      - name: Create Release
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: meteor npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -14,6 +14,7 @@
     "start": "ts-node-dev src/bin/debug/watch-mocks.ts",
     "watch": "tsup --watch",
     "build": "rm -rf ./dist && tsup-node",
+    "prepare": "npm run build",
     "test": "vitest"
   },
   "tsup": [
