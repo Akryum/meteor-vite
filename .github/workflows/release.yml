@@ -16,6 +16,11 @@ jobs:
       - name: 'Checkout Repo'
         uses: actions/checkout@v3
 
+      - name: 'Setup Meteor'
+        uses: meteorengineer/setup-meteor@v1
+        with:
+          meteor-release: '2.10.0'
+
       - name: Setup Node.js 16
         uses: actions/setup-node@v3
         with:
