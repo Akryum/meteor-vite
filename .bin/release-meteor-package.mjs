@@ -17,8 +17,11 @@ function shell(command) {
 }
 
 shell('changeset status --output changeset-status.json');
+const changesetStatus = FS.readFile('changeset-status.json', 'utf-8').then((content) => {
+    return JSON.parse(content);
+});
 
-const status = import('../changeset-status.json').then(async ({ releases }) => {
+changesetStatus.then(async ({ releases }) => {
     const release = releases.find(({ name }) => meteorPackage.releaseName);
 
     if (!release) {
