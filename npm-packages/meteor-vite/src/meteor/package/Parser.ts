@@ -34,37 +34,28 @@ export async function parseMeteorPackage({ fileContent, filePath }: ParseOptions
     const startTime = Date.now();
     const content = (fileContent || FS.readFile(filePath, 'utf-8'))
     
-    const result: ParsedPackage = await parseSource(
-        await content,
-    ).then((result) => {
-        if (!result.name) {
-            throw new ParserError(`Could not extract name from package in: ${filePath}`, {
-                parseOptions: { fileContent, filePath },
-            });
-        }
-        
-        if (!result.packageId) {
-            result.packageId = `meteor/${result.name}`;
-        }
-        
-        const moduleExports = Object.keys(result.modules);
-        const packageExports = Object.keys(result.packageScopeExports);
-        
-        if (!moduleExports.length && !packageExports.length) {
-            console.warn(
-                'Unable to retrieve any metadata from the provided source code!',
-                { result }
-            );
-            throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
-        }
-        
-        return result;
-    }).catch(async (error: Error) => {
-        if (error instanceof ParserError) {
-            await error.formatLog();
-        }
-        throw error;
-    })
+    const result: ParsedPackage = await parseSource(await content);
+    
+    if (!result.name) {
+        throw new ParserError(`Could not extract name from package in: ${filePath}`, {
+            parseOptions: { fileContent, filePath },
+        });
+    }
+    
+    if (!result.packageId) {
+        result.packageId = `meteor/${result.name}`;
+    }
+    
+    const moduleExports = Object.keys(result.modules);
+    const packageExports = Object.keys(result.packageScopeExports);
+    
+    if (!moduleExports.length && !packageExports.length) {
+        console.warn(
+            'Unable to retrieve any metadata from the provided source code!',
+            { result }
+        );
+        throw new ParserError(`No modules or package-scope exports could be extracted from package: ${result.name}`);
+    }
     
     return {
         result,

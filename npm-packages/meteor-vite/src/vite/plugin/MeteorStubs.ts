@@ -24,11 +24,11 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
             const meteorPackage = await MeteorPackage.parse({
                 filePath: request.context.file.sourcePath,
                 fileContent: request.context.file.content,
-            }).catch((error): never => {
+            }).catch(async (error): Promise<never> => {
                 if (!(error instanceof MeteorViteError)) {
                     throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
                 }
-                
+                await error.formatLog();
                 error.setContext(request);
                 throw error;
             });

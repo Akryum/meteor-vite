@@ -44,4 +44,8 @@ export class MeteorViteError extends Error {
     private splitStack(stack: string) {
         return stack?.split(/[\n\r]+/);
     }
+    
+    public async formatLog() {
+        // Used for errors that extend MeteorViteError to add additional data to the error's stack trace.
+    }
 }
