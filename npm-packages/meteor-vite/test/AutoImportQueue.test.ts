@@ -1,7 +1,5 @@
-import FS from 'fs/promises';
 import { describe, expect, it } from 'vitest';
 import AutoImportQueue from '../src/meteor/package/AutoImportQueue';
-import { viteAutoImportBlock } from '../src/meteor/package/StubTemplate';
 import { AutoImportMock } from './__mocks';
 
 describe('Package auto-imports', async () => {
