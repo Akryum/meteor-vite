@@ -24,9 +24,7 @@ jobs:
           meteor-release: '2.10.0'
 
       - name: Install Dependencies
-        run: |
-          meteor npm install
-          meteor npm run install:workspace
+        run: meteor npm run install:workspace
 
       - name: Prepare Meteor Session
         run: echo '${{ secrets.METEOR_SESSION }}' > ${{ env.METEOR_SESSION_FILE_PATH }}
