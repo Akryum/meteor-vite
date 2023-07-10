@@ -1,13 +1,14 @@
-name: 'Build Example'
+name: 'Build Example Apps'
+
 on:
   push:
     branches:
       - main
-      - github-workflows
-      - add-test-suite
+      - release
   pull_request:
     branches:
       - main
+      - release
 
 jobs:
   build-vue-example:
