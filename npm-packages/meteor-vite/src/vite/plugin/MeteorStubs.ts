@@ -11,46 +11,58 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
     return {
         name: 'meteor-vite: stubs',
         resolveId: (id) => ViteLoadRequest.resolveId(id),
-        async load(viteId) {
-            if (!ViteLoadRequest.isStubRequest(viteId)) {
-                return;
-            }
-            const timeStarted = Date.now();
-            const request = await ViteLoadRequest.prepareContext({ id: viteId, pluginSettings });
+        load: prepareLoad({
+            async setupContext(viteId: string) {
+                return ViteLoadRequest.prepareContext({ id: viteId, pluginSettings });
+            },
             
-            if (request.isLazyLoaded) {
-                await request.forceImport();
-            }
-            
-            const meteorPackage = await MeteorPackage.parse({
-                filePath: request.context.file.sourcePath,
-                fileContent: request.context.file.content,
-            }).catch(async (error): Promise<never> => {
-                if (!(error instanceof MeteorViteError)) {
-                    throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
+            async load(request) {
+                const timeStarted = Date.now();
+                
+                if (request.isLazyLoaded) {
+                    await request.forceImport();
                 }
-                await error.formatLog();
-                error.setContext(request);
-                throw error;
-            });
-            
-            const template = stubTemplate({
-                requestId: request.context.id,
-                submodule: meteorPackage.getModule({ importPath: request.requestedModulePath }),
-                meteorPackage,
-            })
-            
-            Logger.debug(`${request.context.file.packageId}:`, {
-                parse: meteorPackage.meta.timeSpent,
-                overall: `${Date.now() - timeStarted}ms`,
-            });
-            
-            if (pluginSettings.debug) {
-                await storeDebugSnippet({ request, stubTemplate: template })
+                
+                const meteorPackage = await MeteorPackage.parse({
+                    filePath: request.context.file.sourcePath,
+                    fileContent: request.context.file.content,
+                });
+                
+                const template = stubTemplate({
+                    requestId: request.context.id,
+                    submodule: meteorPackage.getModule({ importPath: request.requestedModulePath }),
+                    meteorPackage,
+                })
+                
+                Logger.debug(`${request.context.file.packageId}:`, {
+                    parse: meteorPackage.meta.timeSpent,
+                    overall: `${Date.now() - timeStarted}ms`,
+                });
+                
+                if (pluginSettings.debug) {
+                    await storeDebugSnippet({ request, stubTemplate: template })
+                }
+                
+                return template;
             }
-            
-           return template;
-        }
+        })
+    }
+}
+
+function prepareLoad<Context extends ViteLoadRequest>(plugin: {
+    load(request: Context): Promise<string>;
+    setupContext(viteId: string): Promise<Context>;
+}) {
+    return async (viteId: string) => {
+        const request = await plugin.setupContext(viteId);
+        return plugin.load(request).catch(async (error) => {
+            if (!(error instanceof MeteorViteError)) {
+                throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
+            }
+            await error.formatLog();
+            error.setContext(request);
+            throw error;
+        })
     }
 }
 
