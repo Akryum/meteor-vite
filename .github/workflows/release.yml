@@ -16,19 +16,19 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Setup Node.js 16.x
-        uses: actions/setup-node@v3
+      - name: 'Setup Meteor'
+        uses: meteorengineer/setup-meteor@v1
         with:
-          node-version: 16.x
+          meteor-release: '2.10.0'
 
       - name: Install Dependencies
-        run: yarn
+        run: meteor npm ci --workspaces
 
-      - name: Create Release Pull Request or Publish to npm
+      - name: Create Release
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: npm run release
+          publish: meteor npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
