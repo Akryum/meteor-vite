@@ -3,7 +3,7 @@ import Path from 'path';
 import { createServer } from 'vite';
 import { MeteorStubs } from '../../vite';
 
-const meteorRoot = Path.join(process.cwd(), '../../example/vue');
+const meteorRoot = Path.join(process.cwd(), '../../examples/vue');
 
 
 export default createServer({
