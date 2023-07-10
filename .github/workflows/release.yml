@@ -8,28 +8,34 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 env:
-  METEOR_SESSION_FILE_PATH: '/opt/.meteor-session.json'
+  METEOR_SESSION_FILE_PATH: /opt/.meteor-session.json
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
+      - name: 'Checkout Repo'
         uses: actions/checkout@v3
+
+      - name: 'Configure Git'
+        run: | 
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: 'Setup Meteor'
         uses: meteorengineer/setup-meteor@v1
         with:
           meteor-release: '2.10.0'
 
-      - name: Install Dependencies
+      - name: 'Install Dependencies'
         run: meteor npm run install:workspace
 
       - name: Prepare Meteor Session
         run: echo '${{ secrets.METEOR_SESSION }}' > ${{ env.METEOR_SESSION_FILE_PATH }}
 
-      - name: Create Release
+
+      - name: 'Create Release'
         id: changesets
         uses: changesets/action@v1
         with:
