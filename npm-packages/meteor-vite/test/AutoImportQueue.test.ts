@@ -93,8 +93,10 @@ describe('Package auto-imports', async () => {
             const newContent = await readContent()
             
             expect(lastResolvedIndex).toEqual(MOCK_IMPORT_COUNT - 1);
+            console.log({ lastResolvedIndex });
             
             imports.forEach((result) => {
+                console.log({ result });
                 expect(result.lastResolvedIndex).toEqual(result.index - 1);
                 expect(newContent).toContain(`'${result.importString}'`);
             })
