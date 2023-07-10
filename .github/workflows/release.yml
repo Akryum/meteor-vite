@@ -22,7 +22,7 @@ jobs:
         with:
           meteor-release: '2.10.0'
 
-      - name: 'Setup Node.js 16'
+      - name: 'Setup Node.js'
         uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -41,6 +41,9 @@ jobs:
       - name: 'Create Release'
         id: changesets
         uses: changesets/action@v1
+        with:
+          version: meteor npm run version
+          publish: meteor npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
