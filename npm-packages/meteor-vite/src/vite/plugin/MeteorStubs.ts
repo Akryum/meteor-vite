@@ -12,7 +12,9 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
         name: 'meteor-vite: stubs',
         resolveId: (id) => ViteLoadRequest.resolveId(id),
         load: prepareLoad({
-            async setupContext(viteId: string) {
+            shouldProcess: (viteId) => ViteLoadRequest.isStubRequest(viteId),
+            
+            async setupContext(viteId) {
                 return ViteLoadRequest.prepareContext({ id: viteId, pluginSettings });
             },
             
@@ -52,9 +54,17 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
 function prepareLoad<Context extends ViteLoadRequest>(plugin: {
     load(request: Context): Promise<string>;
     setupContext(viteId: string): Promise<Context>;
+    shouldProcess(viteId: string): boolean;
 }) {
     return async (viteId: string) => {
+        const shouldProcess = plugin.shouldProcess(viteId);
+        
+        if (!shouldProcess) {
+            return;
+        }
+        
         const request = await plugin.setupContext(viteId);
+        
         return plugin.load(request).catch(async (error) => {
             if (!(error instanceof MeteorViteError)) {
                 throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
