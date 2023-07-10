@@ -20,8 +20,7 @@
     {
       "entry": [
         "./src/bin/worker/index.ts",
-        "./src/meteor/client/index.ts",
-        "./src/vite/index.ts"
+        "./src/meteor/client/index.ts"
       ],
       "outDir": "dist",
       "format": "esm",
