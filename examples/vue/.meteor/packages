@@ -19,7 +19,7 @@ hot-module-replacement@0.5.2  # Update client in development without reloading t
 
 static-html@1.3.2             # Define static page content in .html files
 
-vite:bundler
+jorgenvatle:vite-bundler
 ostrio:cookies
 
 test:lazy
