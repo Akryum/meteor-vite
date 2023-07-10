@@ -3,7 +3,7 @@ import ViteLoadRequest, { RequestContext } from '../ViteLoadRequest';
 
 export class MeteorViteError extends Error {
     public viteId?: string;
-    constructor(message: string, metadata?: {
+    constructor(public readonly originalMessage: string, metadata?: {
         package?: Pick<MeteorPackage, 'packageId'>;
         context?: Pick<RequestContext, 'id'>;
         cause?: Error;
@@ -18,7 +18,7 @@ export class MeteorViteError extends Error {
             messageSuffix = `: ${metadata.cause.message}`
         }
         
-        super(`${messagePrefix}⚡  ${message}${messageSuffix}`);
+        super(`${messagePrefix}⚡  ${originalMessage}${messageSuffix}`);
         this.name = this.constructor.name;
         
         if (metadata?.context) {
@@ -30,6 +30,11 @@ export class MeteorViteError extends Error {
             const otherStack = this.splitStack(metadata.cause.stack || '')?.map((line) => `  ${line}`);
             this.stack = [selfStack[1], selfStack[2], '  Caused by:', ...otherStack].join('\n');
         }
+    }
+    
+    protected addMetadataLines(lines: string[]) {
+        const whitespace = '\n    '
+        this.message = `${this.message}${whitespace}${lines.join(whitespace)}\n  ${this.constructor.name}: ${this.originalMessage}`
     }
     
     public setContext(loadRequest: ViteLoadRequest) {
