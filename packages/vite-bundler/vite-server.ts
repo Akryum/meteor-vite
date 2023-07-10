@@ -26,7 +26,7 @@ if (Meteor.isDevelopment) {
     
     const viteServer = createWorkerFork({
         viteConfig(config) {
-            const ready = !!config.entryFile;
+            const ready = !!(config.entryFile && config.port);
             setConfig({ ...config, ready });
             if (ready) {
                 console.log(`⚡  Meteor-Vite ready for connections!`)
