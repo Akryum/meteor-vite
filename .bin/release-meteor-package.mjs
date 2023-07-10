@@ -4,7 +4,7 @@ import FS from 'fs/promises';
 
 const meteorPackage = {
     releaseName: 'vite-bundler',
-    packageJsPath: Path.join(__dirname, '../packages/vite-bundler/package.js'),
+    packageJsPath: Path.join('./packages/vite-bundler/package.js'),
 }
 
 const PACKAGE_VERSION_REGEX = /version:\s*'(?<version>[\d.]+)'\s*,/;
@@ -34,7 +34,7 @@ changesetStatus.then(async ({ releases }) => {
     let packageJsContent = await FS.readFile(meteorPackage.packageJsPath, 'utf-8');
     const currentVersion = packageJsContent.match(PACKAGE_VERSION_REGEX)?.groups?.version
     packageJsContent = packageJsContent.replace(PACKAGE_VERSION_REGEX, `version: '${release.newVersion}'`);
-    await FS.write(meteorPackage.packageJsPath, packageJsContent);
+    await FS.writeFile(meteorPackage.packageJsPath, packageJsContent);
 
     console.log(`Changed version in package.js from v${currentVersion} to v${release.newVersion}`);
 
