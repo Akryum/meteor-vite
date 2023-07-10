@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import Path from 'path';
 import FS from 'fs/promises';
 
@@ -13,9 +13,15 @@ const PACKAGE_VERSION_REGEX = /version:\s*'(?<version>[\d.]+)'\s*,/;
 
 function shell(command, options) {
     console.log(`$ ${command}`);
-    console.log(
-        execSync(command, options).toString('utf-8'),
-    )
+    if (!options?.async) {
+        console.log(execSync(command, options).toString('utf-8'))
+        return;
+    }
+    const [bin, ...args] = command.split(' ');
+    spawn(bin, args, {
+        ...options,
+        stdio: 'inherit',
+    });
 }
 
 shell('changeset status --output changeset-status.json');
@@ -41,14 +47,19 @@ changesetStatus.then(async ({ releases }) => {
     packageJsContent = packageJsContent.replace(PACKAGE_VERSION_REGEX, `version: '${release.newVersion}',`);
     await FS.writeFile(meteorPackage.packageJsPath, packageJsContent);
 
-    console.log(`✅  Changed version in package.js from v${currentVersion} to v${release.newVersion}`);
+    console.log(`✅  Changed version in package.js from v${currentVersion} to v${release.newVersion}\n\n`);
 
     shell(`git add ${meteorPackage.packageJsPath}`);
     shell(`git commit -m 'Bump ${meteorPackage.releaseName} version to ${release.newVersion}'`);
+
+    console.log(`⚡  Publishing ${meteorPackage.releaseName}...\n`);
+
     shell('meteor publish', {
+        async: true,
         cwd: Path.dirname(meteorPackage.packageJsPath),
         env: {
             METEOR_SESSION_FILE: process.env.METEOR_SESSION_FILE,
+            ...process.env,
         }
     })
 });
