@@ -3,7 +3,8 @@ import Path from 'path';
 import { Plugin } from 'vite';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
-import ViteLoadRequest, { MeteorViteError } from '../ViteLoadRequest';
+import { MeteorViteError } from '../error/MeteorViteError';
+import ViteLoadRequest from '../ViteLoadRequest';
 
 export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
     return {
@@ -24,7 +25,12 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
                 filePath: request.context.file.sourcePath,
                 fileContent: request.context.file.content,
             }).catch((error): never => {
-                throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
+                if (!(error instanceof MeteorViteError)) {
+                    throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
+                }
+                
+                error.setContext(request);
+                throw error;
             });
             
             const template = stubTemplate({

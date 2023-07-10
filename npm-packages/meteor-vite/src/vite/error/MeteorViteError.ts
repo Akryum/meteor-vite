@@ -19,6 +19,7 @@ export class MeteorViteError extends Error {
         }
         
         super(`${messagePrefix}⚡  ${message}${messageSuffix}`);
+        this.name = this.constructor.name;
         
         if (metadata?.context) {
             this.viteId = metadata.context.id;
