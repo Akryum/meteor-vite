@@ -33,7 +33,7 @@ changesetStatus.then(async ({ releases }) => {
 
     let packageJsContent = await FS.readFile(meteorPackage.packageJsPath, 'utf-8');
     const currentVersion = packageJsContent.match(PACKAGE_VERSION_REGEX)?.groups?.version
-    packageJsContent = packageJsContent.replace(PACKAGE_VERSION_REGEX, `version: '${release.newVersion}'`);
+    packageJsContent = packageJsContent.replace(PACKAGE_VERSION_REGEX, `version: '${release.newVersion}',`);
     await FS.writeFile(meteorPackage.packageJsPath, packageJsContent);
 
     console.log(`Changed version in package.js from v${currentVersion} to v${release.newVersion}`);
