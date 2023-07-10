@@ -12,6 +12,8 @@
   "devDependencies": {},
   "scripts": {
     "install:workspace": "cd npm-packages/meteor-vite && meteor npm install",
+    "version:vite-bundler": "meteor node .bin/release-meteor-package.mjs version",
+    "publish:vite-bundler": "meteor node .bin/release-meteor-package.mjs publish",
     "release": "changeset publish"
   }
 }
