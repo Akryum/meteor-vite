@@ -82,8 +82,14 @@ function shell(command, options) {
     throw new Error(`The provided argument is not recognized: "${action}"`)
 
 })().catch((error) => {
-    if (error.stderr) {
-        console.error(error.stderr.toString('utf-8'));
+    const { stdout, stderr } = error;
+
+    if (stdout) {
+        console.log(stdout.toString())
     }
+    if (stderr) {
+        console.error(stderr.toString());
+    }
+
     console.error(error);
 });
