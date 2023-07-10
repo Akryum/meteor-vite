@@ -3,6 +3,6 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "publish": "meteor publish"
+    "publish": "VITE_METEOR_DISABLED=true meteor publish"
   }
 }
