@@ -71,10 +71,12 @@ function shell(command, options) {
 
     if (action === 'publish') {
         await publish();
+        return;
     }
 
     if (action === 'version') {
         await applyVersion();
+        return;
     }
 
     throw new Error(`The provided argument is not recognized: "${action}"`)
