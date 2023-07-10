@@ -3,7 +3,7 @@ import FS from 'fs/promises';
 import Path from 'path';
 import AutoImportQueue from '../meteor/package/AutoImportQueue';
 import { isSameModulePath } from '../meteor/package/Serialize';
-import { viteAutoImportBlock } from '../meteor/package/StubTemplate';
+import { MeteorViteError } from './error/MeteorViteError';
 import type { PluginSettings } from './plugin/MeteorStubs';
 
 export default class ViteLoadRequest {
@@ -188,7 +188,7 @@ interface PreContextRequest {
     pluginSettings: PluginSettings;
 }
 
-interface RequestContext extends PreContextRequest {
+export interface RequestContext extends PreContextRequest {
     manifest?: ManifestContent;
     file: FileData;
 }
@@ -213,37 +213,5 @@ interface ManifestResource {
     hash: string
 }
 
-export class MeteorViteError extends Error {
-    public readonly viteId?: string;
-    constructor(message: string, metadata?: {
-        context?: Partial<RequestContext>;
-        cause?: Error;
-    }) {
-        let messagePrefix = '';
-        let messageSuffix = '';
-        if (metadata?.context) {
-            messagePrefix = `<${metadata.context.file?.packageId || metadata.context.id}> \n  `
-        }
-        if (metadata?.cause) {
-            messageSuffix = `: ${metadata.cause.message}`
-        }
-        
-        super(`${messagePrefix}⚡  ${message}${messageSuffix}`);
-        
-        if (metadata?.context) {
-            this.viteId = metadata.context.id;
-        }
-        
-        if (metadata?.cause) {
-            const selfStack = this.splitStack(this.stack || '');
-            const otherStack = this.splitStack(metadata.cause.stack || '')?.map((line) => `  ${line}`);
-            this.stack = [selfStack[1], selfStack[2], '  Caused by:', ...otherStack].join('\n');
-        }
-    }
-    
-    private splitStack(stack: string) {
-        return stack?.split(/[\n\r]+/);
-    }
-}
 export class RefreshNeeded extends MeteorViteError {}
 class MeteorViteStubRequestError extends MeteorViteError {}
