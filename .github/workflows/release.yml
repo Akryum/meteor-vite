@@ -5,10 +5,10 @@ on:
       - main
       - release
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 env:
   METEOR_SESSION_FILE_PATH: /opt/.meteor-session.json
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   release:
     name: Release
@@ -17,26 +17,26 @@ jobs:
       - name: 'Checkout Repo'
         uses: actions/checkout@v3
 
-      - name: 'Setup Meteor'
-        uses: meteorengineer/setup-meteor@v1
-        with:
-          meteor-release: '2.10.0'
-
       - name: 'Setup Node.js'
         uses: actions/setup-node@v3
         with:
           node-version: 16
 
       - name: 'Configure Git'
-        run: |
+        run: | 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: 'Prepare Meteor Session'
-        run: echo '${{ secrets.METEOR_SESSION }}' > ${{ env.METEOR_SESSION_FILE_PATH }}
+      - name: 'Setup Meteor'
+        uses: meteorengineer/setup-meteor@v1
+        with:
+          meteor-release: '2.10.0'
 
       - name: 'Install Dependencies'
         run: meteor npm run install:workspace
+
+      - name: 'Prepare Meteor Session'
+        run: echo '${{ secrets.METEOR_SESSION }}' > ${{ env.METEOR_SESSION_FILE_PATH }}
 
       - name: 'Create Release'
         id: changesets
