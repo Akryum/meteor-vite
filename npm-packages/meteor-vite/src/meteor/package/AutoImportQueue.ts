@@ -22,14 +22,15 @@ export default new class AutoImportQueue {
         skipRestart?: boolean; // Skip restart when module is added to Meteor entrypoint
     }) {
         const lastPackageCount = this.addedPackages.length;
+        const content = await FS.readFile(meteorEntrypoint, 'utf-8');
+        
+        if (content.includes(`'${importString}'`)) {
+            Logger.debug('Skipping auto-import for "%s" as it already has all the necessary imports', importString);
+            return;
+        }
+        
         await this.prepareThread(importString, async () => {
             const content = await FS.readFile(meteorEntrypoint, 'utf-8')
-            
-            if (content.includes(`'${importString}'`)) {
-                Logger.debug('Skipping auto-import for "%s" as it already has all the necessary imports', importString);
-                return;
-            }
-            
             const newContent = viteAutoImportBlock({
                 id: importString,
                 content,
