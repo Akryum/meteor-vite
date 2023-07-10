@@ -2,7 +2,7 @@
   "name": "vue-example",
   "private": true,
   "scripts": {
-    "dev": "cross-env BUILD_METEOR_VITE_DEPENDENCY='true' meteor npm run dev",
+    "dev": "cross-env BUILD_METEOR_VITE_DEPENDENCY='true' meteor npm run dev:minimal",
     "dev:build": "meteor npm run build:dependencies && meteor npm run dev",
     "dev:minimal": "meteor run",
     "build": "meteor build ../output/vue --directory",
