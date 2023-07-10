@@ -27,7 +27,6 @@ Package.registerBuildPlugin({
 
 Package.onUse(function(api) {
   api.use('isobuild:compiler-plugin@1.0.0')
-  api.use('zodern:types')
   api.use('ecmascript')
   api.use('webapp@1.13.1')
   api.use('typescript@4.0.0')
