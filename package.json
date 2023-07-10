@@ -15,7 +15,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "install:dependencies": "cd npm-packages/meteor-vite && meteor npm install",
+    "install:workspace": "cd npm-packages/meteor-vite && meteor npm install",
     "release": "changeset publish"
   },
   "repository": {
