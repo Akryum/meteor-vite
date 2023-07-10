@@ -33,7 +33,7 @@
   "bugs": {
     "url": "https://github.com/JorgenVatle/meteor-vite/issues"
   },
-  "homepage": "https://github.com/JorgenVatle/meteor-vite/blob/main/packages/vite-bundler/README.md",
+  "homepage": "https://github.com/JorgenVatle/meteor-vite#readme",
   "license": "ISC",
   "dependencies": {
     "@babel/parser": "^7.22.5",

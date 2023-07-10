@@ -3,7 +3,7 @@
  * You can commit these to your project or move them elsewhere if you'd like,
  * but they must be imported somewhere in your Meteor entrypoint file.
  *
- * More info: https://github.com/JorgenVatle/meteor-vite/blob/main/packages/vite-bundler/README.md#lazy-loaded-meteor-packages
+ * More info: https://github.com/JorgenVatle/meteor-vite#lazy-loaded-meteor-packages
 **/
 import 'meteor/test:lazy';
 import 'meteor/test:ts-modules/re-exports-index';

@@ -1,7 +1,6 @@
 {
   "name": "meteor-vite-repository",
   "version": "1.0.0",
-  "description": "See the package [README](./packages/vite-bundler/README.md) for more information.",
   "private": true,
   "directories": {
     "example": "examples"
