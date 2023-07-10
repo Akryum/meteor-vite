@@ -77,7 +77,7 @@ export default new class Serialize {
             if (!moduleExport.name) return;
             if (moduleExport.type === 'global-binding') return;
             if (reservedKeys.has(moduleExport.name)) {
-                Logger.warn(new ConflictingExportKeys(`Detected conflicting export in "${moduleExport.name}"`, {
+                Logger.warn(new ConflictingExportKeys(`Detected conflicting export for "${moduleExport.name}" in "${packageId}"`, {
                     conflict: {
                         key: moduleExport.name,
                         packageScope,
