@@ -1,4 +1,5 @@
 import { fork } from 'node:child_process'
+import { Meteor } from 'meteor/meteor';
 import Path from 'path';
 import FS from 'fs';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
