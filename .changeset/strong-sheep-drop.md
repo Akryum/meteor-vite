@@ -1,5 +1,8 @@
 ---
 "vite-bundler": minor
+"meteor-vite": minor
 ---
 
-Fixes an issue where Meteor builds with lazy-loaded packages would only work if Meteor had been ran at least once in development mode. \nUpdated dev server loggers
+- Fixed an issue where Meteor builds with lazy-loaded packages would only work if Meteor had been run at least once in development mode.
+- Fixed an issue where some lazy-loaded packages would cause the Vite dev server to become unresponsive
+- Updated Vite dev server loggers.
