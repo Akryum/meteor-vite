@@ -37,9 +37,9 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
                     meteorPackage,
                 })
                 
-                Logger.debug(`${request.context.file.packageId}:`, {
-                    parse: meteorPackage.meta.timeSpent,
-                    overall: `${Date.now() - timeStarted}ms`,
+                request.log.debug(`Meteor stub created`, {
+                    'Parse time': meteorPackage.meta.timeSpent,
+                    'Request duration': `${Date.now() - timeStarted}ms`,
                 });
                 
                 if (pluginSettings.debug) {
