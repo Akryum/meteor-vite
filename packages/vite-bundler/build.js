@@ -38,13 +38,12 @@ const filesToCopy = [
   'tsconfig.json',
   meteorMainModule,
 ]
-
-const tempMeteorProject = path.resolve(cwd, 'node_modules', '.vite-meteor-temp');
+// Todo: Refactor directory structure to better indicate each target's purpose
+const tempMeteorProject = path.resolve(cwd, 'node_modules', '.vite-meteor-temp')
 const meteorPackagePath = path.join(tempMeteorProject, '.dist', 'bundle', 'programs', 'web.browser', 'packages')
-
-// Vite worker
-
 const viteOutDir = path.join(cwd, 'node_modules', '.vite-meteor', 'dist')
+
+
 const payloadMarker = '_vite_result_payload_'
 
 try {
