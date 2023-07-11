@@ -106,6 +106,12 @@ export interface PluginSettings {
     meteorPackagePath: string;
     
     /**
+     * Path to Meteor's Isopacks store.
+     * Used to determine where a package's mainModule is located and whether it's a lazy-loaded package.
+     */
+    meteorIsopackPath: string;
+    
+    /**
      * Full content of the Meteor project's package.json.
      */
     projectJsonContent: ProjectJson;
