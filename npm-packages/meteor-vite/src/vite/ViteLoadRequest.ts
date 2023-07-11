@@ -90,7 +90,7 @@ export default class ViteLoadRequest {
             packageId,
             importPath,
             sourcePath,
-            manifestPath: Path.join('.meteor', 'local', 'isopacks', sourceName, 'web.browser.json')
+            manifestPath: Path.join(pluginSettings.meteor.isopackPath, sourceName, 'web.browser.json')
         }
     }
     
