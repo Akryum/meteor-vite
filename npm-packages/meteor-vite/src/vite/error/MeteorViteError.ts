@@ -1,3 +1,4 @@
+import { inspect } from 'util';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import ViteLoadRequest, { RequestContext } from '../ViteLoadRequest';
 
@@ -43,11 +44,15 @@ export class MeteorViteError extends Error implements ErrorMetadata {
         // Used for errors that extend MeteorViteError to add additional data to the error's stack trace.
     }
     
-    protected addSection(content: string) {
+    protected addSection(title: string, object: any) {
+        const content = inspect(object, { colors: true });
+        const divider = '-'.repeat(76 - title.length);
+        this.addLine(`[${title}]${divider}`);
         content.split(/[\r\n]+/).forEach((line) => {
             this.addLine(`|  ${line}`)
         })
     }
+    
     
     public async beautify() {
         await this.formatLog();
