@@ -154,7 +154,6 @@ class ConflictingExportKeys extends MeteorViteError {
     protected async formatLog() {
         const { key, packageScope, moduleExports } = this.meta.conflict;
         this.addSection('Package Exports', packageScope);
-        this.addLine('|');
         this.addSection('Module Exports', moduleExports);
     }
 }
