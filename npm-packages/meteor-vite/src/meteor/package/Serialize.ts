@@ -77,7 +77,7 @@ export default new class Serialize {
             if (!moduleExport.name) return;
             if (moduleExport.type === 'global-binding') return;
             if (reservedKeys.has(moduleExport.name)) {
-                Logger.warn(new ConflictingExportKeys(`Detected conflicting export for "${moduleExport.name}" in "${packageId}"`, {
+                const error = new ConflictingExportKeys(`Detected conflicting export for "${moduleExport.name}" in "${packageId}"`, {
                     conflict: {
                         key: moduleExport.name,
                         packageScope,
@@ -86,7 +86,8 @@ export default new class Serialize {
                     package: {
                         packageId,
                     },
-                }));
+                });
+                error.beautify().then(() => Logger.warn(error));
                 return;
             }
             
@@ -150,17 +151,11 @@ class ConflictingExportKeys extends MeteorViteError {
         super(message, meta);
     }
     
-    async formatLog() {
+    protected async formatLog() {
         const { key, packageScope, moduleExports } = this.meta.conflict;
-        this.addLine([
-            `Conflicting export: ${key}`,
-            '',
-            '// Package exports',
-            inspect(packageScope),
-            '',
-            '// Module exports:',
-            inspect(moduleExports),
-        ])
+        this.addSection('Package Exports', packageScope);
+        this.addLine('|');
+        this.addSection('Module Exports', moduleExports);
     }
 }
 
