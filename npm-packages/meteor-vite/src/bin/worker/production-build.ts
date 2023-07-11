@@ -4,12 +4,13 @@ import { build, resolveConfig } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import MeteorVitePackage from '../../../package.json';
+import { PluginSettings } from '../../vite/plugin/MeteorStubs';
 import CreateIPCInterface, { IPCReply } from './IPC/interface';
 
 interface BuildOptions {
     viteOutDir: string;
-    meteorPackagePath: string;
     payloadMarker: string;
+    meteor: PluginSettings['meteor'];
 }
 
 export default CreateIPCInterface({
@@ -27,7 +28,8 @@ export default CreateIPCInterface({
         buildConfig: BuildOptions
     ) {
         const viteConfig: MeteorViteConfig = await resolveConfig({}, 'build');
-        const { viteOutDir, meteorPackagePath, payloadMarker } = buildConfig;
+        const { viteOutDir, meteor, payloadMarker } = buildConfig;
+        
         Object.entries(buildConfig).forEach(([key, value]) => {
             if (!value) {
                 throw new Error(`Vite: Worker missing required build argument "${key}"!`)
@@ -55,8 +57,8 @@ export default CreateIPCInterface({
             },
             plugins: [
                 MeteorStubs({
-                    meteorPackagePath,
-                    projectJsonContent: JSON.parse(await fs.readFile('package.json', 'utf-8')),
+                    meteor,
+                    packageJson: JSON.parse(await fs.readFile('package.json', 'utf-8')),
                 }),
             ],
         });
