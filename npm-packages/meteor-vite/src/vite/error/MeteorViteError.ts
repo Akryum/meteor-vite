@@ -1,6 +1,7 @@
 import { inspect } from 'util';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import ViteLoadRequest, { RequestContext } from '../ViteLoadRequest';
+import PackageJson from '../../../package.json';
 
 
 export class MeteorViteError extends Error implements ErrorMetadata {
@@ -91,7 +92,8 @@ export class MeteorViteError extends Error implements ErrorMetadata {
         }).join('\n');
         
         const endOfLog = this.titleDivider({ divider: '_' })
-        this.stack = `${this.stack}\n${endOfLog}\n`;
+        const reportIssue = ` 🐛  Report an issue:\n  -  ${PackageJson.bugs.url}`
+        this.stack = `${this.stack}\n\n${reportIssue}\n${endOfLog}\n`;
         
         if (!this.cause) {
             this.clearProperties(['cause'])
