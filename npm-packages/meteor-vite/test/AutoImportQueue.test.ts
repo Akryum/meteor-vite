@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import AutoImportQueue from '../src/meteor/package/AutoImportQueue';
+import AutoImportQueue, { wait } from '../src/meteor/package/AutoImportQueue';
 import { AutoImportMock } from './__mocks';
 
 describe('Package auto-imports', async () => {
@@ -100,6 +100,33 @@ describe('Package auto-imports', async () => {
                 expect(result.lastResolvedIndex).toEqual(result.index - 1);
                 expect(newContent).toContain(`'${result.importString}'`);
             })
-        }, 15_000)
+        }, 15_000);
+        
+        it('handles concurrent import requests submitted at different times', async (context) => {
+            const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
+                testName: context.task.name,
+                entrypoint: 'withExistingAutoImports',
+            });
+            
+            const importRequests: Promise<void>[] = [];
+            const expectedImports: string[] = [];
+            
+            for (let number = 0; number < 5; number++) {
+                const importString = `meteor/test:staggered-import-${number}`;
+                expectedImports.push(importString);
+                const request = AutoImportQueue.write({
+                    importString,
+                    meteorEntrypoint,
+                    skipRestart: true,
+                });
+                importRequests.push(request);
+                await wait(150 * number);
+            }
+            
+            await Promise.all(importRequests);
+            const newContent = await readContent();
+            
+            expectedImports.forEach((importString) => expect(newContent).toContain(importString));
+        })
     })
 })
