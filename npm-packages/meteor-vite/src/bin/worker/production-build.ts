@@ -12,18 +12,20 @@ interface BuildOptions {
     meteor: PluginSettings['meteor'];
 }
 
+type Replies = IPCReply<{
+    kind: 'buildResult',
+    data: {
+        payload: {
+            success: boolean,
+            meteorViteConfig: any,
+            output?: {name?: string, type: string, fileName: string}[]
+        };
+    }
+}>
+
 export default CreateIPCInterface({
     async buildForProduction(
-        reply: IPCReply<{
-            kind: 'buildResult',
-            data: {
-                payload: {
-                    success: boolean,
-                    meteorViteConfig: any,
-                    output?: {name?: string, type: string, fileName: string}[]
-                };
-            }
-        }>,
+        reply: Replies,
         buildConfig: BuildOptions
     ) {
         const viteConfig: MeteorViteConfig = await resolveConfig({}, 'build');
