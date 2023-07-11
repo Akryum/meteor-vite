@@ -70,11 +70,13 @@ export class MeteorViteError extends Error implements ErrorMetadata {
     public async beautify() {
         await this.formatLog();
         
-        this.name = `\n\n` + this.titleDivider({
+        const moduleId = this.context?.id.replace('meteor/', '') || this.package?.packageId;
+        const moduleString = moduleId && pc.yellow(`\n⚡   <${moduleId}>`) || '';
+        this.name = `\n\n${this.titleDivider({
             title: `[${this.constructor.name}]`,
             divider: '_',
             indent: 6,
-        }) + pc.yellow(`\n⚡   <${pc.yellow(this.context?.id.replace('meteor/', ''))}>`);
+        })}${moduleString}`;
         
         this.message = [
             '',
