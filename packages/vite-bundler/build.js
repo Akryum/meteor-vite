@@ -45,7 +45,6 @@ const meteorPackagePath = path.join(tempMeteorProject, '.dist', 'bundle', 'progr
 // Vite worker
 
 const viteOutDir = path.join(cwd, 'node_modules', '.vite-meteor', 'dist')
-const workerDir = path.join(cwd, 'node_modules', '.meteor-vite-build');
 const payloadMarker = '_vite_result_payload_'
 
 try {
@@ -221,6 +220,4 @@ try {
 
 } catch (e) {
   throw e
-} finally {
-  fs.removeSync(workerDir)
 }
