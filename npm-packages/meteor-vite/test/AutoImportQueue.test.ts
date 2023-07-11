@@ -71,47 +71,53 @@ describe('Package auto-imports', async () => {
     ];
     
     describe.each(testCases)('Concurrent Requests: $entrypoint', ({ entrypoint }) => {
-        it('Will process staggered import requests without restarting early', async (context) => {
-            const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
-                testName: context.task.name,
+        describe('staggered requests within the time limit', async () => {
+            const { processingTime, newContent, expectedImports, template, queue } = await AutoImportMock.useEntrypoint({
+                testName: 'staggered requests within the time limit',
                 entrypoint,
-            });
-            
-            const importRequests: Promise<void>[] = [];
-            const expectedImports: string[] = [];
-            const startTime = Date.now();
-            
-            for (let number = 0; number < 10; number++) {
-                const importString = `meteor/test:staggered-import-${number}`;
-                expectedImports.push(importString);
-                const request = AutoImportQueue.write({
-                    importString,
-                    meteorEntrypoint,
-                    skipRestart: false,
-                });
-                importRequests.push(request);
-                const waitTime = 50 * number;
+            }).then(async ({ meteorEntrypoint, template, readContent }) => {
+                const importRequests: Promise<void>[] = [];
+                const expectedImports: string[] = [];
+                const startTime = Date.now();
                 
-                if (waitTime > AutoImportQueue.RESTART_COUNTDOWN_MS) {
-                    await wait(150);
-                    continue;
+                for (let number = 0; number < 10; number++) {
+                    const importString = `meteor/test:staggered-import-${number}`;
+                    expectedImports.push(importString);
+                    const request = AutoImportQueue.write({
+                        importString,
+                        meteorEntrypoint,
+                        skipRestart: false,
+                    });
+                    importRequests.push(request);
+                    const waitTime = (AutoImportQueue.RESTART_COUNTDOWN_MS / 10) + (Math.random() > 0.5 ? 70 : 25)
+                    
+                    await wait(waitTime);
                 }
                 
-                await wait(waitTime);
-            }
+                const queue = Promise.all(importRequests);
+                
+                return {
+                    processingTime: await queue.catch(() => Date.now() - startTime),
+                    newContent: await readContent(),
+                    expectedImports,
+                    template,
+                    queue,
+                }
+            });
             
-            await expect(Promise.all(importRequests)).rejects.toThrow(RefreshNeeded);
-            
-            const newContent = await readContent();
-            const processingTime = Date.now() - startTime;
-            console.log({ processingTime });
-            
-            expect(processingTime).toBeGreaterThan(AutoImportQueue.RESTART_COUNTDOWN_MS);
-            expectedImports.forEach((importString) => expect(newContent).toContain(importString));
-            
-            if (entrypoint !== 'withExistingAutoImports') {
+            it('will extend the restart countdown with new requests', () => {
+                console.log({ processingTime });
+                expect(processingTime).toBeGreaterThan(AutoImportQueue.RESTART_COUNTDOWN_MS)
+            });
+            it('emits a "refresh needed" error on timeout', async () => {
+                await expect(queue).rejects.toThrow(RefreshNeeded)
+            });
+            it.skipIf(entrypoint === 'withExistingAutoImports')('retains existing entrypoint source code', () => {
                 expect(newContent).toContain(template);
-            }
-        }, 15_000)
+            });
+            it('adds all requested imports to the entrypoint file', () => {
+                expectedImports.forEach((importString) => expect(newContent).toContain(importString));
+            })
+        })
     })
 })
