@@ -61,7 +61,7 @@ describe('Package auto-imports', async () => {
             
             expect(newContent.match(matchRegex)?.length).toEqual(1);
         })
-    })
+    });
     
     type EntryPoints = typeof AutoImportMock['entrypoints'];
     const testCases: { entrypoint: keyof EntryPoints }[] = [
@@ -71,7 +71,28 @@ describe('Package auto-imports', async () => {
     ];
     
     describe.each(testCases)('Concurrent Requests: $entrypoint', ({ entrypoint }) => {
-        describe('staggered requests within the time limit', async () => {
+        it('throws a "RefreshNeeded" exception for all import requests', async (context) => {
+            const requests: Promise<void>[] = [];
+            const { meteorEntrypoint } = await AutoImportMock.useEntrypoint({
+                testName: context.task.name,
+                entrypoint,
+            });
+            for (let id = 0; id < 10; id++) {
+                const importString = `meteor/test:refresh-needed-${id}`;
+                requests.push(AutoImportQueue.write({
+                    importString,
+                    meteorEntrypoint,
+                    skipRestart: false,
+                }))
+            }
+            
+            expect.assertions(10);
+            const rejections = requests.map((promise) => expect(promise).rejects.toThrow(RefreshNeeded));
+            await Promise.all(rejections);
+        })
+        
+        describe('Staggered - submitted within the countdown time-limit', async () => {
+            const IMPORT_COUNT = 10;
             const { processingTime, newContent, expectedImports, template, queue } = await AutoImportMock.useEntrypoint({
                 testName: 'staggered requests within the time limit',
                 entrypoint,
@@ -80,7 +101,8 @@ describe('Package auto-imports', async () => {
                 const expectedImports: string[] = [];
                 const startTime = Date.now();
                 
-                for (let number = 0; number < 10; number++) {
+                
+                for (let number = 0; number < IMPORT_COUNT; number++) {
                     const importString = `meteor/test:staggered-import-${number}`;
                     expectedImports.push(importString);
                     const request = AutoImportQueue.write({
@@ -116,6 +138,7 @@ describe('Package auto-imports', async () => {
                 expect(newContent).toContain(template);
             });
             it('adds all requested imports to the entrypoint file', () => {
+                expect(expectedImports).toHaveLength(IMPORT_COUNT);
                 expectedImports.forEach((importString) => expect(newContent).toContain(importString));
             })
         })
