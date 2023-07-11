@@ -46,15 +46,14 @@ export class MeteorViteError extends Error implements ErrorMetadata {
     
     protected addSection(title: string, object: any) {
         const content = inspect(object, { colors: true });
-        const divider = '-'.repeat(76 - title.length);
-        this.addLine(`[${title}]${divider}`);
+        this.addLine(this.titleDivider(`[${title}]`, -2));
         content.split(/[\r\n]+/).forEach((line) => {
             this.addLine(`|  ${line}`)
         })
     }
     
-    protected addDivider(title: string) {
-        let repeatCount = 80 - title.length;
+    protected titleDivider(title: string, addLength = 0) {
+        let repeatCount = 85 - title.length + addLength;
         if (repeatCount < 1) {
             return title;
         }
@@ -64,14 +63,14 @@ export class MeteorViteError extends Error implements ErrorMetadata {
     public async beautify() {
         await this.formatLog();
         
-        this.name = this.addDivider(`---[${this.constructor.name}]`) + '\n';
+        this.name = this.titleDivider(`---[${this.constructor.name}]`) + '\n';
         
         this.message = [
             `⚡   ${this.message}`,
             `-   ${this.subtitle}`,
             '',
             ...this.metadataLines!,
-            '-'.repeat(80)
+            this.titleDivider('---[Error Stack]')
         ].filter((line, index) => {
             if (typeof line !== 'string') {
                 return false;
