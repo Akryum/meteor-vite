@@ -1,6 +1,7 @@
 import { existsSync } from 'fs';
 import FS from 'fs/promises';
 import Path from 'path';
+import { createLabelledLogger, LabelLogger } from '../Logger';
 import AutoImportQueue from '../meteor/package/AutoImportQueue';
 import { isSameModulePath } from '../meteor/package/Serialize';
 import { MeteorViteError } from './error/MeteorViteError';
@@ -111,9 +112,11 @@ export default class ViteLoadRequest {
     
     public mainModulePath?: string;
     public isLazyLoaded: boolean;
+    public log: LabelLogger;
     
     constructor(public readonly context: RequestContext ) {
         this.isLazyLoaded = false;
+        this.log = createLabelledLogger(context.id);
         
         context.manifest?.resources.forEach((resource) => {
             const isMainModule = resource.fileOptions.mainModule;

@@ -19,17 +19,17 @@ export type LoggerObject<Params extends DefaultParams> = { [key in LoggerMethods
 type DefaultParams = Parameters<typeof console.log>;
 type LoggerMethods = 'info' | 'warn' | 'error' | 'debug';
 
-export const CreateLogger = (label: string) => createLogger<[
-    message: string,
-    dataLines: [key: string, value: string][] | Record<string, string>
-]>((message, dataLines) => {
+export const createLabelledLogger = (label: string) => createLogger((message: string, dataLines: [key: string, value: string][] | Record<string, string>) => {
     if (!Array.isArray(dataLines)) {
         dataLines = Object.entries(dataLines);
     }
     const data = dataLines.map(([key, value]) => {
         return `\n ${pc.dim('L')}  ${key}: ${value}`
     }).join('')
+    
     return [`${label} ${message}${data}`]
 });
+
+export type LabelLogger = ReturnType<typeof createLabelledLogger>
 
 export default createLogger((...params: DefaultParams) => params);
