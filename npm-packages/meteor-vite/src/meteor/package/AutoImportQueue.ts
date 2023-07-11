@@ -3,7 +3,7 @@ import Logger from '../../Logger';
 import { RefreshNeeded } from '../../vite/ViteLoadRequest';
 import { viteAutoImportBlock } from './StubTemplate';
 
-const wait = (waitMs: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), waitMs));
+export const wait = (waitMs: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), waitMs));
 
 export default new class AutoImportQueue {
     protected readonly requests = new Map<string, { threadId: string }>();
