@@ -43,6 +43,12 @@ export class MeteorViteError extends Error implements ErrorMetadata {
         // Used for errors that extend MeteorViteError to add additional data to the error's stack trace.
     }
     
+    protected addSection(content: string) {
+        content.split(/[\r\n]+/).forEach((line) => {
+            this.addLine(`|  ${line}`)
+        })
+    }
+    
     public async beautify() {
         await this.formatLog();
         
