@@ -39,4 +39,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          METEOR_SESSION_FILE: ${{ env.METEOR_SESSION_FILE_PATH }}
