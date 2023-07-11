@@ -20,12 +20,6 @@ export class MeteorViteError extends Error implements ErrorMetadata {
         this.context = context;
         this.package = meteorPackage;
         
-        if (meteorPackage) {
-            this.addLine(`Package: ${meteorPackage.packageId}`)
-        }
-        if (context) {
-            this.addLine(`File: ${context.id}`)
-        }
         if (cause && !subtitle) {
             this.subtitle = `Caused by [${cause?.name}] ${cause?.message}`
         }
@@ -79,12 +73,14 @@ export class MeteorViteError extends Error implements ErrorMetadata {
         this.name = `\n\n` + this.titleDivider({
             title: `[${this.constructor.name}]`,
             divider: '_',
-            indent: 3,
-        }) + '\n';
+            indent: 6,
+        }) + pc.yellow(`\n⚡   <${pc.yellow(this.context?.id.replace('meteor/', ''))}>`);
         
         this.message = [
-            `⚡   ${this.message}`,
-            `-   ${this.subtitle}`,
+            '',
+            '',
+            `${pc.bgRed(pc.bold(' ERROR '))} ${this.message}`,
+            `${pc.dim(this.subtitle)}`,
             '',
             ...this.metadataLines!,
             this.titleDivider({
