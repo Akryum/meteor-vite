@@ -2,7 +2,9 @@ import { inspect } from 'util';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import ViteLoadRequest, { RequestContext } from '../ViteLoadRequest';
 import PackageJson from '../../../package.json';
+import pc from 'picocolors';
 
+const divColor = (text: string) => pc.dim(text);
 
 export class MeteorViteError extends Error implements ErrorMetadata {
     public package: ErrorMetadata['package'];
@@ -49,28 +51,35 @@ export class MeteorViteError extends Error implements ErrorMetadata {
         const content = inspect(object, { colors: true });
         const divider = this.titleDivider({
             title: `[${title}]`,
-            addLength: -2,
+            indent: 2,
         })
         this.addLine(divider);
         content.split(/[\r\n]+/).forEach((line) => {
-            this.addLine(`|  ${line}`)
+            this.addLine(`${divColor('|')}  ${line}`)
         })
     }
     
-    protected titleDivider({ title = '', addLength = 0, divider = '-' }) {
-        let repeatCount = 85 - title.length + addLength;
+    protected titleDivider({
+       title = '',
+       addLength = 0,
+       divider = '-',
+       indent = 0
+   }) {
+        divider = divColor(divider);
+        let repeatCount = 85 - title.length + addLength - indent;
         if (repeatCount < 1) {
             return title;
         }
-        return `${title}${divider.repeat(repeatCount)}`
+        return `${divider.repeat(indent)}${title}${divider.repeat(repeatCount)}`
     }
     
     public async beautify() {
         await this.formatLog();
         
-        this.name = this.titleDivider({
-            title: `\n\n___[${this.constructor.name}]`,
-            divider: '_'
+        this.name = `\n\n` + this.titleDivider({
+            title: `[${this.constructor.name}]`,
+            divider: '_',
+            indent: 3,
         }) + '\n';
         
         this.message = [
@@ -79,7 +88,8 @@ export class MeteorViteError extends Error implements ErrorMetadata {
             '',
             ...this.metadataLines!,
             this.titleDivider({
-                title: '--[Error Stack]',
+                title: '[Error Stack]',
+                indent: 2,
             }),
         ].filter((line, index) => {
             if (typeof line !== 'string') {

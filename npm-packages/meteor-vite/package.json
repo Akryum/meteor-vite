@@ -37,7 +37,8 @@
   "license": "ISC",
   "dependencies": {
     "@babel/parser": "^7.22.5",
-    "@babel/traverse": "^7.22.5"
+    "@babel/traverse": "^7.22.5",
+    "picocolors": "^1.0.0"
   },
   "devDependencies": {
     "@babel/types": "^7.22.5",
