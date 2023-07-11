@@ -73,7 +73,7 @@ export default class ViteLoadRequest {
         const packageName = packageId.replace(/^meteor\//, '');
         const sourceName = packageName.replace(':', '_');
         const sourceFile = `${sourceName}.js`;
-        const sourcePath = Path.join(pluginSettings.meteorPackagePath, sourceFile);
+        const sourcePath = Path.join(pluginSettings.meteor.packagePath, sourceFile);
         
         /**
          * Raw file content for the current file request.
@@ -145,7 +145,7 @@ export default class ViteLoadRequest {
      * @return {Promise<void>}
      */
     public async forceImport() {
-        const mainModule = this.context.pluginSettings.projectJsonContent.meteor.mainModule;
+        const mainModule = this.context.pluginSettings.packageJson.meteor.mainModule;
         
         if (!mainModule?.client) {
             throw new MeteorViteError(`No meteor.mainModule.client found in package.json`)
