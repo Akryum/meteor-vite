@@ -6,7 +6,7 @@ on:
       - release
 
 env:
-  METEOR_SESSION_FILE_PATH: /opt/.meteor-session.json
+  METEOR_SESSION_FILE_PATH: ./.gh-release/.meteor_session.json
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
@@ -21,6 +21,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+
+      - name: 'Prepare Meteor Session'
+        run: |
+          echo '${{ secrets.METEOR_SESSION }}' > "$METEOR_SESSION_FILE_PATH"
 
       - name: 'Configure Git'
         run: | 
