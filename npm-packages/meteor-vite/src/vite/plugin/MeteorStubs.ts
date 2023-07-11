@@ -1,5 +1,6 @@
 import FS from 'fs/promises';
 import Path from 'path';
+import pc from 'picocolors';
 import { Plugin } from 'vite';
 import Logger from '../../Logger';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
@@ -92,7 +93,9 @@ async function storeDebugSnippet({ request, stubTemplate }: {
         FS.writeFile(packagePath, await request.context.file.content),
     ]);
     
-    console.log('Stored debug snippets for package %s in %s', request.context.id, baseDir)
+    request.log.info('Stored debug snippets', {
+        File: pc.cyan(baseDir),
+    })
 }
 
 
