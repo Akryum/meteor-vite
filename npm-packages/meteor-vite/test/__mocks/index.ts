@@ -149,7 +149,7 @@ export const AutoImportMock = new class {
     protected readonly sourceDir = Path.join(__dirname, '/auto-imports/entrypoint');
     public readonly outDir = Path.join(this.sourceDir, '.temp');
     
-    protected readonly entrypoints = {
+    public readonly entrypoints = {
         empty: 'empty.js',
         withExistingAutoImports: 'with-existing-auto-imports.js',
         withUnrelatedImports: 'with-unrelated-imports.js',

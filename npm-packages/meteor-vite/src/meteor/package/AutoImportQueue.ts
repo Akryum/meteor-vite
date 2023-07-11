@@ -10,7 +10,17 @@ export default new class AutoImportQueue {
     protected restartTimeout?: ReturnType<typeof setTimeout>;
     protected addedPackages: string[] = [];
     protected queueWrite = PLimit(1);
-    protected onRestartWatchers: (() => void)[] = []
+    protected onRestartWatchers: (() => void)[] = [];
+    
+    /**
+     * Once an import is added for a lazy-loaded package, the Meteor server needs to restart in order for the
+     * package to become available to Vite.
+     *
+     * This countdown timer will start from the first auto-import and reset with every following import request
+     * within the time limit. If no more requests are received, the server will finally restart.
+     * @type {number}
+     */
+    public readonly RESTART_COUNTDOWN_MS = 2_500;
     
     /**
      * Queues auto-imports for writing to disk to avoid race-conditions with concurrent write requests to the same file.
@@ -56,7 +66,7 @@ export default new class AutoImportQueue {
         
         this.restartTimeout = setTimeout(() => {
             this.onRestartWatchers.forEach((callListener) => callListener());
-        }, 2500)
+        }, this.RESTART_COUNTDOWN_MS)
         
         return new Promise<void>((resolve, reject) => {
             this.onRestartWatchers.push(() => {
