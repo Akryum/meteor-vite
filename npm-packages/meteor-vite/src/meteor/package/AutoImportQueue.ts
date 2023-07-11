@@ -2,16 +2,15 @@ import FS from 'fs/promises';
 import Logger from '../../Logger';
 import { RefreshNeeded } from '../../vite/ViteLoadRequest';
 import { viteAutoImportBlock } from './StubTemplate';
+import PLimit from 'p-limit';
 
 export const wait = (waitMs: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), waitMs));
 
 export default new class AutoImportQueue {
-    protected readonly requests = new Map<string, { threadId: string }>();
-    protected queue: (() => Promise<void>)[] = [];
     protected restartTimeout?: ReturnType<typeof setTimeout>;
-    protected workerId?: string;
-    protected currentJob = Promise.resolve();
     protected addedPackages: string[] = [];
+    protected queueWrite = PLimit(1);
+    protected onRestartWatchers: (() => void)[] = []
     
     /**
      * Queues auto-imports for writing to disk to avoid race-conditions with concurrent write requests to the same file.
@@ -29,7 +28,7 @@ export default new class AutoImportQueue {
             return;
         }
         
-        await this.prepareThread(importString, async () => {
+        await this.queueWrite(async () => {
             const content = await FS.readFile(meteorEntrypoint, 'utf-8')
             const newContent = viteAutoImportBlock({
                 id: importString,
@@ -43,7 +42,7 @@ export default new class AutoImportQueue {
                                : 'Added auto-import for "%s" - server will restart shortly';
             
             Logger.info(logMessage, importString);
-        });
+        })
         
         if (this.addedPackages.length > lastPackageCount && !skipRestart) {
             await this.scheduleRestart()
@@ -55,67 +54,17 @@ export default new class AutoImportQueue {
             clearTimeout(this.restartTimeout);
         }
         
+        this.restartTimeout = setTimeout(() => {
+            this.onRestartWatchers.forEach((callListener) => callListener());
+        }, 2500)
+        
         return new Promise<void>((resolve, reject) => {
-            let rejected = false;
-            setTimeout(() => !rejected && resolve(), 2550);
-            
-            this.restartTimeout = setTimeout(() => {
-                rejected = true;
-                this.requests.clear();
-                
-                // Todo: Look into a better way for forcing a restart without needing a potentially confusing error
-                this.processQueuedImports().then(() => reject(new RefreshNeeded(`Terminating Vite server to load isopacks for new packages`, this.addedPackages)))
-            }, 2500);
+            this.onRestartWatchers.push(() => {
+                reject(
+                    // Todo: Look into a better way for forcing a restart without needing a potentially confusing error
+                    new RefreshNeeded(`Terminating Vite server to load isopacks for new packages`, this.addedPackages)
+                )
+            })
         })
     }
-    
-    protected async prepareThread(importString: string, write: () => Promise<void>)  {
-        const threadId = Math.random().toString();
-        const existingRequest = this.requests.get(importString);
-        
-        if (!this.workerId) {
-            this.workerId = threadId;
-        }
-        
-        if (existingRequest) {
-            Logger.debug('Detected multiple import requests for "%s" - skipping import', importString);
-            return;
-        }
-        
-        this.requests.set(importString, { threadId: this.workerId });
-        const writePromise = new Promise((resolve, reject) => {
-            this.queue.push(() => write().then(resolve)
-                                         .catch(reject)
-                                         .finally(() => this.requests.delete(importString)));
-        });
-        await wait(150);
-        
-        if (threadId !== this.workerId) {
-            Logger.debug(
-                'Detected concurrent auto-import requests for the same module. Waiting on other imports...',
-                { importString, existingRequest, threadId: this.workerId },
-            )
-            return writePromise;
-        }
-        
-        Logger.debug('Worker: %s - Processing import queue...', this.workerId);
-        
-        this.currentJob = this.currentJob.then(() => this.processQueuedImports());
-        return writePromise;
-    }
-    
-    protected async processQueuedImports() {
-        const queue = [...this.queue];
-        this.queue = [];
-        
-        for (const addImport of queue) {
-            await addImport();
-        }
-        
-        this.workerId = undefined;
-        if (this.queue.length) {
-            await this.processQueuedImports();
-        }
-    }
-    
 }
