@@ -1,6 +1,7 @@
 import { existsSync } from 'fs';
 import FS from 'fs/promises';
 import Path from 'path';
+import pc from 'picocolors';
 import { createLabelledLogger, LabelLogger } from '../Logger';
 import AutoImportQueue from '../meteor/package/AutoImportQueue';
 import { isSameModulePath } from '../meteor/package/Serialize';
@@ -116,7 +117,7 @@ export default class ViteLoadRequest {
     
     constructor(public readonly context: RequestContext ) {
         this.isLazyLoaded = false;
-        this.log = createLabelledLogger(context.id);
+        this.log = createLabelledLogger(`[${pc.yellow(context.id.replace('meteor/', ''))}]`);
         
         context.manifest?.resources.forEach((resource) => {
             const isMainModule = resource.fileOptions.mainModule;
