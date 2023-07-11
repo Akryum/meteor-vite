@@ -63,14 +63,14 @@ export class MeteorViteError extends Error implements ErrorMetadata {
     public async beautify() {
         await this.formatLog();
         
-        this.name = this.titleDivider(`---[${this.constructor.name}]`) + '\n';
+        this.name = this.titleDivider(`\n\n---[${this.constructor.name}]`) + '\n';
         
         this.message = [
             `⚡   ${this.message}`,
             `-   ${this.subtitle}`,
             '',
             ...this.metadataLines!,
-            this.titleDivider('---[Error Stack]')
+            this.titleDivider('---[Error Stack]'),
         ].filter((line, index) => {
             if (typeof line !== 'string') {
                 return false;
@@ -80,6 +80,8 @@ export class MeteorViteError extends Error implements ErrorMetadata {
             }
             return true;
         }).join('\n');
+        
+        this.stack = `${this.stack}\n__\n`;
         
         this.clearProperties([
             'subtitle',
