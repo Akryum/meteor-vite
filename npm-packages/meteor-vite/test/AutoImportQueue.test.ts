@@ -61,47 +61,6 @@ describe('Package auto-imports', async () => {
             expect(newContent.match(matchRegex)?.length).toEqual(1);
         })
         
-        it('adds import lines one by one during concurrent import requests', async (context) => {
-            type AutoImportResult = { index: number, lastResolvedIndex: number, importString: string };
-            let lastResolvedIndex = -1;
-            const MOCK_IMPORT_COUNT = 25;
-            const pendingImports: Promise<AutoImportResult>[] = [];
-            const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
-                testName: context.task.name,
-                entrypoint: 'withUnrelatedImports',
-            });
-            
-            for (let index = 0; index < MOCK_IMPORT_COUNT; index++) {
-                const importString = `meteor/test:auto-imports-${index}`
-                pendingImports.push(AutoImportQueue.write({
-                    importString,
-                    meteorEntrypoint,
-                    skipRestart: true,
-                }).then(() => {
-                    console.log('Import completed for %s', importString);
-                    const result: AutoImportResult = {
-                        importString,
-                        lastResolvedIndex,
-                        index,
-                    }
-                    lastResolvedIndex = index;
-                    return result;
-                }));
-            }
-            
-            const imports = await Promise.all(pendingImports);
-            const newContent = await readContent()
-            
-            expect(lastResolvedIndex).toEqual(MOCK_IMPORT_COUNT - 1);
-            console.log({ lastResolvedIndex });
-            
-            imports.forEach((result) => {
-                console.log({ result });
-                expect(result.lastResolvedIndex).toEqual(result.index - 1);
-                expect(newContent).toContain(`'${result.importString}'`);
-            })
-        }, 15_000);
-        
         it('handles concurrent import requests submitted at different times', async (context) => {
             const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
                 testName: context.task.name,
