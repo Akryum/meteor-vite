@@ -5,10 +5,10 @@ on:
       - main
       - release
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
 env:
   METEOR_SESSION_FILE_PATH: /opt/.meteor-session.json
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   release:
     name: Release
@@ -29,9 +29,6 @@ jobs:
 
       - name: 'Install Dependencies'
         run: meteor npm run install:workspace
-
-      - name: 'Prepare Meteor Session'
-        run: echo '${{ secrets.METEOR_SESSION }}' > ${{ env.METEOR_SESSION_FILE_PATH }}
 
       - name: 'Create Release'
         id: changesets
