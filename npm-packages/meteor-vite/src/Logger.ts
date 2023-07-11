@@ -1,5 +1,6 @@
+import pc from 'picocolors';
 
-export function CreateLogger<Params extends DefaultParams>(formatter: (...params: Params) => DefaultParams): LoggerObject<Params> {
+function createLogger<Params extends DefaultParams>(formatter: (...params: Params) => DefaultParams): LoggerObject<Params> {
     return {
         info: (...params: Params) => console.log(...formatMessage(formatter(...params))),
         warn: (...params: Params) => console.warn(...formatMessage(formatter(...params))),
@@ -18,4 +19,17 @@ export type LoggerObject<Params extends DefaultParams> = { [key in LoggerMethods
 type DefaultParams = Parameters<typeof console.log>;
 type LoggerMethods = 'info' | 'warn' | 'error' | 'debug';
 
-export default CreateLogger((...params: DefaultParams) => params);
+export const CreateLogger = (label: string) => createLogger<[
+    message: string,
+    dataLines: [key: string, value: string][] | Record<string, string>
+]>((message, dataLines) => {
+    if (!Array.isArray(dataLines)) {
+        dataLines = Object.entries(dataLines);
+    }
+    const data = dataLines.map(([key, value]) => {
+        return `\n ${pc.dim('L')}  ${key}: ${value}`
+    }).join('')
+    return [`${label} ${message}${data}`]
+});
+
+export default createLogger((...params: DefaultParams) => params);
