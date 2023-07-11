@@ -46,31 +46,40 @@ export class MeteorViteError extends Error implements ErrorMetadata {
     
     protected addSection(title: string, object: any) {
         const content = inspect(object, { colors: true });
-        this.addLine(this.titleDivider(`[${title}]`, -2));
+        const divider = this.titleDivider({
+            title: `[${title}]`,
+            addLength: -2,
+        })
+        this.addLine(divider);
         content.split(/[\r\n]+/).forEach((line) => {
             this.addLine(`|  ${line}`)
         })
     }
     
-    protected titleDivider(title: string, addLength = 0) {
+    protected titleDivider({ title = '', addLength = 0, divider = '-' }) {
         let repeatCount = 85 - title.length + addLength;
         if (repeatCount < 1) {
             return title;
         }
-        return `${title}${'-'.repeat(repeatCount)}`
+        return `${title}${divider.repeat(repeatCount)}`
     }
     
     public async beautify() {
         await this.formatLog();
         
-        this.name = this.titleDivider(`\n\n---[${this.constructor.name}]`) + '\n';
+        this.name = this.titleDivider({
+            title: `\n\n___[${this.constructor.name}]`,
+            divider: '_'
+        }) + '\n';
         
         this.message = [
             `⚡   ${this.message}`,
             `-   ${this.subtitle}`,
             '',
             ...this.metadataLines!,
-            this.titleDivider('---[Error Stack]'),
+            this.titleDivider({
+                title: '--[Error Stack]',
+            }),
         ].filter((line, index) => {
             if (typeof line !== 'string') {
                 return false;
@@ -81,7 +90,12 @@ export class MeteorViteError extends Error implements ErrorMetadata {
             return true;
         }).join('\n');
         
-        this.stack = `${this.stack}\n__\n`;
+        const endOfLog = this.titleDivider({ divider: '_' })
+        this.stack = `${this.stack}\n${endOfLog}\n`;
+        
+        if (!this.cause) {
+            this.clearProperties(['cause'])
+        }
         
         this.clearProperties([
             'subtitle',
