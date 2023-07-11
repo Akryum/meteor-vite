@@ -39,12 +39,10 @@ const filesToCopy = [
   meteorMainModule,
 ]
 // Todo: Refactor directory structure to better indicate each target's purpose
+// Todo: Use maybe using os.tmpdir() may be a better approach here to avoid bloating users' node_modules over time
 const tempMeteorProject = path.resolve(cwd, 'node_modules', '.vite-meteor-temp')
-const meteorPackagePath = path.join(tempMeteorProject, '.dist', 'bundle', 'programs', 'web.browser', 'packages')
+const tempMeteorOutDir = path.join(tempMeteorProject, '.dist')
 const viteOutDir = path.join(cwd, 'node_modules', '.vite-meteor', 'dist')
-
-
-const payloadMarker = '_vite_result_payload_'
 
 try {
   // Temporary Meteor build
@@ -97,7 +95,7 @@ try {
   }
   execaSync('meteor', [
     'build',
-    './.dist',
+    tempMeteorOutDir,
     '--directory',
   ], {
     cwd: tempMeteorProject,
@@ -128,8 +126,10 @@ try {
       method: 'buildForProduction',
       params: [{
         viteOutDir,
-        meteorPackagePath,
-        payloadMarker,
+        meteor: {
+          packagePath: path.join(tempMeteorOutDir, 'bundle', 'programs', 'web.browser', 'packages'),
+          isopackPath: path.join(tempMeteorProject, '.meteor', 'local', 'isopacks'),
+        },
       }],
     })
   }))
