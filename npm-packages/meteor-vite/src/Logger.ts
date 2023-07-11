@@ -1,8 +1,11 @@
-export default {
-    info: (...params: Parameters<typeof console.log>) => console.log(...formatMessage(params)),
-    warn: (...params: Parameters<typeof console.log>) => console.warn(...formatMessage(params)),
-    error: (...params: Parameters<typeof console.log>) => console.error(...formatMessage(params)),
-    debug: (...params: Parameters<typeof console.log>) => process.env.ENABLE_DEBUG_LOGS && console.debug(...formatMessage(params)),
+
+export function CreateLogger<Params extends DefaultParams>(formatter: (...params: Params) => DefaultParams): LoggerObject<Params> {
+    return {
+        info: (...params: Params) => console.log(...formatMessage(formatter(...params))),
+        warn: (...params: Params) => console.warn(...formatMessage(formatter(...params))),
+        error: (...params: Params) => console.error(...formatMessage(formatter(...params))),
+        debug: (...params: Params) => process.env.ENABLE_DEBUG_LOGS && console.debug(...formatMessage(formatter(...params))),
+    }
 }
 
 function formatMessage([message, ...params]: Parameters<typeof console.log>): Parameters<typeof console.log> {
@@ -11,3 +14,8 @@ function formatMessage([message, ...params]: Parameters<typeof console.log>): Pa
     }
     return [message, ...params];
 }
+export type LoggerObject<Params extends DefaultParams> = { [key in LoggerMethods]: (...params: Params) => void };
+type DefaultParams = Parameters<typeof console.log>;
+type LoggerMethods = 'info' | 'warn' | 'error' | 'debug';
+
+export default CreateLogger((...params: DefaultParams) => params);
