@@ -71,7 +71,7 @@ function prepareLoad<Context extends ViteLoadRequest>(plugin: {
             }
             
             error.setContext(request);
-            await error.formatLog();
+            await error.beautify();
             throw error;
         })
     }

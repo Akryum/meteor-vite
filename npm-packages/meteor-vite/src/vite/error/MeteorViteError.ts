@@ -1,52 +1,86 @@
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import ViteLoadRequest, { RequestContext } from '../ViteLoadRequest';
 
-export class MeteorViteError extends Error {
-    public viteId?: string;
-    constructor(protected readonly originalMessage: string, metadata?: ErrorMetadata) {
-        let messagePrefix = '';
-        let messageSuffix = '';
+
+export class MeteorViteError extends Error implements ErrorMetadata {
+    public package: ErrorMetadata['package'];
+    public context: ErrorMetadata['context'];
+    public cause: ErrorMetadata['cause'];
+    public subtitle?: ErrorMetadata['subtitle'];
+    protected metadataLines: string[] = [];
+    
+    constructor(public originalMessage?: string, { cause, context, package: meteorPackage, subtitle }: ErrorMetadata = {}) {
+        super(originalMessage);
+        this.subtitle = subtitle
+        this.cause = cause;
+        this.context = context;
+        this.package = meteorPackage;
         
-        if (metadata?.package) {
-            messagePrefix = `<${metadata.package.packageId}> \n  `
+        if (meteorPackage) {
+            this.addLine(`Package: ${meteorPackage.packageId}`)
         }
-        if (metadata?.cause) {
-            messageSuffix = `: ${metadata.cause.message}`
+        if (context) {
+            this.addLine(`File: ${context.id}`)
         }
-        
-        super(`${messagePrefix}⚡  ${originalMessage}${messageSuffix}`);
-        this.name = this.constructor.name;
-        
-        if (metadata?.context) {
-            this.viteId = metadata.context.id;
-        }
-        
-        if (metadata?.cause) {
-            const selfStack = this.splitStack(this.stack || '');
-            const otherStack = this.splitStack(metadata.cause.stack || '')?.map((line) => `  ${line}`);
-            this.stack = [selfStack[1], selfStack[2], '  Caused by:', ...otherStack].join('\n');
+        if (cause && !subtitle) {
+            this.subtitle = `Caused by [${cause?.name}] ${cause?.message}`
         }
     }
     
-    protected addMetadataLines(lines: string[]) {
-        const whitespace = '\n    '
-        this.message = `${this.message}${whitespace}${lines.join(whitespace)}\n  ${this.constructor.name}: ${this.originalMessage}`
+    protected addLine(...lines: string[] | [string[]]) {
+        if (Array.isArray(lines[0])) {
+            lines = lines[0];
+        }
+        const whitespace = '  '
+        this.metadataLines.push(`${whitespace}${lines.join(whitespace)}`);
     }
     
     public setContext(loadRequest: ViteLoadRequest) {
-        this.viteId = loadRequest.context.id;
+        this.context = loadRequest.context;
     }
     
-    private splitStack(stack: string) {
-        return stack?.split(/[\n\r]+/);
-    }
-    
-    public async formatLog() {
+    protected async formatLog() {
         // Used for errors that extend MeteorViteError to add additional data to the error's stack trace.
+    }
+    
+    public async beautify() {
+        await this.formatLog();
+        
+        this.name = `---[${this.constructor.name}]`;
+        this.name += '-'.repeat(80 - this.name.length) + '\n';
+        
+        this.message = [
+            `⚡   ${this.message}`,
+            `-   ${this.subtitle}`,
+            '',
+            ...this.metadataLines!,
+            '-'.repeat(80)
+        ].filter((line, index) => {
+            if (typeof line !== 'string') {
+                return false;
+            }
+            if (index === 1 && !this.subtitle) { // Filter out subtitle
+                return false;
+            }
+            return true;
+        }).join('\n');
+        
+        this.clearProperties([
+            'subtitle',
+            'originalMessage',
+            'package',
+            'context',
+            'metadataLines',
+        ])
+    }
+    
+    protected clearProperties(keys: (keyof ErrorMetadata | keyof MeteorViteError | 'metadataLines')[]) {
+        keys.forEach((key) => delete this[key]);
     }
 }
 
 export interface ErrorMetadata {
+    subtitle?: string;
     package?: Pick<MeteorPackage, 'packageId'>;
     context?: Pick<RequestContext, 'id'>;
     cause?: Error;

@@ -332,14 +332,14 @@ class ParserError extends MeteorViteError {
     public async formatLog() {
         const { parseOptions, node } = await this.metadata || {};
         if (parseOptions?.fileContent) {
-            this.addMetadataLines([
+            this.addLine([
                 `// File content for: ${this.metadata?.parseOptions?.filePath}`,
                 '',
                 ...(await parseOptions.fileContent).split(/[\r\n]+/)
             ]);
         }
         if (node) {
-            this.addMetadataLines([inspect(node)]);
+            this.addLine([inspect(node)]);
         }
     }
 }
