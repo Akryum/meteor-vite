@@ -70,7 +70,6 @@ export default new class AutoImportQueue {
     }
     
     protected async prepareThread(importString: string, write: () => Promise<void>)  {
-        await this.currentJob;
         const threadId = Math.random().toString();
         const existingRequest = this.requests.get(importString);
         
@@ -106,7 +105,7 @@ export default new class AutoImportQueue {
     }
     
     protected async processQueuedImports() {
-        const queue = this.queue;
+        const queue = [...this.queue];
         this.queue = [];
         
         for (const addImport of queue) {
@@ -114,6 +113,9 @@ export default new class AutoImportQueue {
         }
         
         this.workerId = undefined;
+        if (this.queue.length) {
+            await this.processQueuedImports();
+        }
     }
     
 }
