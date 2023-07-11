@@ -9,7 +9,6 @@ import CreateIPCInterface, { IPCReply } from './IPC/interface';
 
 interface BuildOptions {
     viteOutDir: string;
-    payloadMarker: string;
     meteor: PluginSettings['meteor'];
 }
 
@@ -28,7 +27,7 @@ export default CreateIPCInterface({
         buildConfig: BuildOptions
     ) {
         const viteConfig: MeteorViteConfig = await resolveConfig({}, 'build');
-        const { viteOutDir, meteor, payloadMarker } = buildConfig;
+        const { viteOutDir, meteor } = buildConfig;
         
         Object.entries(buildConfig).forEach(([key, value]) => {
             if (!value) {
