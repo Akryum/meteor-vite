@@ -2,7 +2,6 @@ import FS from 'fs/promises';
 import Path from 'path';
 import pc from 'picocolors';
 import { Plugin } from 'vite';
-import Logger from '../../Logger';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
 import { MeteorViteError } from '../error/MeteorViteError';
@@ -100,24 +99,32 @@ async function storeDebugSnippet({ request, stubTemplate }: {
 
 
 export interface PluginSettings {
-    /**
-     * Path to Meteor's internal package cache.
-     *
-     * @example
-     * .meteor/local/build/programs/web.browser/packages
-     */
-    meteorPackagePath: string;
+    
+    meteor: {
+        /**
+         * Path to Meteor's internal package cache.
+         * This can change independently of the isopack path depending on whether we're building for production or
+         * serving up the dev server.
+         *
+         * @example {@link /examples/vue/.meteor/local/build/programs/web.browser/packages}
+         */
+        packagePath: string;
+        
+        /**
+         * Path to Meteor's Isopacks store. Used to determine where a package's mainModule is located and whether
+         * the package has lazy-loaded modules. During production builds this would be pulled from a temporary
+         * Meteor build, so that we have solid metadata to use when creating Meteor package stubs.
+         *
+         * @example {@link /examples/vue/.meteor/local/isopacks/}
+         */
+        isopackPath: string;
+    }
     
     /**
-     * Path to Meteor's Isopacks store.
-     * Used to determine where a package's mainModule is located and whether it's a lazy-loaded package.
+     * Full content of the user's Meteor project package.json.
+     * Like the one found in {@link /examples/vue/package.json}
      */
-    meteorIsopackPath: string;
-    
-    /**
-     * Full content of the Meteor project's package.json.
-     */
-    projectJsonContent: ProjectJson;
+    packageJson: ProjectJson;
     
     /**
      * Enabling debug mode will write all input and output files to a `.meteor-vite` directory.
