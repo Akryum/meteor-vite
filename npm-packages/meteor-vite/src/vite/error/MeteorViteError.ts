@@ -53,12 +53,18 @@ export class MeteorViteError extends Error implements ErrorMetadata {
         })
     }
     
+    protected addDivider(title: string) {
+        let repeatCount = 80 - title.length;
+        if (repeatCount < 1) {
+            return title;
+        }
+        return `${title}${'-'.repeat(repeatCount)}`
+    }
     
     public async beautify() {
         await this.formatLog();
         
-        this.name = `---[${this.constructor.name}]`;
-        this.name += '-'.repeat(80 - this.name.length) + '\n';
+        this.name = this.addDivider(`---[${this.constructor.name}]`) + '\n';
         
         this.message = [
             `⚡   ${this.message}`,
