@@ -1,0 +1,25 @@
+{
+  "changesets": [
+    {
+      "releases": [
+        {
+          "name": "vite-bundler",
+          "type": "patch"
+        }
+      ],
+      "summary": "- Clean up internal tsconfig.json\n- Test changeset releases",
+      "id": "early-pumpkins-burn"
+    }
+  ],
+  "releases": [
+    {
+      "name": "vite-bundler",
+      "type": "patch",
+      "oldVersion": "1.0.0",
+      "changesets": [
+        "early-pumpkins-burn"
+      ],
+      "newVersion": "1.0.1"
+    }
+  ]
+}
