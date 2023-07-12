@@ -4,22 +4,35 @@
       "releases": [
         {
           "name": "vite-bundler",
-          "type": "patch"
+          "type": "minor"
+        },
+        {
+          "name": "meteor-vite",
+          "type": "minor"
         }
       ],
-      "summary": "- Clean up internal tsconfig.json\n- Test changeset releases",
-      "id": "early-pumpkins-burn"
+      "summary": "- Fixed an issue where Meteor builds with lazy-loaded packages would only work if Meteor had been run at least once in development mode.\n- Fixed an issue where some lazy-loaded packages would cause the Vite dev server to become unresponsive\n- Updated Vite dev server loggers.",
+      "id": "strong-sheep-drop"
     }
   ],
   "releases": [
     {
       "name": "vite-bundler",
-      "type": "patch",
+      "type": "minor",
+      "oldVersion": "1.0.1",
+      "changesets": [
+        "strong-sheep-drop"
+      ],
+      "newVersion": "1.1.0"
+    },
+    {
+      "name": "meteor-vite",
+      "type": "minor",
       "oldVersion": "1.0.0",
       "changesets": [
-        "early-pumpkins-burn"
+        "strong-sheep-drop"
       ],
-      "newVersion": "1.0.1"
+      "newVersion": "1.1.0"
     }
   ]
 }
