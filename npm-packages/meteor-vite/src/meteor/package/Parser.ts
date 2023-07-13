@@ -201,6 +201,29 @@ function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' 
     };
 }
 
+const KnownModuleMethods = ['export', 'link', 'exportDefault'] as const;
+type ModuleMethod = typeof KnownModuleMethods[number];
+
+function validateModuleMethod(method: string): asserts method is ModuleMethod {
+    if (!KnownModuleMethods.includes(method as ModuleMethod)) {
+        // todo: Classify error so that only a warning will be emitted to the console instead of a hard error.
+        throw new ParserError(`Meteor module.${method}(...) is not recognized by Meteor-Vite! Please open an issue to get this resolved! 🙏`)
+    }
+}
+
+// Todo narrow the type assertion down to something like ModuleLinkExpression, ModuleExportExpression,
+//  ModuleExportDefault
+function parseModuleMethod(node: Node): node is MemberExpression {
+    if (node.type !== 'MemberExpression') return false;
+    if (node.object.type !== 'Identifier') return false;
+    if (!node.object.name.match(/^module\d*$/)) return false;
+    if (node.property.type !== 'Identifier') return false;
+    
+    validateModuleMethod(node.property.name);
+    
+    return true;
+}
+
 // Todo: Refactor export handling into a more broad parsing approach.
 // One handler where we match against any Member call expression that matches our criteria;
 // Object name: module or module[0-9]+
