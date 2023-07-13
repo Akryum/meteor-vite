@@ -234,12 +234,24 @@ class MeteorInstall {
 
 class PackageModule {
     public readonly exports: ModuleExport[] = [];
-    constructor(public readonly module: { path: string }) {}
+    constructor(public readonly module: {
+        /**
+         * Relative path to the package for this module.
+         * E.g. /index.js
+         */
+        path: string
+    }) {}
 
+    /**
+     * Helper for checking if an already validated node is of the provided method
+     */
     protected isMethod<MethodName extends ModuleMethodName>(node: ModuleMethod.MethodMap[ModuleMethodName], method: MethodName): node is ModuleMethod.MethodMap[MethodName] {
         return node.callee.property.name === method;
     }
 
+    /**
+     * Check if provided node is a valid `module.[method]` call expression.
+     */
     protected shouldParse(node: Node): node is ModuleMethod.MethodMap[ModuleMethodName] {
         if (node.type !== 'CallExpression') return false;
 
@@ -259,6 +271,10 @@ class PackageModule {
         return true;
     }
 
+    /**
+     * Parse everything within the current module and store detected exports.
+     * Todo: Possibly migrate parsers to their own class to save on memory usage?
+     */
     public parse(node: Node) {
         if (!this.shouldParse(node)) return;
 
@@ -276,6 +292,10 @@ class PackageModule {
         }
     }
 
+    /**
+     * Parse a Meteor bundle's `module.link()` call.
+     * {@link ModuleMethod.Link}
+     */
     protected parseLink(node: NeedsArgValidation<'link'>) {
         const args = node.arguments;
 
@@ -301,6 +321,10 @@ class PackageModule {
         })
     }
 
+    /**
+     * Parse a Meteor bundle's `module.export({ ... })` call.
+     * {@link ModuleMethod.export see type for examples}
+     */
     protected parseExport(node: NeedsArgValidation<'export'>) {
         if (node.arguments[0].type !== 'ObjectExpression'){
             throw new ModuleExportsError('Unexpected export type!', exports)
@@ -311,6 +335,10 @@ class PackageModule {
         });
     }
 
+    /**
+     * Parse a Meteor bundle's `module.exportDefault()` call.
+     * {@link ModuleMethod.exportDefault see examples in type declaration}
+     */
     protected parseExportDefault(node: NeedsArgValidation<'exportDefault'>) {
         const args = node.arguments;
         if (args[0].type !== 'Identifier') {
