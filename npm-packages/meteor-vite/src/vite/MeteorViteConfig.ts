@@ -33,10 +33,8 @@ export interface StubValidationSettings {
     warnOnly?: boolean;
     
     /**
-     * Whether to use runtime stub validation in production.
-     * This can be useful if you use a tool for collecting error logs from your users where you'll be
-     * notified if something were to go wrong with the Vite build.
-     * @default false
+     * Whether to completely disable stub validation feature for Meteor-Vite.
+     * Really couldn't recommend it as warn-only should suffice.
      */
-    inProduction?: boolean;
+    disabled?: boolean;
 }

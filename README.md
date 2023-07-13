@@ -148,11 +148,10 @@ export default defineConfig({
       warnOnly: true,
 
       /**
-       * Whether to use runtime stub validation in production.
-       * This can be useful if you use a tool for collecting error logs from your users where you'll be
-       * notified if there was something you missed before the build went to production.
+       * Set to true to completely disable stub validation. Any of the above options will be ignored.
+       * This is discuraged as `warnOnly` should give you an important heads up if something might be wrong with Meteor-Vite
        */
-      inProduction: false,
+      disabled: false,
     }
   } satisfies MeteorViteConfig['meteor'],
 })
