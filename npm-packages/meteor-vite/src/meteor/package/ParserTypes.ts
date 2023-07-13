@@ -33,7 +33,7 @@ type ModuleMethodCall<
  * }, 1);
  */
 type ModuleLink = ModuleMethodCall<'link', [
-    importPath: StringLiteral,
+    importPath: StringLiteral, // Hopefully only StringLiteral is all that can be here.
     exports: ObjectExpression,
     id: NumericLiteral
 ] | [importPath: StringLiteral]>;
@@ -41,7 +41,7 @@ type ModuleLink = ModuleMethodCall<'link', [
 /**
  * Meteor's `module.exportDefault()` method - seems to only be used primarily for modules that are written in
  * TypeScript?
- * @example
+ * @example bundle result
  * function namedFunction() {
  *   return 'foo';
  * }
@@ -49,6 +49,22 @@ type ModuleLink = ModuleMethodCall<'link', [
  */
 type ModuleExportDefault = ModuleMethodCall<'exportDefault', [
     CallExpression['arguments'][number], // Can be anything, see ts_modules mock for example
+]>
+
+/**
+ * Meteor's `module.export({ ... })` method. This is essentially ES exports
+ * @example Package source
+ * export const Foo = 'bar'
+ * export default class FooBar {}
+ *
+ * @example Bundle result
+ * module.export({
+ *     Foo: () => Foo
+ *    FooBar: () => FooBar
+ * })
+ */
+type ModuleExport = ModuleMethodCall<'export', [
+    ObjectExpression, // todo: Narrow this type further for keys and values (key Identifier/StringLiteral, etc.)
 ]>
 
 export type MeteorPackageProperty = KnownObjectProperty<{
