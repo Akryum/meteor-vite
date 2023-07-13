@@ -22,6 +22,8 @@ export declare interface MeteorViteConfig extends ResolvedConfig {
 export interface StubValidationSettings {
     /**
      * list of packages to ignore export validation for.
+     * @example
+     * { ignorePackages: ['ostrio:cookies', 'test:ts-modules', ...] }
      */
     ignorePackages?: string[];
     
