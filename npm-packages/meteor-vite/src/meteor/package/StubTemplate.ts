@@ -110,7 +110,8 @@ function stubValidationTemplate({ settings, requestId, exportKeys, packageId }: 
     if (settings?.ignorePackages?.includes(packageId)) {
         return {
             importString: '',
-            validateStub: `console.debug("Stub validation disabled for '${packageId}'")`,
+            // language=js
+            validateStub: `console.debug("Stub validation disabled for '${packageId}'");`,
         }
     }
     
