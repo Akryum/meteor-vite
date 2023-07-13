@@ -1,9 +1,1 @@
-{
-  "public":{
-    "vite:bundler": {
-      "stubValidation": {
-        "warnOnly": true
-      }
-    }
-  }
-}
+{}
