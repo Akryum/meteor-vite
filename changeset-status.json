@@ -4,20 +4,39 @@
       "releases": [
         {
           "name": "meteor-vite",
+          "type": "minor"
+        }
+      ],
+      "summary": "- Migrate Vite stub validation configuration from Meteor's `settings.json` to Vite config.\n- Update exception names for stub validation\n- Add an option to stub validation where you can toggle it on or off entirely.",
+      "id": "funny-items-rest"
+    },
+    {
+      "releases": [
+        {
+          "name": "vite-bundler",
           "type": "patch"
         }
       ],
-      "summary": "Fix error handling for non-MeteorVite errors",
-      "id": "chatty-gifts-hope"
+      "summary": "- Rework \"waiting for Vite\" splash screen to work around issue where the screen would need to be refreshed manually.\n- Add `zodern:types` to vite-bundler",
+      "id": "nervous-dodos-jam"
     }
   ],
   "releases": [
     {
       "name": "meteor-vite",
+      "type": "minor",
+      "oldVersion": "1.1.1",
+      "changesets": [
+        "funny-items-rest"
+      ],
+      "newVersion": "1.2.0"
+    },
+    {
+      "name": "vite-bundler",
       "type": "patch",
       "oldVersion": "1.1.0",
       "changesets": [
-        "chatty-gifts-hope"
+        "nervous-dodos-jam"
       ],
       "newVersion": "1.1.1"
     }
