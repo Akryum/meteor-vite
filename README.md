@@ -126,25 +126,34 @@ broken Meteor packages.
 The validation is done simply through verifying that package exports do not have a `typeof` value of `undefined`.
 If you do have a package that intentionally has `undefined` exports, you can disable the warning message for this 
 package by excluding it in your Meteor settings.json file;
-```json5
-{
-  "public": {
-    "vite": {
-      "bundler": {
-        "stubValidation": {
-          /**
-           * list of packages to ignore export validation for.
-           */
-          "ignorePackages": ["ostrio:cookies"],
+```ts
+// vite.config.ts
 
-          /**
-           * Will only emit warnings in the console instead of throwing an exception that may prevent the client app
-           * from loading.
-           */
-          "warnOnly": true,
-        }
-      }
+import type { MeteorViteConfig } from 'meteor-vite';
+export default defineConfig({
+  // ...
+  
+  meteor: {
+    clientEntry: 'imports/ui/main.ts',
+    stubValidation: {
+      /**
+       * list of packages to ignore export validation for.
+       */
+      ignorePackages: ["ostrio:cookies"],
+
+      /**
+       * Will only emit warnings in the console instead of throwing an exception that may prevent the client app
+       * from loading.
+       */
+      warnOnly: true,
+
+      /**
+       * Whether to use runtime stub validation in production.
+       * This can be useful if you use a tool for collecting error logs from your users where you'll be
+       * notified if there was something you missed before the build went to production.
+       */
+      inProduction: false,
     }
-  },
-}
+  } satisfies MeteorViteConfig['meteor'],
+})
 ```
