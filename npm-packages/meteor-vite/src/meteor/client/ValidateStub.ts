@@ -30,6 +30,7 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
         packageName,
         stubbedPackage,
         exportKeys,
+        settings,
     });
     
     const errors: Error[] = [];
