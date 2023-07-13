@@ -104,6 +104,13 @@ function stubValidationTemplate({ settings, requestId, exportKeys, packageId }: 
         return {
             importString: '',
             validateStub: '',
+        };
+    }
+    
+    if (settings?.ignorePackages?.includes(packageId)) {
+        return {
+            importString: '',
+            validateStub: `console.debug("Stub validation disabled for '${packageId}'")`,
         }
     }
     
