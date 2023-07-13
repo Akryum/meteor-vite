@@ -232,6 +232,7 @@ class MeteorInstall {
 }
 
 class PackageModule {
+    public readonly exports: ModuleExport[] = [];
     constructor(public readonly module: { path: string }) {}
 
     protected isMethod<MethodName extends ModuleMethodName>(node: ModuleMethod.MethodMap[ModuleMethodName], method: MethodName): node is ModuleMethod.MethodMap[MethodName] {
@@ -269,7 +270,8 @@ class PackageModule {
         }
 
         if (this.isMethod(node, 'exportDefault')) {
-            return this.parseExportDefault(node);
+            this.exports.push(...this.parseExportDefault(node));
+            return;
         }
     }
 
@@ -282,7 +284,13 @@ class PackageModule {
     }
 
     protected parseExportDefault(node: ModuleMethod.ExportDefault) {
-        // todo
+        const args = node.arguments;
+        if (args[0].type !== 'Identifier') {
+            throw new ModuleExportsError('Unexpected default export value!', args[0]);
+        }
+
+        // todo: test for default exports with `export default { foo: 'bar' }`
+        return [{ type: 'export-default', name: args[0].name, } satisfies ModuleExport];
     }
 }
 
