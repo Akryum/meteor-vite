@@ -1,21 +1,19 @@
-<script>
+<script lang="ts">
   import { Meteor } from "meteor/meteor";
   import { LinksCollection } from '../api/links';
-  
+
+  /**
+   * Meteor tracker for Svelte
+   * {@link https://github.com/rdb/svelte-meteor-data}
+   */
+  import { useTracker } from 'meteor/rdb:svelte-meteor-data';
+
   let counter = 0;
   const addToCounter = () => {
     counter += 1;
   }
-  
-  let subIsReady = false;
-  $m: {
-    const handle = Meteor.subscribe("links.all");
-    subIsReady = handle.ready();
-  }
 
-  // more information about $m at https://atmospherejs.com/zodern/melte#tracker-statements
-  let links;
-  $m: links = LinksCollection.find().fetch();
+  const links = useTracker(() => LinksCollection.find().fetch());
 </script>
 
 
@@ -26,7 +24,7 @@
   <p>You've pressed the button {counter} times.</p>
 
   <h2>Learn Meteor!</h2>
-  {#if subIsReady}
+  {#await Meteor.subscribe('todos')}
     <ul>
       {#each links as link (link._id)}
         <li><a href={link.url} target="_blank" rel="noreferrer">{link.title}</a></li>
@@ -35,6 +33,7 @@
   {:else}
     <div>Loading ...</div>
   {/if}
+
   <h2>Typescript ready</h2>
   <p>Just add lang="ts" to .svelte components.</p>
 </div>
