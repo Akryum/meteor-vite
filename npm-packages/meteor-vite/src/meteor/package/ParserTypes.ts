@@ -35,7 +35,7 @@ type ModuleMethodCall<
  *     "*": "*"
  * }, 1);
  */
-type ModuleLink = ModuleMethodCall<'link', [
+export type ModuleLink = ModuleMethodCall<'link', [
     importPath: StringLiteral, // Hopefully only StringLiteral is all that can be here.
     exports: ObjectExpression,
     id: NumericLiteral
@@ -52,7 +52,7 @@ type ModuleLink = ModuleMethodCall<'link', [
  * @example Bundle result
  * module1.exportDefault(namedFunction);
  */
-type ModuleExportDefault = ModuleMethodCall<'exportDefault', [
+export type ModuleExportDefault = ModuleMethodCall<'exportDefault', [
     CallExpression['arguments'][number], // Can be anything, see ts_modules mock for example
 ]>
 
@@ -69,7 +69,7 @@ type ModuleExportDefault = ModuleMethodCall<'exportDefault', [
  *    FooBar: () => FooBar
  * })
  */
-type ModuleExport = ModuleMethodCall<'export', [
+export type ModuleExport = ModuleMethodCall<'export', [
     ObjectExpression, // todo: Narrow this type further for keys and values (key Identifier/StringLiteral, etc.)
 ]>
 
