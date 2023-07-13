@@ -201,6 +201,12 @@ function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' 
     };
 }
 
+// Todo: Refactor export handling into a more broad parsing approach.
+// One handler where we match against any Member call expression that matches our criteria;
+// Object name: module or module[0-9]+
+//  - link
+//  - export
+//  - exportDefault
 function readModuleExports(node: Node) {
     if (node.type !== 'ExpressionStatement') return;
     if (node.expression.type === 'UnaryExpression') {
