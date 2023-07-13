@@ -129,7 +129,7 @@ export interface PluginSettings {
      * in case there is something wrong with the way Meteor-Vite parses Meteor packages.
      * {@link StubValidationSettings}
      */
-    stubValidation: StubValidationSettings;
+    stubValidation?: StubValidationSettings;
     
     /**
      * Full content of the user's Meteor project package.json.
