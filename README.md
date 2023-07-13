@@ -21,9 +21,6 @@ Use [Vite](https://vitejs.dev) in your Meteor app! ⚡️
   - [x] [Svelte](/examples/svelte)
   - [ ] React
 
-## Demo/Starter templates
-- [Svelte](/examples/svelte)
-
 ## Installation
 
 ```sh
