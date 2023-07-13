@@ -1,5 +1,11 @@
 # meteor-vite
 
+## 1.2.1
+
+### Patch Changes
+
+- 9b26de5: Update parser to eagerly parse and export all available exports for a given Meteor package
+
 ## 1.2.0
 
 ### Minor Changes
