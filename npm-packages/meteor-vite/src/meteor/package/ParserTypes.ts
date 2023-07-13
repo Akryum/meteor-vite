@@ -2,7 +2,7 @@ import {
     CallExpression,
     FunctionExpression,
     Identifier,
-    MemberExpression,
+    MemberExpression, NumericLiteral,
     ObjectExpression,
     ObjectProperty,
     StringLiteral
@@ -20,6 +20,19 @@ type ModuleMethodCall<
     }
     arguments: Arguments
 }
+/**
+ * Meteor's `module.link()` method, exposed internally for built Meteor packages.
+ *
+ * @example
+ * module.link('meteor/ostrio:cookies', {
+ *     default: 'Cookies'
+ * })
+ */
+type ModuleLink = ModuleMethodCall<'link', [
+    importPath: StringLiteral,
+    exports: ObjectExpression,
+    id: NumericLiteral
+] | [importPath: StringLiteral]>;
 
 export type MeteorPackageProperty = KnownObjectProperty<{
     key: StringLiteral, // File name
