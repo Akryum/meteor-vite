@@ -1,5 +1,12 @@
 # vite-bundler
 
+## 1.1.1
+
+### Patch Changes
+
+- 3c553e2: - Rework "waiting for Vite" splash screen to work around issue where the screen would need to be refreshed manually.
+  - Add `zodern:types` to vite-bundler
+
 ## 1.1.0
 
 ### Minor Changes
