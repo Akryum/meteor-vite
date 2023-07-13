@@ -242,6 +242,12 @@ class PackageModule {
             }
         }
 
+        if (method === 'export') {
+            if (node.arguments[0].type !== 'ObjectExpression'){
+                throw new ModuleExportsError('Unexpected export type!', exports)
+            }
+        }
+
 
         return node.callee.property.name === method;
     }
