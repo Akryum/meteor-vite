@@ -1,13 +1,14 @@
-export interface MeteorSettings extends PluginSettings {
-    /**
-     * In the development environment, the Meteor-Vite plugin settings will be exposed under public settings.
-     * For production, we skip this step.
-     */
+export interface MeteorSettings {
     public?: PluginSettings;
 }
 
 interface PluginSettings {
     'vite:bundler'?: {
+        /**
+         * Settings for controlling how stubs created by Meteor-Vite are validated.
+         * These settings only apply in a development environment. Once the app is bundled for production, runtime
+         * stub validation is disabled.
+         */
         stubValidation?: {
             /**
              * list of packages to ignore export validation for.
