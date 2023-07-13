@@ -236,6 +236,13 @@ class PackageModule {
     constructor(public readonly module: { path: string }) {}
 
     protected isMethod<MethodName extends ModuleMethodName>(node: ModuleMethod.MethodMap[ModuleMethodName], method: MethodName): node is ModuleMethod.MethodMap[MethodName] {
+        if (method === 'exportDefault') {
+            if (node.arguments[0].type !== 'Identifier') {
+                throw new ModuleExportsError('Unexpected default export value!', node.arguments[0]);
+            }
+        }
+
+
         return node.callee.property.name === method;
     }
 
