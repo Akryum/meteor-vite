@@ -1,7 +1,25 @@
-import {FunctionExpression, ObjectExpression, ObjectProperty, StringLiteral} from "@babel/types";
+import {
+    CallExpression,
+    FunctionExpression,
+    Identifier,
+    MemberExpression,
+    ObjectExpression,
+    ObjectProperty,
+    StringLiteral
+} from "@babel/types";
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
+type ModuleMethodCall<
+    MethodName extends ModuleMethodName,
+    Arguments extends CallExpression['arguments']
+> = Omit<CallExpression, 'callee' | 'arguments'> & {
+    callee: MemberExpression & {
+        object: Identifier;
+        property: Omit<Identifier, 'name'> & { name: MethodName };
+    }
+    arguments: Arguments
+}
 
 export type MeteorPackageProperty = KnownObjectProperty<{
     key: StringLiteral, // File name
