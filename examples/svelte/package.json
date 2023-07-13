@@ -14,21 +14,17 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.4.2",
+    "@tsconfig/svelte": "^5.0.0",
     "meteor-vite": "file:../../npm-packages/meteor-vite",
-    "svelte-preprocess": "^5.0.0",
+    "svelte-check": "^3.4.6",
+    "svelte-preprocess": "^5.0.4",
+    "typescript": "^5.1.6",
     "vite": "^4.4.3"
   },
   "meteor": {
     "mainModule": {
       "client": "client/main.ts",
       "server": "server/main.ts"
-    },
-    "nodeModules": {
-      "recompile": {
-        "svelte": [
-          "legacy"
-        ]
-      }
     },
     "testModule": "tests/main.js"
   }
