@@ -8,7 +8,9 @@ declare module 'vite' {
 
 export default defineConfig({
   plugins: [
-    svelte(),
+    svelte({
+      configFile: 'svelte.config.mjs'
+    })
   ],
 
   meteor: {
