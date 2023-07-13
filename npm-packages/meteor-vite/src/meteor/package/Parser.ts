@@ -275,7 +275,7 @@ function readModuleExports(node: Node) {
     if (args[1].type !== 'ObjectExpression') {
         throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
     }
-    if (args[2].type !== 'NumericLiteral') {
+    if (args[2]?.type !== 'NumericLiteral') {
         throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0])
     }
     
