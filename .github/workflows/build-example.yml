@@ -37,7 +37,7 @@ jobs:
       - name: 'Setup Meteor'
         uses: meteorengineer/setup-meteor@v1
         with:
-          meteor-release: '2.10.0'
+          meteor-release: '2.12'
       - name: 'Install dependencies'
         run: cd examples/svelte && meteor npm install
       - name: 'Build for production'
