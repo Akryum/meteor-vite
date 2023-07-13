@@ -88,8 +88,8 @@ export const KnownModuleMethodNames = ['export', 'link', 'exportDefault'] as con
 export type ModuleMethodName = typeof KnownModuleMethodNames[number];
 
 /**
- * Meteor's `meteorInstall()` function for its packages.
- * An internal method that isn't used by package authors.
+ * First argument of Meteor's `meteorInstall()` function for its packages.
+ * This is an internal method that isn't used by package authors.
  *
  * @example start of the meteorInstall call {@link https://github.com/JorgenVatle/meteor-vite/blob/85120ec60beccca956c65880e94bce99b338f24e/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 see mock example}
  * var require = meteorInstall({"node_modules":{"meteor":{"rdb:svelte-meteor-data":{"index.js":function module(require,exports,module){
