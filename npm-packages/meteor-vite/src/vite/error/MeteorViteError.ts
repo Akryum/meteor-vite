@@ -23,6 +23,9 @@ export class MeteorViteError extends Error implements ErrorMetadata {
         if (cause && !subtitle) {
             this.subtitle = `Caused by [${cause?.name}] ${cause?.message}`
         }
+        if (cause) {
+            this.addSection('Caused by', cause);
+        }
     }
     
     protected addLine(...lines: string[] | [string[]]) {
