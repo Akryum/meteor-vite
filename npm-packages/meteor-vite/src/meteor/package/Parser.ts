@@ -263,11 +263,11 @@ class PackageModule {
         if (!this.shouldParse(node)) return;
 
         if (this.isMethod(node, 'link')) {
-            return this.parseLink(node);
+            return this.exports.push(...this.parseLink(node));
         }
 
         if (this.isMethod(node, 'export')) {
-            return this.parseExport(node);
+            return this.exports.push(...this.parseExport(node));
         }
 
         if (this.isMethod(node, 'exportDefault')) {
@@ -285,7 +285,7 @@ class PackageModule {
 
         // Module.link('./some-path') without any arguments.
         // Translates to `import './some-path' - so no exports to be found here. 👍
-        if (!args[1]) return;
+        if (!args[1]) return [];
 
         if (args[1].type !== 'ObjectExpression') {
             throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
@@ -294,14 +294,21 @@ class PackageModule {
             throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0])
         }
 
-        // todo
+        return formatExports({
+            packageName: args[0],
+            expression: args[1],
+            id: args[2],
+        })
     }
 
     protected parseExport(node: NeedsArgValidation<'export'>) {
         if (node.arguments[0].type !== 'ObjectExpression'){
             throw new ModuleExportsError('Unexpected export type!', exports)
         }
-        // todo
+
+        return formatExports({
+            expression: node.arguments[0]
+        });
     }
 
     protected parseExportDefault(node: NeedsArgValidation<'exportDefault'>) {
