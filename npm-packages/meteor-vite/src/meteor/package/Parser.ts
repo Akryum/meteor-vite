@@ -84,7 +84,7 @@ function parseSource(code: string) {
         traverse(source, {
             enter(node) {
                 const packageScope = parsePackageScope(node);
-                const meteorInstall = parseMeteorInstall(node);
+                const meteorInstall = MeteorInstall.parse(node);
                 result.mainModulePath = readMainModulePath(node) || result.mainModulePath;
                 
                 if (meteorInstall) {
@@ -168,33 +168,39 @@ function parsePackageScope(node: Node) {
     return packageExport;
 }
 
-function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' | 'packageId'> | undefined {
-    if (node.type !== 'CallExpression') return;
-    if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
-    
-    const packageConfig = node.arguments[0] as MeteorInstallObject;
-    const node_modules = packageConfig.properties[0];
-    const meteor = node_modules.value.properties[0];
-    const packageName = meteor.value.properties[0];
-    const packageModules = packageName.value.properties;
-
-    const meteorPackage = new MeteorInstall({
-        packageId: `${meteor.key.value}/${packageName.key.value}`,
-        name: packageName.key.value,
-    });
-
-    meteorPackage.traverseModules(packageModules, '');
-
-    return meteorPackage;
-}
-
+/**
+ * Parser for a build Meteor package's meteorInstall() call.
+ * Traverses through all the entries in the passed object to build up a map of each file exposed by the package
+ * as well as tracking exports (module.export, module.exportDefault) and re-exports (module.link).
+ * {@link https://github.com/JorgenVatle/meteor-vite/blob/8b0a7a5f5f95d78661793e8b4bc7f266c1081ed9/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 example of meteorInstall() }
+ */
 class MeteorInstall {
     public readonly modules: ModuleList = {}
     public readonly packageId: string;
     public readonly name: string;
+
     constructor({ packageId, name }: Pick<MeteorInstall, 'packageId' | 'name'>) {
         this.packageId = packageId;
         this.name = name;
+    }
+
+    public static parse(node: Node) {
+        if (node.type !== 'CallExpression') return;
+        if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
+        const packageConfig = node.arguments[0] as MeteorInstallObject;
+        const node_modules = packageConfig.properties[0];
+        const meteor = node_modules.value.properties[0];
+        const packageName = meteor.value.properties[0];
+        const packageModules = packageName.value.properties;
+
+        const meteorPackage = new this({
+            packageId: `${meteor.key.value}/${packageName.key.value}`,
+            name: packageName.key.value,
+        });
+
+        meteorPackage.traverseModules(packageModules, '');
+
+        return meteorPackage;
     }
 
     public traverseModules(properties: MeteorPackageProperty[], parentPath: string) {
