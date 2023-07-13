@@ -87,7 +87,15 @@ type MeteorNestedPackageProperty = KnownObjectExpression<{
 export const KnownModuleMethodNames = ['export', 'link', 'exportDefault'] as const;
 export type ModuleMethodName = typeof KnownModuleMethodNames[number];
 
-export type PackageConfig = KnownObjectExpression<{
+/**
+ * Meteor's `meteorInstall()` function for its packages.
+ * An internal method that isn't used by package authors.
+ *
+ * @example start of the meteorInstall call {@link https://github.com/JorgenVatle/meteor-vite/blob/85120ec60beccca956c65880e94bce99b338f24e/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 see mock example}
+ * var require = meteorInstall({"node_modules":{"meteor":{"rdb:svelte-meteor-data":{"index.js":function module(require,exports,module){
+ * // ... build package code starts here
+ */
+export type MeteorInstallObject = KnownObjectExpression<{
     properties: [KnownObjectProperty<{
         key: StringLiteral & { value: 'node_modules' }
         value: KnownObjectExpression<{

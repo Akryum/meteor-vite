@@ -11,7 +11,13 @@ import FS from 'fs/promises';
 import { inspect } from 'util';
 import Logger from '../../Logger';
 import { MeteorViteError } from '../../vite/error/MeteorViteError';
-import {KnownModuleMethodNames, MeteorPackageProperty, ModuleMethodName, PackageConfig} from "./ParserTypes";
+import {
+    KnownModuleMethodNames,
+    MeteorPackageProperty,
+    ModuleMethod,
+    ModuleMethodName,
+    MeteorInstallObject
+} from "./ParserTypes";
 
 interface ParseOptions {
     /**
@@ -166,7 +172,7 @@ function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' 
     if (node.type !== 'CallExpression') return;
     if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
     
-    const packageConfig = node.arguments[0] as PackageConfig;
+    const packageConfig = node.arguments[0] as MeteorInstallObject;
     const node_modules = packageConfig.properties[0];
     const meteor = node_modules.value.properties[0];
     const packageName = meteor.value.properties[0];
