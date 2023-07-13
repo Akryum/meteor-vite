@@ -35,7 +35,7 @@ jobs:
       - name: 'Setup Meteor'
         uses: meteorengineer/setup-meteor@v1
         with:
-          meteor-release: '2.10.0'
+          meteor-release: '2.12'
 
       - name: 'Install Dependencies'
         run: meteor npm run install:workspace
