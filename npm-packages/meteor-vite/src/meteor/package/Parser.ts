@@ -9,6 +9,7 @@ import {
 } from '@babel/types';
 import FS from 'fs/promises';
 import { inspect } from 'util';
+import Logger from '../../Logger';
 import { MeteorViteError } from '../../vite/error/MeteorViteError';
 
 interface ParseOptions {
@@ -235,9 +236,19 @@ function readModuleExports(node: Node) {
     
     // Meteor's module declaration method. `module.link(...)`
     if (methodName !== 'link') return;
+    
     if (args[0].type !== 'StringLiteral') throw new ModuleExportsError('Expected string as the first argument in module.link()!', args[0]);
-    if (args[1].type !== 'ObjectExpression') throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
-    if (args[2].type !== 'NumericLiteral') throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0]);
+    
+    // Module.link('./some-path') without any arguments.
+    // Translates to `import './some-path' - so no exports to be found here. 👍
+    if (!args[1]) return;
+    
+    if (args[1].type !== 'ObjectExpression') {
+        throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
+    }
+    if (args[2].type !== 'NumericLiteral') {
+        throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0])
+    }
     
     return formatExports({
         packageName: args[0],
