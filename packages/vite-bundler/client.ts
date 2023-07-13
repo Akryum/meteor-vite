@@ -5,54 +5,58 @@ import { getConfig, RuntimeConfig, ViteConnection } from './loading/vite-connect
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
+function checkServer(config: RuntimeConfig) {
+    if (initialConfig.host === config.host && initialConfig.port === config.port) {
+        return;
+    }
+    
+    console.info(
+        '⚡  Meteor-Vite dev server details changed from %s to %s',
+        buildConnectionUri(initialConfig),
+        buildConnectionUri(config),
+        { initialConfig, newConfig: config }
+    );
+    
+    if (!config.ready) {
+        console.log('⚡  Meteor-Vite dev server not ready yet. Waiting on server to become ready...');
+    }
+    
+    if (window.__METEOR_VITE_STARTUP__) {
+        // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
+        console.log('⚡  Refreshing client...');
+        window.location.reload();
+        return;
+    }
+    
+    // todo: potentially trigger a refresh to clear out the old server config
+    console.info('⚡  Not on startup screen. Letting the Vite server deal with this.', { config });
+    
+}
+
+let subscription: Meteor.SubscriptionHandle;
+let initialConfig: RuntimeConfig;
+
+Meteor.startup(() => {
+    if (!Meteor.isDevelopment) {
+        return;
+    }
+    
+    Tracker.autorun(function() {
+        subscription = Meteor.subscribe(ViteConnection.publication);
+        if (!initialConfig && subscription.ready()) {
+            initialConfig = getConfig();
+        }
+        
+        checkServer(getConfig());
+    })
+});
+
 declare global {
     interface Window {
         __METEOR_VITE_STARTUP__?: boolean;
     }
 }
 
-
-if (Meteor.isDevelopment) {
-    let initialConfig: RuntimeConfig;
-    Meteor.subscribe(ViteConnection.publication, function() {
-        if (this.ready) {
-            initialConfig = getConfig();
-        }
-    });
-    
-    Tracker.autorun(function() {
-        const viteConfig = getConfig();
-        
-        if (!initialConfig) {
-            return;
-        }
-        
-        if (initialConfig.port !== viteConfig.port) {
-            console.log('Vite server port changed! Reloading client...', { initialConfig, viteConfig });
-            window.location.reload();
-        }
-        
-        if (initialConfig.host !== viteConfig.host) {
-            console.log('Vite server host changed! Reloading client...', { initialConfig, viteConfig });
-            window.location.reload();
-        }
-        
-        // Skip reloading if we're already in the app
-        if (window.__METEOR_VITE_STARTUP__ !== true) {
-            return;
-        }
-        
-        if (viteConfig) {
-            console.log('Received Vite configuration', viteConfig)
-        }
-        
-        if (viteConfig.ready) {
-            console.log('Vite server ready! Reloading client...');
-            // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
-            window.location.reload();
-            return;
-        }
-        
-        console.log('Waiting on Vite server...', { viteConfig });
-    });
+function buildConnectionUri(config: RuntimeConfig) {
+    return `http://${config.host || 'localhost'}:${config.port}/`
 }
