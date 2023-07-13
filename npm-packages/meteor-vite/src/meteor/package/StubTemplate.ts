@@ -86,7 +86,7 @@ export function viteAutoImportBlock({ content, id }: { content: string, id: stri
  * You can commit these to your project or move them elsewhere if you'd like,
  * but they must be imported somewhere in your Meteor entrypoint file.
  *
- * More info: https://github.com/JorgenVatle/meteor-vite#lazy-loaded-meteor-packages
+ * More info: https://github.com/Akryum/meteor-vite#lazy-loaded-meteor-packages
 **/
 ${imports}
 /** End of vite:bundler auto-imports **/
