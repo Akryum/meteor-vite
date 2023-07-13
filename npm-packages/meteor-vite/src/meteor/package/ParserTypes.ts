@@ -23,11 +23,14 @@ type ModuleMethodCall<
 /**
  * Meteor's `module.link()` method, exposed internally for built Meteor packages.
  *
- * @example
+ * @example package source
+ * export { default } from 'meteor/ostrio:cookies';
+ * export * from 'meteor/tracker;
+ *
+ * @example bundle result
  * module.link('meteor/ostrio:cookies', {
  *     default: 'Cookies'
- * })
- * @example
+ * }, 0)
  * module1.link("meteor/tracker", {
  *     "*": "*"
  * }, 1);
@@ -39,12 +42,14 @@ type ModuleLink = ModuleMethodCall<'link', [
 ] | [importPath: StringLiteral]>;
 
 /**
- * Meteor's `module.exportDefault()` method - seems to only be used primarily for modules that are written in
- * TypeScript?
- * @example bundle result
- * function namedFunction() {
- *   return 'foo';
+ * Meteor's `module.exportDefault()` method - seems to only be used for modules that are lazy-loaded?
+ * {@link https://github.com/JorgenVatle/meteor-vite/blob/71a1ed5b84439c02f5592bef1d4cf3ae565fa879/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L42}
+ *
+ * @example Package source
+ * export default namedFunction() {
+ *     return 'foo';
  * }
+ * @example Bundle result
  * module1.exportDefault(namedFunction);
  */
 type ModuleExportDefault = ModuleMethodCall<'exportDefault', [
@@ -53,6 +58,7 @@ type ModuleExportDefault = ModuleMethodCall<'exportDefault', [
 
 /**
  * Meteor's `module.export({ ... })` method. This is essentially ES exports
+ *
  * @example Package source
  * export const Foo = 'bar'
  * export default class FooBar {}
