@@ -1,5 +1,11 @@
 # meteor-vite
 
+## 1.1.1
+
+### Patch Changes
+
+- c22937e: Fix error handling for non-MeteorVite errors
+
 ## 1.1.0
 
 ### Minor Changes
