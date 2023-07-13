@@ -67,7 +67,10 @@ function prepareLoad<Context extends ViteLoadRequest>(plugin: {
         
         return plugin.load(request).catch(async (error) => {
             if (!(error instanceof MeteorViteError)) {
-                throw new MeteorViteError(`Unable to parse package`, { cause: error, context: request.context });
+                error = new MeteorViteError(`Unable to parse package`, {
+                    cause: error,
+                    context: request.context
+                });
             }
             
             error.setContext(request);
