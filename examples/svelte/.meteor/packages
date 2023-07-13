@@ -21,3 +21,4 @@ hot-module-replacement@0.5.3  # Update client in development without reloading t
 zodern:types                  # Enable types from meteor/atmosphere packages
 jorgenvatle:vite-bundler      # ⚡ Replaces Meteor's client bundler with Vite
 rdb:svelte-meteor-data
+session
