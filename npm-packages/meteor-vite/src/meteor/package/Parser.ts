@@ -200,26 +200,23 @@ class MeteorInstall {
     public traverseModules(properties: MeteorPackageProperty[], parentPath: string) {
         properties.forEach((property) => {
             const path = `${parentPath}${property.key.value.toString()}`
-            const module = new PackageModule({ path });
+            const module = new PackageModule();
+
 
             if (property.value.type === 'ObjectExpression') {
                 return this.traverseModules(property.value.properties, `${path}/`);
             }
 
-            property.value.body.body.forEach((node) => module.parse(node))
+            property.value.body.body.forEach((node) => module.parse(node));
+            this.modules[path] = module.exports;
         })
     }
 }
 
 class PackageModule {
     public readonly exports: ModuleExport[] = [];
-    constructor(public readonly module: {
-        /**
-         * Relative path to the package for this module.
-         * E.g. /index.js
-         */
-        path: string
-    }) {}
+    // Todo: Accept module metadata from callee to provide more insightful error messages
+    constructor() {}
 
     /**
      * Helper for checking if an already validated node is of the provided method
