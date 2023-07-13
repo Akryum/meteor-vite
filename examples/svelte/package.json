@@ -2,7 +2,7 @@
   "name": "svelte",
   "private": true,
   "scripts": {
-    "start": "meteor run",
+    "start": "meteor npm run build:dependencies && meteor run",
     "build": "meteor npm run build:dependencies && meteor npm run build:meteor",
     "build:dependencies": "(cd ./node_modules/meteor-vite && npm run build)",
     "test": "meteor test --once --driver-package meteortesting:mocha",
