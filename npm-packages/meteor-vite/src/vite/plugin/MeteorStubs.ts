@@ -35,6 +35,7 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
                     requestId: request.context.id,
                     submodule: meteorPackage.getModule({ importPath: request.requestedModulePath }),
                     meteorPackage,
+                    stubValidation: pluginSettings.stubValidation,
                 })
                 
                 request.log.debug(`Meteor stub created`, {
