@@ -80,6 +80,12 @@ export namespace ModuleMethod {
         link: Link;
         exportDefault: ExportDefault;
     }
+
+    /**
+     * Any of the above methods, just that the arguments could be anything at this point.
+     * Assists with the parser's `isMethod()` utility.
+     */
+    export type NeedsArgValidation<MethodName extends ModuleMethodName> = Omit<MethodMap[MethodName], 'arguments'> & Pick<CallExpression, 'arguments'>
 }
 
 export type MeteorPackageProperty = KnownObjectProperty<{

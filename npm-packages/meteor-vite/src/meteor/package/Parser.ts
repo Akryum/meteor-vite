@@ -18,6 +18,7 @@ import {
     ModuleMethodName,
     MeteorInstallObject
 } from "./ParserTypes";
+import NeedsArgValidation = ModuleMethod.NeedsArgValidation;
 
 interface ParseOptions {
     /**
@@ -236,35 +237,6 @@ class PackageModule {
     constructor(public readonly module: { path: string }) {}
 
     protected isMethod<MethodName extends ModuleMethodName>(node: ModuleMethod.MethodMap[ModuleMethodName], method: MethodName): node is ModuleMethod.MethodMap[MethodName] {
-        const args = node.arguments;
-
-        if (method === 'exportDefault') {
-            if (args[0].type !== 'Identifier') {
-                throw new ModuleExportsError('Unexpected default export value!', node.arguments[0]);
-            }
-        }
-
-        if (method === 'export') {
-            if (args[0].type !== 'ObjectExpression'){
-                throw new ModuleExportsError('Unexpected export type!', exports)
-            }
-        }
-
-        if (method === 'link') {
-            if (args[0].type !== 'StringLiteral') throw new ModuleExportsError('Expected string as the first argument in module.link()!', args[0]);
-
-            // Module.link('./some-path') without any arguments.
-            // Translates to `import './some-path' - so no exports to be found here. 👍
-            if (!args[1]) return false;
-
-            if (args[1].type !== 'ObjectExpression') {
-                throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
-            }
-            if (args[2]?.type !== 'NumericLiteral') {
-                throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0])
-            }
-        }
-
         return node.callee.property.name === method;
     }
 
@@ -304,15 +276,35 @@ class PackageModule {
         }
     }
 
-    protected parseLink(node: ModuleMethod.Link) {
+    protected parseLink(node: NeedsArgValidation<'link'>) {
+        const args = node.arguments;
+
+        if (args[0].type !== 'StringLiteral') {
+            throw new ModuleExportsError('Expected string as the first argument in module.link()!', args[0]);
+        }
+
+        // Module.link('./some-path') without any arguments.
+        // Translates to `import './some-path' - so no exports to be found here. 👍
+        if (!args[1]) return;
+
+        if (args[1].type !== 'ObjectExpression') {
+            throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
+        }
+        if (args[2]?.type !== 'NumericLiteral') {
+            throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0])
+        }
+
         // todo
     }
 
-    protected parseExport(node: ModuleMethod.Export) {
+    protected parseExport(node: NeedsArgValidation<'export'>) {
+        if (node.arguments[0].type !== 'ObjectExpression'){
+            throw new ModuleExportsError('Unexpected export type!', exports)
+        }
         // todo
     }
 
-    protected parseExportDefault(node: ModuleMethod.ExportDefault) {
+    protected parseExportDefault(node: NeedsArgValidation<'exportDefault'>) {
         const args = node.arguments;
         if (args[0].type !== 'Identifier') {
             throw new ModuleExportsError('Unexpected default export value!', args[0]);
