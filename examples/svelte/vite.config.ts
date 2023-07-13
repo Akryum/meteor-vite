@@ -12,7 +12,7 @@ defineConfig({
   ],
 
   meteor: {
-    clientEntry: 'imports/ui/main.ts',
+    clientEntry: 'imports/ui/main.js',
     stubValidation: {
       warnOnly: true,
     }
