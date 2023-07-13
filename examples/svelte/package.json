@@ -3,9 +3,12 @@
   "private": true,
   "scripts": {
     "start": "meteor run",
+    "build": "meteor npm run build:dependencies && meteor npm run build:meteor",
+    "build:dependencies": "(cd ./node_modules/meteor-vite && npm run build)",
     "test": "meteor test --once --driver-package meteortesting:mocha",
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
-    "visualize": "meteor --production --extra-packages bundle-visualizer"
+    "visualize": "meteor --production --extra-packages bundle-visualizer",
+    "postinstall": "npm run build:dependencies"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.6",
