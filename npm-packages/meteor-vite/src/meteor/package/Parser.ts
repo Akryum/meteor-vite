@@ -208,28 +208,37 @@ function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' 
     };
 }
 
-function validateModuleMethod(method: string): asserts method is ModuleMethodName {
-    if (!KnownModuleMethodNames.includes(method as ModuleMethodName)) {
-        // todo: Classify error so that only a warning will be emitted to the console instead of a hard error.
-        throw new ParserError(`Meteor module.${method}(...) is not recognized by Meteor-Vite! Please open an issue to get this resolved! 🙏`)
+class MeteorInstall {
+    public readonly modules: { [filePath in string]: PackageModule } = {}
+    public readonly packageId: string;
+    public readonly name: string;
+    constructor({ packageId, name }: Pick<MeteorInstall, 'packageId' | 'name'>) {
+        this.packageId = packageId;
+        this.name = name;
+    }
+
+    public traverseModule(properties: MeteorPackageProperty[], parentPath: string) {
+        properties.forEach((property) => {
+            const path = `${parentPath}${property.key.value.toString()}`
+            const module = new PackageModule({ path });
+
+            if (property.value.type === 'ObjectExpression') {
+                return this.traverseModule(property.value.properties, `${path}/`);
+            }
+
+            property.value.body.body.forEach((node) => module.parse(node))
+        })
     }
 }
 
-// Todo narrow the type assertion down to something like ModuleLinkExpression, ModuleExportExpression,
-//  ModuleExportDefault
-function parseModuleMethod(node: Node): node is MemberExpression {
-    if (node.type !== 'MemberExpression') return false;
-    if (node.object.type !== 'Identifier') return false;
-    if (!node.object.name.match(/^module\d*$/)) return false;
-    if (node.property.type !== 'Identifier') return false;
-    
-    validateModuleMethod(node.property.name);
-    
-    return true;
-}
+class PackageModule {
+    constructor(public readonly module: { path: string }) {}
 
-class ParseModuleMethod {
-    protected isModuleMethod<MethodName extends ModuleMethodName>(node: Node, method: MethodName): node is ModuleMethod.MethodMap[MethodName] {
+    protected isMethod<MethodName extends ModuleMethodName>(node: ModuleMethod.MethodMap[ModuleMethodName], method: MethodName): node is ModuleMethod.MethodMap[MethodName] {
+        return node.callee.property.name === method;
+    }
+
+    protected shouldParse(node: Node): node is ModuleMethod.MethodMap[ModuleMethodName] {
         if (node.type !== 'CallExpression') return false;
 
         const callee = node.callee;
@@ -242,23 +251,37 @@ class ParseModuleMethod {
 
         if (!KnownModuleMethodNames.includes(calleeMethod as ModuleMethodName)) {
             Logger.warn(`Meteor module.${calleeMethod}(...) is not recognized by Meteor-Vite! Please open an issue to get this resolved! 🙏`)
+            return false
         }
 
-        return calleeMethod === method;
+        return true;
     }
 
-    public link(node: Node) {
-        if (!this.isModuleMethod(node, 'link')) return;
-        // todo: Process link statement here
+    public parse(node: Node) {
+        if (!this.shouldParse(node)) return;
+
+        if (this.isMethod(node, 'link')) {
+            return this.parseLink(node);
+        }
+
+        if (this.isMethod(node, 'export')) {
+            return this.parseExport(node);
+        }
+
+        if (this.isMethod(node, 'exportDefault')) {
+            return this.parseExportDefault(node);
+        }
     }
 
-    public export(node: Node) {
-        if (!this.isModuleMethod(node, 'export')) return;
+    protected parseLink(node: ModuleMethod.Link) {
         // todo
     }
 
-    public exportDefault(node: Node) {
-        if (!this.isModuleMethod(node, 'exportDefault')) return;
+    protected parseExport(node: ModuleMethod.Export) {
+        // todo
+    }
+
+    protected parseExportDefault(node: ModuleMethod.ExportDefault) {
         // todo
     }
 }
