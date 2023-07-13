@@ -104,6 +104,28 @@ export const OstrioCookies = prepareMock({
     mainModulePath: '/node_modules/meteor/ostrio:cookies/cookies.js',
 })
 
+export const RdbSvelteMeteorData = prepareMock({
+    packageName: 'rdb:svelte-meteor-data',
+    fileName: 'rdb_svelte-meteor-data.js',
+    modules: {
+        'index.js': [
+            { type: 'global-binding', name: 'checkNpmVersions', from: 'meteor/tmeasday:check-npm-versions', id: 0 },
+            { type: 're-export', name: 'default', as: 'useTracker', from: './use-tracker', id: 1 },
+            { type: 're-export', name: 'default', as: 'useSession', from: './use-session', id: 2 },
+        ],
+        'use-session.js': [
+            { type: 'export-default', }
+        ],
+        'use-tracker.js': [
+            { type: 'export-default', }
+        ],
+    },
+    packageScopeExports: {
+    
+    },
+    mainModulePath: '/node_modules/meteor/rdb:svelte-meteor-data/index.js',
+})
+
 function prepareMock<Modules extends ModuleList>({ fileName, ...details }: PrepareMockModule<Modules>): MockModule<Modules> {
     const filePath = Path.join(__dirname, `meteor-bundle/${fileName}`);
     const packageId = `meteor/${details.packageName}`;

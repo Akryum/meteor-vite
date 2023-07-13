@@ -11,7 +11,13 @@ import FS from 'fs/promises';
 import { inspect } from 'util';
 import Logger from '../../Logger';
 import { MeteorViteError } from '../../vite/error/MeteorViteError';
-import MeteorPackage from './MeteorPackage';
+import {
+    KnownModuleMethodNames,
+    MeteorPackageProperty,
+    ModuleMethod,
+    ModuleMethodName,
+    MeteorInstallObject
+} from "./ParserTypes";
 
 interface ParseOptions {
     /**
@@ -78,7 +84,7 @@ function parseSource(code: string) {
         traverse(source, {
             enter(node) {
                 const packageScope = parsePackageScope(node);
-                const meteorInstall = parseMeteorInstall(node);
+                const meteorInstall = MeteorInstall.parse(node);
                 result.mainModulePath = readMainModulePath(node) || result.mainModulePath;
                 
                 if (meteorInstall) {
@@ -162,110 +168,180 @@ function parsePackageScope(node: Node) {
     return packageExport;
 }
 
-function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' | 'packageId'> | undefined {
-    if (node.type !== 'CallExpression') return;
-    if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
-    
-    const packageConfig = node.arguments[0] as PackageConfig;
-    const node_modules = packageConfig.properties[0];
-    const meteor = node_modules.value.properties[0];
-    const packageName = meteor.value.properties[0];
-    const packageModules = packageName.value.properties;
-    const traverseModules = (properties: MeteorPackageProperty[], parentPath: string) => {
+/**
+ * Parser for a build Meteor package's meteorInstall() call.
+ * Traverses through all the entries in the passed object to build up a map of each file exposed by the package
+ * as well as tracking exports (module.export, module.exportDefault) and re-exports (module.link).
+ * {@link https://github.com/JorgenVatle/meteor-vite/blob/8b0a7a5f5f95d78661793e8b4bc7f266c1081ed9/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 example of meteorInstall() }
+ */
+class MeteorInstall {
+    public readonly modules: ModuleList = {}
+    public readonly packageId: string;
+    public readonly name: string;
+
+    constructor({ packageId, name }: Pick<MeteorInstall, 'packageId' | 'name'>) {
+        this.packageId = packageId;
+        this.name = name;
+    }
+
+    public static parse(node: Node) {
+        if (node.type !== 'CallExpression') return;
+        if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
+        const packageConfig = node.arguments[0] as MeteorInstallObject;
+        const node_modules = packageConfig.properties[0];
+        const meteor = node_modules.value.properties[0];
+        const packageName = meteor.value.properties[0];
+        const packageModules = packageName.value.properties;
+
+        const meteorPackage = new this({
+            packageId: `${meteor.key.value}/${packageName.key.value}`,
+            name: packageName.key.value,
+        });
+
+        meteorPackage.traverseModules(packageModules, '');
+
+        return meteorPackage;
+    }
+
+    public traverseModules(properties: MeteorPackageProperty[], parentPath: string) {
         properties.forEach((property) => {
             const path = `${parentPath}${property.key.value.toString()}`
-            const exportList: ModuleExport[] = [];
-            
+            const module = new PackageModule();
+
+
             if (property.value.type === 'ObjectExpression') {
-                return traverseModules(property.value.properties, `${path}/`);
+                return this.traverseModules(property.value.properties, `${path}/`);
             }
-            
-            modules[path] = exportList;
-            
-            property.value.body.body.forEach((node) => {
-                const exports = readModuleExports(node);
-                if (!exports) {
-                    return;
+
+            traverse(property.value.body, {
+                enter(node) {
+                    module.parse(node)
                 }
-                exportList.push(...exports);
             });
+
+            this.modules[path] = module.exports;
         })
     }
-    
-    const modules: ModuleList = {};
-    traverseModules(packageModules, '');
-    
-    return {
-        name: packageName.key.value,
-        modules,
-        packageId: `${meteor.key.value}/${packageName.key.value}`
-    };
 }
 
-function readModuleExports(node: Node) {
-    if (node.type !== 'ExpressionStatement') return;
-    if (node.expression.type === 'UnaryExpression') {
-        return handleMainModule(node);
+/**
+ * An individual file within a built Meteor package's meteorInstall file tree.
+ * It essentially represents a single file and its associated exports within a given Meteor package.
+ * E.g. `index.js` or `cookie-store.js`.
+ *
+ * {@link https://github.com/JorgenVatle/meteor-vite/blob/78a451fa311989d10cbb061bb929d8feb795ea2c/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L20 `explicit-relative-path.ts`} would count as a module here.
+ */
+class PackageModule {
+    public readonly exports: ModuleExport[] = [];
+    // Todo: Accept module metadata from callee to provide more insightful error messages
+    constructor() {}
+
+    /**
+     * Helper for checking if an already validated node is of the provided method
+     */
+    protected isMethod<MethodName extends ModuleMethodName>(node: ModuleMethod.MethodMap[ModuleMethodName], method: MethodName): node is ModuleMethod.MethodMap[MethodName] {
+        return node.callee.property.name === method;
     }
-    if (node.expression.type !== 'CallExpression') return;
-    const { callee, arguments: args } = node.expression;
-    if (callee.type !== 'MemberExpression') return;
-    if (callee.object.type !== 'Identifier') return;
-    
-    // Meteor's module declaration object. `module.`
-    if (!callee.object.name.match(/^module\d*$/)) return;
-    if (callee.property.type !== 'Identifier') return;
-    const methodName = callee.property.name as 'export' | 'link' | 'exportDefault';
-    
-    
-    if (methodName === 'exportDefault') {
+
+    /**
+     * Check if provided node is a valid `module.[method]` call expression.
+     */
+    protected shouldParse(node: Node): node is ModuleMethod.MethodMap[ModuleMethodName] {
+        if (node.type !== 'CallExpression') return false;
+
+        const callee = node.callee;
+
+        if (callee.type !== 'MemberExpression') return false;
+        if (callee.object.type !== 'Identifier') return false;
+        if (!callee.object.name.match(/^module\d*$/)) return false;
+        if (callee.property.type !== 'Identifier') return false;
+        const calleeMethod = callee.property.name;
+
+        if (!KnownModuleMethodNames.includes(calleeMethod as ModuleMethodName)) {
+            Logger.warn(`Meteor module.${calleeMethod}(...) is not recognized by Meteor-Vite! Please open an issue to get this resolved! 🙏`)
+            return false
+        }
+
+        return true;
+    }
+
+    /**
+     * Parse everything within the current module and store detected exports.
+     * Todo: Possibly migrate parsers to their own class to save on memory usage?
+     */
+    public parse(node: Node) {
+        if (!this.shouldParse(node)) return;
+
+        if (this.isMethod(node, 'link')) {
+            return this.exports.push(...this.parseLink(node));
+        }
+
+        if (this.isMethod(node, 'export')) {
+            return this.exports.push(...this.parseExport(node));
+        }
+
+        if (this.isMethod(node, 'exportDefault')) {
+            this.exports.push(...this.parseExportDefault(node));
+            return;
+        }
+    }
+
+    /**
+     * Parse a Meteor bundle's `module.link()` call.
+     * {@link ModuleMethod.Link}
+     */
+    protected parseLink(node: ModuleMethod.WithoutArgs<'link'>) {
+        const [importPath, exports, id] = node.arguments;
+
+        if (importPath.type !== 'StringLiteral') {
+            throw new ModuleExportsError('Expected string as the first argument in module.link()!', importPath);
+        }
+
+        // Module.link('./some-path') without any arguments.
+        // Translates to `import './some-path' - so no exports to be found here. 👍
+        if (!exports) return [];
+
+        if (exports.type !== 'ObjectExpression') {
+            throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', importPath);
+        }
+        if (id?.type !== 'NumericLiteral') {
+            throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', importPath)
+        }
+
+        return formatExports({
+            packageName: importPath,
+            expression: exports,
+            id,
+        })
+    }
+
+    /**
+     * Parse a Meteor bundle's `module.export({ ... })` call.
+     * {@link ModuleMethod.export see type for examples}
+     */
+    protected parseExport(node: ModuleMethod.WithoutArgs<'export'>) {
+        if (node.arguments[0].type !== 'ObjectExpression'){
+            throw new ModuleExportsError('Unexpected export type!', exports)
+        }
+
+        return formatExports({
+            expression: node.arguments[0]
+        });
+    }
+
+    /**
+     * Parse a Meteor bundle's `module.exportDefault()` call.
+     * {@link ModuleMethod.exportDefault see examples in type declaration}
+     */
+    protected parseExportDefault(node: ModuleMethod.WithoutArgs<'exportDefault'>) {
+        const args = node.arguments;
         if (args[0].type !== 'Identifier') {
             throw new ModuleExportsError('Unexpected default export value!', args[0]);
         }
-        
+
         // todo: test for default exports with `export default { foo: 'bar' }`
         return [{ type: 'export-default', name: args[0].name, } satisfies ModuleExport];
     }
-    
-    // Meteor's module declaration method. `module.export(...)`
-    if (methodName === 'export') {
-        if (args[0].type !== 'ObjectExpression') throw new ModuleExportsError('Unexpected export type!', exports)
-        return formatExports({
-            expression: args[0]
-        });
-    }
-    
-    // Meteor's module declaration method. `module.link(...)`
-    if (methodName !== 'link') return;
-    if (args[0].type !== 'StringLiteral') throw new ModuleExportsError('Expected string as the first argument in module.link()!', args[0]);
-    if (args[1].type !== 'ObjectExpression') throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
-    if (args[2].type !== 'NumericLiteral') throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0]);
-    
-    return formatExports({
-        packageName: args[0],
-        expression: args[1],
-        id: args[2],
-    })
-}
-
-function handleMainModule({ expression }: ExpressionStatement) {
-    if (expression.type !== 'UnaryExpression') return;
-    if (expression.operator !== '!') return;
-    if (expression.argument.type !== 'CallExpression') return;
-    const callee = expression.argument.callee
-    if (callee.type !== 'MemberExpression') return;
-    if (callee.object.type !== 'FunctionExpression') return;
-    
-    const mainModule = callee.object.body;
-    const moduleExports: ReturnType<typeof formatExports> = [];
-    
-    mainModule.body.forEach((node) => {
-        const exports = readModuleExports(node);
-        if (!exports) return;
-        moduleExports.push(...exports)
-    });
-    
-    return moduleExports;
 }
 
 const propParser = {
@@ -423,34 +499,3 @@ export interface ParsedPackage {
      */
     packageId: string;
 }
-
-
-type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
-type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
-
-type MeteorPackageProperty = KnownObjectProperty<{
-    key: StringLiteral, // File name
-    value: FunctionExpression | MeteorNestedPackageProperty, // Module function
-}>
-type MeteorNestedPackageProperty = KnownObjectExpression<{
-    properties: MeteorPackageProperty[]
-}>
-
-type PackageConfig = KnownObjectExpression<{
-    properties: [KnownObjectProperty<{
-        key: StringLiteral & { value: 'node_modules' }
-        value: KnownObjectExpression<{
-            properties: [KnownObjectProperty<{
-                key: StringLiteral & { value: 'meteor' },
-                value: KnownObjectExpression<{
-                    properties: [KnownObjectProperty<{
-                        key: StringLiteral, // Package name
-                        value: KnownObjectExpression<{
-                            properties: MeteorPackageProperty[]
-                        }>
-                    }>]
-                }>
-            }>]
-        }>
-    }>]
-}>

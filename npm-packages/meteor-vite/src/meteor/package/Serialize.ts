@@ -21,7 +21,7 @@ export default new class Serialize {
             return `export { ${module.name} ${module.as && `as ${module.as} ` || ''}} from '${from}';`
         }
         
-        if (module.type === 'export-default') {
+        if (module.type === 'export-default' || (module.type === 'export' && module.name === 'default')) {
             return `export default ${METEOR_STUB_KEY}.default ?? ${METEOR_STUB_KEY};`
         }
         

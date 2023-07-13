@@ -27,4 +27,19 @@ jobs:
       - name: 'Build for production'
         run: cd examples/vue && meteor npm run build
 
+  build-svelte-example:
+    name: 'Svelte App'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: 'Setup Meteor'
+        uses: meteorengineer/setup-meteor@v1
+        with:
+          meteor-release: '2.10.0'
+      - name: 'Install dependencies'
+        run: cd examples/svelte && meteor npm install
+      - name: 'Build for production'
+        run: cd examples/svelte && meteor npm run build
 

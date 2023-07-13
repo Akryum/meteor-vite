@@ -11,7 +11,7 @@
     "test": "meteor test --once --driver-package meteortesting:mocha",
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
     "visualize": "meteor --production --extra-packages bundle-visualizer",
-    "build:dependencies": "(cd ./node_modules/meteor-vite && npm run build)",
+    "build:dependencies": "(cd ./node_modules/meteor-vite && meteor npm run build)",
     "build:meteor": "meteor build ../output/vue --directory",
     "postinstall": "npm run build:dependencies"
   },
