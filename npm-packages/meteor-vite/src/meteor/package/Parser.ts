@@ -224,6 +224,13 @@ class MeteorInstall {
     }
 }
 
+/**
+ * An individual file within a built Meteor package's meteorInstall file tree.
+ * It essentially represents a single file and its associated exports within a given Meteor package.
+ * E.g. `index.js` or `cookie-store.js`.
+ *
+ * {@link https://github.com/JorgenVatle/meteor-vite/blob/78a451fa311989d10cbb061bb929d8feb795ea2c/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L20 `explicit-relative-path.ts`} would count as a module here.
+ */
 class PackageModule {
     public readonly exports: ModuleExport[] = [];
     // Todo: Accept module metadata from callee to provide more insightful error messages
