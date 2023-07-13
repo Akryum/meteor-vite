@@ -11,7 +11,7 @@ import FS from 'fs/promises';
 import { inspect } from 'util';
 import Logger from '../../Logger';
 import { MeteorViteError } from '../../vite/error/MeteorViteError';
-import {KnownModuleMethods, MeteorPackageProperty, ModuleMethod, PackageConfig} from "./ParserTypes";
+import {KnownModuleMethodNames, MeteorPackageProperty, ModuleMethodName, PackageConfig} from "./ParserTypes";
 
 interface ParseOptions {
     /**
@@ -202,8 +202,8 @@ function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' 
     };
 }
 
-function validateModuleMethod(method: string): asserts method is ModuleMethod {
-    if (!KnownModuleMethods.includes(method as ModuleMethod)) {
+function validateModuleMethod(method: string): asserts method is ModuleMethodName {
+    if (!KnownModuleMethodNames.includes(method as ModuleMethodName)) {
         // todo: Classify error so that only a warning will be emitted to the console instead of a hard error.
         throw new ParserError(`Meteor module.${method}(...) is not recognized by Meteor-Vite! Please open an issue to get this resolved! 🙏`)
     }
