@@ -8,11 +8,37 @@ import { Tracker } from 'meteor/tracker';
 let subscription: Meteor.SubscriptionHandle;
 let initialConfig: RuntimeConfig;
 
-function checkServer(config: RuntimeConfig) {
-    if (initialConfig.host === config.host && initialConfig.port === config.port) {
+function watchConfig(config: RuntimeConfig) {
+    if (initialConfig.host !== config.host) {
+        return onChange(config);
+    }
+    
+    if (initialConfig.ready !== config.ready) {
+        return onChange(config);
+    }
+    
+    if (initialConfig.port !== config.port) {
+        return onChange(config);
+    }
+    
+    if (config.ready) {
+        return onReady(config);
+    }
+}
+
+function onReady(config: RuntimeConfig) {
+    if (hasLoadedVite()) {
+        console.info('⚡  Vite has already been loaded. Waiting on changes before refreshing.', { config });
         return;
     }
     
+    // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
+    console.log('⚡  Refreshing client...');
+    window.location.reload();
+    return;
+}
+
+function onChange(config: RuntimeConfig) {
     console.info(
         '⚡  Meteor-Vite dev server details changed from %s to %s',
         buildConnectionUri(initialConfig),
@@ -22,17 +48,20 @@ function checkServer(config: RuntimeConfig) {
     
     if (!config.ready) {
         console.log('⚡  Meteor-Vite dev server not ready yet. Waiting on server to become ready...');
+        return;
     }
     
-    if (window.__METEOR_VITE_STARTUP__) {
-        // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
-        console.log('⚡  Refreshing client...');
+    if (hasLoadedVite()) {
+        console.log('⚡  Attempting to refresh current Vite session to load new server config...')
         window.location.reload();
         return;
     }
     
-    // todo: potentially trigger a refresh to clear out the old server config
-    console.info('⚡  Not on startup screen. Letting the Vite server deal with this.', { config });
+    onReady(config);
+}
+
+function hasLoadedVite() {
+    return !window.__METEOR_VITE_STARTUP__;
 }
 
 Meteor.startup(() => {
@@ -51,7 +80,7 @@ Meteor.startup(() => {
             return;
         }
         
-        checkServer(getConfig());
+        watchConfig(getConfig());
     })
 });
 
