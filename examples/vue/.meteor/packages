@@ -26,3 +26,4 @@ test:lazy
 test:modules
 zodern:types
 test:ts-modules
+test:stub-validation
