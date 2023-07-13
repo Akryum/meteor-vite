@@ -1,3 +1,5 @@
+import { StubValidationSettings } from '../../vite/MeteorViteConfig';
+import { StubValidatorOptions } from '../client/ValidateStub';
 import MeteorPackage from './MeteorPackage';
 import { PackageSubmodule } from './PackageSubmodule';
 import Serialize from './Serialize';
@@ -11,10 +13,11 @@ export const TEMPLATE_GLOBAL_KEY = 'g';
  * Used to bridge imports for Meteor code that Vite doesn't have access to, to the below template that acts as a
  * proxy between Vite and Meteor's modules.
  */
-export function stubTemplate({ requestId, submodule, meteorPackage }: {
+export function stubTemplate({ requestId, submodule, meteorPackage, stubValidation: validationSettings }: {
     submodule?: PackageSubmodule;
     meteorPackage: MeteorPackage;
     requestId: string;
+    stubValidation?: StubValidationSettings,
 }) {
     const stubId = getStubId();
     const packageId = meteorPackage.packageId;
@@ -24,12 +27,19 @@ export function stubTemplate({ requestId, submodule, meteorPackage }: {
         modules: submodule?.exports || [],
         packageScope: meteorPackage.packageScopeExports,
     });
+    const stubValidation = stubValidationTemplate({
+        packageId,
+        requestId,
+        settings: validationSettings,
+        exportKeys: serialized.exportedKeys
+    });
+    
     
     // language="js"
     return`
 // requestId: ${requestId}
 // packageId: ${packageId}
-import { validateStub } from 'meteor-vite/client';
+${stubValidation.importString}
 const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global;
 ${serialized.package.top.join('\n')}
 ${serialized.module.top.join('\n')}
@@ -38,13 +48,8 @@ let ${METEOR_STUB_KEY};
 const require = Package.modules.meteorInstall({
   '__vite_stub${stubId}.js': (require, exports, module) => {
       ${METEOR_STUB_KEY} = require('${importPath}');
-    
-      validateStub({
-          requestId: '${requestId}',
-          packageName: '${packageId}',
-          stubbedPackage: ${METEOR_STUB_KEY},
-          exportKeys: ${JSON.stringify(serialized.exportedKeys)},
-      });
+      
+      ${stubValidation.validateStub}
   }
 }, {
   "extensions": [
@@ -87,6 +92,45 @@ ${imports}
 /** End of vite:bundler auto-imports **/
 
 ${content}`;
+}
+
+function stubValidationTemplate({ settings, requestId, exportKeys, packageId }: {
+    settings?: StubValidationSettings,
+    requestId: string;
+    exportKeys: string[];
+    packageId: string;
+}) {
+    if (settings?.disabled) {
+        return {
+            importString: '',
+            validateStub: '',
+        };
+    }
+    
+    if (settings?.ignorePackages?.includes(packageId)) {
+        return {
+            importString: '',
+            // language=js
+            validateStub: `console.debug("Stub validation disabled for '${packageId}'");`,
+        }
+    }
+    
+    const validatorOptions: StubValidatorOptions = {
+        requestId,
+        packageName: packageId,
+        exportKeys: exportKeys,
+        warnOnly: settings?.warnOnly,
+    }
+    
+    // language=js
+    const importString = `import { validateStub } from 'meteor-vite/client';`
+    // language=js
+    const validateStub = `validateStub(${METEOR_STUB_KEY}, ${JSON.stringify(validatorOptions)});`;
+    
+    return {
+        importString,
+        validateStub,
+    }
 }
 
 /**

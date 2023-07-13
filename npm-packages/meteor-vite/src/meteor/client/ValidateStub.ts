@@ -1,4 +1,5 @@
 import PackageJson from '../../../package.json';
+import { StubValidationSettings } from '../../vite/MeteorViteConfig';
 
 /**
  * Validate that the provided stub export key maps to a working export.
@@ -10,28 +11,25 @@ import PackageJson from '../../../package.json';
  * TODO: Read expected 'typeof' value from package exports at the parser and compare against the expected type
  * rather than just an undefined check.
  */
-export function validateStub({ stubbedPackage, exportKeys, packageName, requestId }: StubValidation) {
-    if (settings.stubValidation?.ignorePackages?.includes(packageName)) {
-        return;
-    }
-    
+export function validateStub(stubbedPackage: any, { exportKeys, packageName, requestId, warnOnly }: StubValidatorOptions) {
     console.debug('Meteor-Vite package validation:', {
         packageName,
         stubbedPackage,
         exportKeys,
+        warnOnly,
     });
     
     const errors: Error[] = [];
     
     exportKeys.forEach((key) => {
         if (!stubbedPackage) {
-            errors.push(new MeteorViteError(`Was not able to import Meteor package: "${packageName}"`, {
+            errors.push(new ImportException(`Was not able to import Meteor package: "${packageName}"`, {
                 requestId: requestId,
                 packageName,
             }))
         }
         if (typeof stubbedPackage[key] === 'undefined') {
-            errors.push(new MeteorViteError(`Could not import Meteor package into the client: export '${key}' is undefined`, {
+            errors.push(new UndefinedExportException(`Could not import Meteor package into the client: export '${key}' is undefined`, {
                 requestId: requestId,
                 packageName,
                 exportName: key,
@@ -40,7 +38,7 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
     });
     
     errors.forEach((error, i) => {
-        if (settings.stubValidation?.warnOnly) {
+        if (warnOnly) {
             return console.warn(error);
         }
         if (errors.length - 1 >= i) {
@@ -51,13 +49,7 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
     
 }
 
-// @ts-ignore
-const meteor = typeof window !== 'undefined' ? window.Meteor : global.Meteor
-// Todo: Move settings into private namespace
-const settings: MeteorViteSettings = meteor?.settings?.public?.vite?.bundler || {};
-
 class MeteorViteError extends Error {
-    public readonly name = '[meteor-vite] ⚠️ Error';
     constructor(message: string, { packageName, requestId, exportName }: ErrorMetadata) {
         const footerLines = [
             `⚡ Affected package: ${packageName}`,
@@ -73,30 +65,18 @@ class MeteorViteError extends Error {
         ].join('\n')
         
         super(message);
+        this.name = `[meteor-vite] ⚠️ ${this.constructor.name}`
         this.stack += `\n\n${footerLines}`
     }
 }
 
-interface MeteorViteSettings {
-    stubValidation?: {
-        /**
-         * list of packages to ignore export validation for.
-         */
-        ignorePackages?: string[];
-        
-        /**
-         * Will only emit warnings in the console instead of throwing an exception that may prevent the client app
-         * from loading.
-         */
-        warnOnly?: boolean;
-    }
-}
+class ImportException extends MeteorViteError {}
+class UndefinedExportException extends MeteorViteError {}
 
-type ErrorMetadata = Pick<StubValidation, 'packageName' | 'requestId'> & { exportName?: string };
+type ErrorMetadata = Pick<StubValidatorOptions, 'packageName' | 'requestId'> & { exportName?: string };
 
-interface StubValidation {
+export interface StubValidatorOptions extends Pick<StubValidationSettings, 'warnOnly'>{
     requestId: string;
-    
     packageName: string;
     
     /**
@@ -104,10 +84,4 @@ interface StubValidation {
      * export {}
      */
     exportKeys: string[];
-    
-    /**
-     * The result of the stub template's require() call.
-     * Can be anything.
-     */
-    stubbedPackage: any;
 }

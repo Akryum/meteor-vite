@@ -23,6 +23,7 @@ Meteor.startup(() => {
   Promise.all([
     import('./tests/ts-modules.test'),
     import('./tests/meteor.test'),
+    import('./tests/stub-validation'),
   ]).catch((error) => {
     console.error('Error importing test module!', error);
     return [];

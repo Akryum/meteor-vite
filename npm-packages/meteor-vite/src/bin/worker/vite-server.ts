@@ -1,11 +1,12 @@
 import fs from 'node:fs/promises';
 import Path from 'path';
-import { createServer, ViteDevServer } from 'vite';
+import { createServer, resolveConfig, ViteDevServer } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import CreateIPCInterface, { IPCReply } from './IPC/interface';
 
 let server: ViteDevServer;
+let viteConfig: MeteorViteConfig;
 
 type Replies = IPCReply<{
     kind: 'viteConfig',
@@ -31,6 +32,8 @@ export default CreateIPCInterface({
             })
         }
         
+        viteConfig = await resolveConfig({}, 'serve');
+        
         if (!server) {
             server = await createServer({
                 plugins: [
@@ -40,6 +43,7 @@ export default CreateIPCInterface({
                             isopackPath: Path.join('.meteor', 'local', 'isopacks'),
                         },
                         packageJson: JSON.parse(await fs.readFile('package.json', 'utf-8')),
+                        stubValidation: viteConfig.meteor?.stubValidation,
                     }),
                     {
                         name: 'meteor-handle-restart',
