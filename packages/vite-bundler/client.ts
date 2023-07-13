@@ -28,31 +28,31 @@ function watchConfig(config: RuntimeConfig) {
 
 function onReady(config: RuntimeConfig) {
     if (hasLoadedVite()) {
-        console.info('⚡  Vite has already been loaded. Waiting on changes before refreshing.', { config });
+        log.info('Vite has already been loaded. Waiting on changes before refreshing.', { config });
         return;
     }
     
     // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
-    console.log('⚡  Refreshing client...');
+    log.info('Refreshing client...');
     window.location.reload();
     return;
 }
 
 function onChange(config: RuntimeConfig) {
-    console.info(
-        '⚡  Meteor-Vite dev server details changed from %s to %s',
+    log.info(
+        'Meteor-Vite dev server details changed from %s to %s',
         buildConnectionUri(initialConfig),
         buildConnectionUri(config),
         { initialConfig, newConfig: config }
     );
     
     if (!config.ready) {
-        console.log('⚡  Meteor-Vite dev server not ready yet. Waiting on server to become ready...');
+        log.info('Meteor-Vite dev server not ready yet. Waiting on server to become ready...');
         return;
     }
     
     if (hasLoadedVite()) {
-        console.log('⚡  Attempting to refresh current Vite session to load new server config...')
+        log.info('Attempting to refresh current Vite session to load new server config...')
         window.location.reload();
         return;
     }
@@ -83,6 +83,10 @@ Meteor.startup(() => {
         watchConfig(getConfig());
     })
 });
+
+const log = {
+    info: (message: string, ...params: Parameters<typeof console.log>) => console.info(`[Meteor-Vite] ⚡ ${message}`, ...params),
+}
 
 declare global {
     interface Window {
