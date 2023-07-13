@@ -20,58 +20,61 @@ type ModuleMethodCall<
     }
     arguments: Arguments
 }
-/**
- * Meteor's `module.link()` method, exposed internally for built Meteor packages.
- *
- * @example package source
- * export { default } from 'meteor/ostrio:cookies';
- * export * from 'meteor/tracker;
- *
- * @example bundle result
- * module.link('meteor/ostrio:cookies', {
- *     default: 'Cookies'
- * }, 0)
- * module1.link("meteor/tracker", {
- *     "*": "*"
- * }, 1);
- */
-export type ModuleLink = ModuleMethodCall<'link', [
-    importPath: StringLiteral, // Hopefully only StringLiteral is all that can be here.
-    exports: ObjectExpression,
-    id: NumericLiteral
-] | [importPath: StringLiteral]>;
 
-/**
- * Meteor's `module.exportDefault()` method - seems to only be used for modules that are lazy-loaded?
- * {@link https://github.com/JorgenVatle/meteor-vite/blob/71a1ed5b84439c02f5592bef1d4cf3ae565fa879/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L42}
- *
- * @example Package source
- * export default namedFunction() {
- *     return 'foo';
- * }
- * @example Bundle result
- * module1.exportDefault(namedFunction);
- */
-export type ModuleExportDefault = ModuleMethodCall<'exportDefault', [
-    CallExpression['arguments'][number], // Can be anything, see ts_modules mock for example
-]>
+export namespace ModuleMethod {
+    /**
+     * Meteor's `module.link()` method, exposed internally for built Meteor packages.
+     *
+     * @example package source
+     * export { default } from 'meteor/ostrio:cookies';
+     * export * from 'meteor/tracker;
+     *
+     * @example bundle result
+     * module.link('meteor/ostrio:cookies', {
+     *     default: 'Cookies'
+     * }, 0)
+     * module1.link("meteor/tracker", {
+     *     "*": "*"
+     * }, 1);
+     */
+    export type Link = ModuleMethodCall<'link', [
+        importPath: StringLiteral, // Hopefully only StringLiteral is all that can be here.
+        exports: ObjectExpression,
+        id: NumericLiteral
+    ] | [importPath: StringLiteral]>;
 
-/**
- * Meteor's `module.export({ ... })` method. This is essentially ES exports
- *
- * @example Package source
- * export const Foo = 'bar'
- * export default class FooBar {}
- *
- * @example Bundle result
- * module.export({
- *     Foo: () => Foo
- *    FooBar: () => FooBar
- * })
- */
-export type ModuleExport = ModuleMethodCall<'export', [
-    ObjectExpression, // todo: Narrow this type further for keys and values (key Identifier/StringLiteral, etc.)
-]>
+    /**
+     * Meteor's `module.exportDefault()` method - seems to only be used for modules that are lazy-loaded?
+     * {@link https://github.com/JorgenVatle/meteor-vite/blob/71a1ed5b84439c02f5592bef1d4cf3ae565fa879/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L42}
+     *
+     * @example Package source
+     * export default namedFunction() {
+     *     return 'foo';
+     * }
+     * @example Bundle result
+     * module1.exportDefault(namedFunction);
+     */
+    export type ExportDefault = ModuleMethodCall<'exportDefault', [
+        CallExpression['arguments'][number], // Can be anything, see ts_modules mock for example
+    ]>
+
+    /**
+     * Meteor's `module.export({ ... })` method. This is essentially ES exports
+     *
+     * @example Package source
+     * export const Foo = 'bar'
+     * export default class FooBar {}
+     *
+     * @example Bundle result
+     * module.export({
+     *     Foo: () => Foo
+     *    FooBar: () => FooBar
+     * })
+     */
+    export type Export = ModuleMethodCall<'export', [
+        ObjectExpression, // todo: Narrow this type further for keys and values (key Identifier/StringLiteral, etc.)
+    ]>
+}
 
 export type MeteorPackageProperty = KnownObjectProperty<{
     key: StringLiteral, // File name
