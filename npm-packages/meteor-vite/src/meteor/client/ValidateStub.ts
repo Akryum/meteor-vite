@@ -1,15 +1,5 @@
 import PackageJson from '../../../package.json';
-import { MeteorSettings } from '../Types';
-
-declare global {
-    interface Window {
-        Meteor: Meteor;
-    }
-    
-    interface Meteor {
-        settings: MeteorSettings
-    }
-}
+import { StubValidationSettings } from '../../vite/MeteorViteConfig';
 
 /**
  * Validate that the provided stub export key maps to a working export.
@@ -21,16 +11,12 @@ declare global {
  * TODO: Read expected 'typeof' value from package exports at the parser and compare against the expected type
  * rather than just an undefined check.
  */
-export function validateStub({ stubbedPackage, exportKeys, packageName, requestId }: StubValidation) {
-    if (settings.stubValidation?.ignorePackages?.includes(packageName)) {
-        return;
-    }
-    
+export function validateStub({ stubbedPackage, exportKeys, packageName, requestId, warnOnly }: StubValidation) {
     console.debug('Meteor-Vite package validation:', {
         packageName,
         stubbedPackage,
         exportKeys,
-        settings,
+        warnOnly,
     });
     
     const errors: Error[] = [];
@@ -52,7 +38,7 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
     });
     
     errors.forEach((error, i) => {
-        if (settings.stubValidation?.warnOnly) {
+        if (warnOnly) {
             return console.warn(error);
         }
         if (errors.length - 1 >= i) {
@@ -62,9 +48,6 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
     })
     
 }
-
-const meteor: Meteor = typeof window !== 'undefined' ? window.Meteor : (global as any).Meteor
-const settings = meteor?.settings?.public?.['vite:bundler'] || {};
 
 class MeteorViteError extends Error {
     constructor(message: string, { packageName, requestId, exportName }: ErrorMetadata) {
@@ -92,9 +75,8 @@ class UndefinedExportException extends MeteorViteError {}
 
 type ErrorMetadata = Pick<StubValidation, 'packageName' | 'requestId'> & { exportName?: string };
 
-interface StubValidation {
+interface StubValidation extends Pick<StubValidationSettings, 'warnOnly'>{
     requestId: string;
-    
     packageName: string;
     
     /**
