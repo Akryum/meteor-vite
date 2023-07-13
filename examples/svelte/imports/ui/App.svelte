@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Meteor } from "meteor/meteor";
+  import { Tracker } from 'meteor/tracker';
   import { LinksCollection } from '../api/links';
 
   /**
@@ -13,7 +14,8 @@
     counter += 1;
   }
 
-  const links = useTracker(() => LinksCollection.find().fetch());
+  const ready = useTracker(() => Meteor.subscribe('links.all'))
+  $: links = LinksCollection.find({});
 </script>
 
 
@@ -24,14 +26,14 @@
   <p>You've pressed the button {counter} times.</p>
 
   <h2>Learn Meteor!</h2>
-  {#await Meteor.subscribe('todos')}
+  {#if $ready}
     <ul>
-      {#each links as link (link._id)}
+      {#each $links as link (link._id)}
         <li><a href={link.url} target="_blank" rel="noreferrer">{link.title}</a></li>
       {/each}
     </ul>
   {:else}
-    <div>Loading ...</div>
+    <div>Waiting on links...</div>
   {/if}
 
   <h2>Typescript ready</h2>
