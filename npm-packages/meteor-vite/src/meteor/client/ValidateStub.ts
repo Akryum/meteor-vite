@@ -36,13 +36,13 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
     
     exportKeys.forEach((key) => {
         if (!stubbedPackage) {
-            errors.push(new MeteorViteError(`Was not able to import Meteor package: "${packageName}"`, {
+            errors.push(new ImportException(`Was not able to import Meteor package: "${packageName}"`, {
                 requestId: requestId,
                 packageName,
             }))
         }
         if (typeof stubbedPackage[key] === 'undefined') {
-            errors.push(new MeteorViteError(`Could not import Meteor package into the client: export '${key}' is undefined`, {
+            errors.push(new UndefinedExportException(`Could not import Meteor package into the client: export '${key}' is undefined`, {
                 requestId: requestId,
                 packageName,
                 exportName: key,
@@ -66,7 +66,6 @@ const meteor: Meteor = typeof window !== 'undefined' ? window.Meteor : (global a
 const settings = meteor?.settings?.public?.['vite:bundler'] || {};
 
 class MeteorViteError extends Error {
-    public readonly name = '[meteor-vite] ⚠️ Error';
     constructor(message: string, { packageName, requestId, exportName }: ErrorMetadata) {
         const footerLines = [
             `⚡ Affected package: ${packageName}`,
@@ -82,9 +81,13 @@ class MeteorViteError extends Error {
         ].join('\n')
         
         super(message);
+        this.name = `[meteor-vite] ⚠️ ${this.constructor.name}`
         this.stack += `\n\n${footerLines}`
     }
 }
+
+class ImportException extends MeteorViteError {}
+class UndefinedExportException extends MeteorViteError {}
 
 type ErrorMetadata = Pick<StubValidation, 'packageName' | 'requestId'> & { exportName?: string };
 
