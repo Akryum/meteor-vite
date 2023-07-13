@@ -108,6 +108,10 @@ export const RdbSvelteMeteorData = prepareMock({
     packageName: 'rdb:svelte-meteor-data',
     fileName: 'rdb_svelte-meteor-data.js',
     modules: {
+        'index.js': [
+            { type: 're-export', name: 'default', as: 'useTracker', from: './use-tracker' },
+            { type: 're-export', name: 'default', as: 'useSession', from: './use-session' }
+        ],
         'use-session.js': [
             { type: 'export-default', }
         ],
@@ -115,7 +119,9 @@ export const RdbSvelteMeteorData = prepareMock({
             { type: 'export-default', }
         ],
     },
-    packageScopeExports: {},
+    packageScopeExports: {
+    
+    },
     mainModulePath: '/node_modules/meteor/rdb:svelte-meteor-data/index.js',
 })
 
