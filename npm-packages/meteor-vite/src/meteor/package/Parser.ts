@@ -11,6 +11,7 @@ import FS from 'fs/promises';
 import { inspect } from 'util';
 import Logger from '../../Logger';
 import { MeteorViteError } from '../../vite/error/MeteorViteError';
+import {KnownModuleMethods, MeteorPackageProperty, ModuleMethod, PackageConfig} from "./ParserTypes";
 
 interface ParseOptions {
     /**
@@ -200,9 +201,6 @@ function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' 
         packageId: `${meteor.key.value}/${packageName.key.value}`
     };
 }
-
-const KnownModuleMethods = ['export', 'link', 'exportDefault'] as const;
-type ModuleMethod = typeof KnownModuleMethods[number];
 
 function validateModuleMethod(method: string): asserts method is ModuleMethod {
     if (!KnownModuleMethods.includes(method as ModuleMethod)) {
@@ -461,34 +459,3 @@ export interface ParsedPackage {
      */
     packageId: string;
 }
-
-
-type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
-type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
-
-type MeteorPackageProperty = KnownObjectProperty<{
-    key: StringLiteral, // File name
-    value: FunctionExpression | MeteorNestedPackageProperty, // Module function
-}>
-type MeteorNestedPackageProperty = KnownObjectExpression<{
-    properties: MeteorPackageProperty[]
-}>
-
-type PackageConfig = KnownObjectExpression<{
-    properties: [KnownObjectProperty<{
-        key: StringLiteral & { value: 'node_modules' }
-        value: KnownObjectExpression<{
-            properties: [KnownObjectProperty<{
-                key: StringLiteral & { value: 'meteor' },
-                value: KnownObjectExpression<{
-                    properties: [KnownObjectProperty<{
-                        key: StringLiteral, // Package name
-                        value: KnownObjectExpression<{
-                            properties: MeteorPackageProperty[]
-                        }>
-                    }>]
-                }>
-            }>]
-        }>
-    }>]
-}>
