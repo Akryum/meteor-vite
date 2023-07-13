@@ -236,18 +236,34 @@ class PackageModule {
     constructor(public readonly module: { path: string }) {}
 
     protected isMethod<MethodName extends ModuleMethodName>(node: ModuleMethod.MethodMap[ModuleMethodName], method: MethodName): node is ModuleMethod.MethodMap[MethodName] {
+        const args = node.arguments;
+
         if (method === 'exportDefault') {
-            if (node.arguments[0].type !== 'Identifier') {
+            if (args[0].type !== 'Identifier') {
                 throw new ModuleExportsError('Unexpected default export value!', node.arguments[0]);
             }
         }
 
         if (method === 'export') {
-            if (node.arguments[0].type !== 'ObjectExpression'){
+            if (args[0].type !== 'ObjectExpression'){
                 throw new ModuleExportsError('Unexpected export type!', exports)
             }
         }
 
+        if (method === 'link') {
+            if (args[0].type !== 'StringLiteral') throw new ModuleExportsError('Expected string as the first argument in module.link()!', args[0]);
+
+            // Module.link('./some-path') without any arguments.
+            // Translates to `import './some-path' - so no exports to be found here. 👍
+            if (!args[1]) return false;
+
+            if (args[1].type !== 'ObjectExpression') {
+                throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
+            }
+            if (args[2]?.type !== 'NumericLiteral') {
+                throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0])
+            }
+        }
 
         return node.callee.property.name === method;
     }
