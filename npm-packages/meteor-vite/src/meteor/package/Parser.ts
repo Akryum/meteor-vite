@@ -18,7 +18,6 @@ import {
     ModuleMethodName,
     MeteorInstallObject
 } from "./ParserTypes";
-import NeedsArgValidation = ModuleMethod.NeedsArgValidation;
 
 interface ParseOptions {
     /**
@@ -276,7 +275,7 @@ class PackageModule {
      * Parse a Meteor bundle's `module.link()` call.
      * {@link ModuleMethod.Link}
      */
-    protected parseLink(node: NeedsArgValidation<'link'>) {
+    protected parseLink(node: ModuleMethod.WithoutArgs<'link'>) {
         const [importPath, exports, id] = node.arguments;
 
         if (importPath.type !== 'StringLiteral') {
@@ -305,7 +304,7 @@ class PackageModule {
      * Parse a Meteor bundle's `module.export({ ... })` call.
      * {@link ModuleMethod.export see type for examples}
      */
-    protected parseExport(node: NeedsArgValidation<'export'>) {
+    protected parseExport(node: ModuleMethod.WithoutArgs<'export'>) {
         if (node.arguments[0].type !== 'ObjectExpression'){
             throw new ModuleExportsError('Unexpected export type!', exports)
         }
@@ -319,7 +318,7 @@ class PackageModule {
      * Parse a Meteor bundle's `module.exportDefault()` call.
      * {@link ModuleMethod.exportDefault see examples in type declaration}
      */
-    protected parseExportDefault(node: NeedsArgValidation<'exportDefault'>) {
+    protected parseExportDefault(node: ModuleMethod.WithoutArgs<'exportDefault'>) {
         const args = node.arguments;
         if (args[0].type !== 'Identifier') {
             throw new ModuleExportsError('Unexpected default export value!', args[0]);
