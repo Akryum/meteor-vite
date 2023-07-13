@@ -207,7 +207,12 @@ class MeteorInstall {
                 return this.traverseModules(property.value.properties, `${path}/`);
             }
 
-            property.value.body.body.forEach((node) => module.parse(node));
+            traverse(property.value.body, {
+                enter(node) {
+                    module.parse(node)
+                }
+            });
+
             this.modules[path] = module.exports;
         })
     }
