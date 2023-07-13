@@ -8,11 +8,11 @@ Use [Vite](https://vitejs.dev) in your Meteor app! ⚡️
 - [x] Build
 - [x] Importing non-core Meteor packages
 - [x] Lazy meteor packages
-- [ ] Reify support
+- [x] Reify support
   - [x] Named exports
   - [x] Default exports
   - [x] Re-exports (named + wildcard)
-  - [ ] Re-exports via intermediary variable (not tested)
+  - [x] Re-exports via intermediary variable
 - [x] Code-splitting/Dynamic imports
 - [ ] SSR (not tested)
 - [ ] Starter/demo templates
