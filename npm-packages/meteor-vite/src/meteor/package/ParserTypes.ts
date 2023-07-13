@@ -74,6 +74,12 @@ export namespace ModuleMethod {
     export type Export = ModuleMethodCall<'export', [
         ObjectExpression, // todo: Narrow this type further for keys and values (key Identifier/StringLiteral, etc.)
     ]>
+
+    export type MethodMap = {
+        export: Export;
+        link: Link;
+        exportDefault: ExportDefault;
+    }
 }
 
 export type MeteorPackageProperty = KnownObjectProperty<{

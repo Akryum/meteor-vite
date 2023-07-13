@@ -228,12 +228,41 @@ function parseModuleMethod(node: Node): node is MemberExpression {
     return true;
 }
 
-// Todo: Refactor export handling into a more broad parsing approach.
-// One handler where we match against any Member call expression that matches our criteria;
-// Object name: module or module[0-9]+
-//  - link
-//  - export
-//  - exportDefault
+class ParseModuleMethod {
+    protected isModuleMethod<MethodName extends ModuleMethodName>(node: Node, method: MethodName): node is ModuleMethod.MethodMap[MethodName] {
+        if (node.type !== 'CallExpression') return false;
+
+        const callee = node.callee;
+
+        if (callee.type !== 'MemberExpression') return false;
+        if (callee.object.type !== 'Identifier') return false;
+        if (!callee.object.name.match(/^module\d*$/)) return false;
+        if (callee.property.type !== 'Identifier') return false;
+        const calleeMethod = callee.property.name;
+
+        if (!KnownModuleMethodNames.includes(calleeMethod as ModuleMethodName)) {
+            Logger.warn(`Meteor module.${calleeMethod}(...) is not recognized by Meteor-Vite! Please open an issue to get this resolved! 🙏`)
+        }
+
+        return calleeMethod === method;
+    }
+
+    public link(node: Node) {
+        if (!this.isModuleMethod(node, 'link')) return;
+        // todo: Process link statement here
+    }
+
+    public export(node: Node) {
+        if (!this.isModuleMethod(node, 'export')) return;
+        // todo
+    }
+
+    public exportDefault(node: Node) {
+        if (!this.isModuleMethod(node, 'exportDefault')) return;
+        // todo
+    }
+}
+
 function readModuleExports(node: Node) {
     if (node.type !== 'ExpressionStatement') return;
     if (node.expression.type === 'UnaryExpression') {
