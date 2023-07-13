@@ -10,6 +10,7 @@
   "dependencies": {
     "@babel/runtime": "^7.20.6",
     "meteor-node-stubs": "^1.2.5",
+    "meteor-vite": "file:../../npm-packages/meteor-vite",
     "svelte": "^3.54.0"
   },
   "devDependencies": {
