@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "meteor npm run dev:build",
-    "dev:build": "meteor npm run build:dependencies && cross-env BUILD_METEOR_VITE_DEPENDENCY='true' meteor npm run dev:run",
+    "dev:build": "meteor npm run build:dependencies && cross-env BUILD_METEOR_VITE_DEPENDENCY='true' meteor npm run dev:start",
     "dev:start": "meteor run",
     "build": "meteor npm run build:dependencies && meteor npm run build:meteor",
     "start": "(cd ../output/vue/bundle && (cd programs/server && meteor npm install) && PORT=4040 ROOT_URL=http://localhost:4040 MONGO_URL=mongodb://127.0.0.1:3001/meteor meteor node main.js)",
