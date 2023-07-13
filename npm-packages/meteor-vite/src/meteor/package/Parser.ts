@@ -178,39 +178,19 @@ function parseMeteorInstall(node: Node): Pick<ParsedPackage, 'modules' | 'name' 
     const meteor = node_modules.value.properties[0];
     const packageName = meteor.value.properties[0];
     const packageModules = packageName.value.properties;
-    const traverseModules = (properties: MeteorPackageProperty[], parentPath: string) => {
-        properties.forEach((property) => {
-            const path = `${parentPath}${property.key.value.toString()}`
-            const exportList: ModuleExport[] = [];
-            
-            if (property.value.type === 'ObjectExpression') {
-                return traverseModules(property.value.properties, `${path}/`);
-            }
-            
-            modules[path] = exportList;
-            
-            property.value.body.body.forEach((node) => {
-                const exports = readModuleExports(node);
-                if (!exports) {
-                    return;
-                }
-                exportList.push(...exports);
-            });
-        })
-    }
-    
-    const modules: ModuleList = {};
-    traverseModules(packageModules, '');
-    
-    return {
+
+    const meteorPackage = new MeteorInstall({
+        packageId: `${meteor.key.value}/${packageName.key.value}`,
         name: packageName.key.value,
-        modules,
-        packageId: `${meteor.key.value}/${packageName.key.value}`
-    };
+    });
+
+    meteorPackage.traverseModules(packageModules, '');
+
+    return meteorPackage;
 }
 
 class MeteorInstall {
-    public readonly modules: { [filePath in string]: PackageModule } = {}
+    public readonly modules: ModuleList = {}
     public readonly packageId: string;
     public readonly name: string;
     constructor({ packageId, name }: Pick<MeteorInstall, 'packageId' | 'name'>) {
@@ -218,13 +198,13 @@ class MeteorInstall {
         this.name = name;
     }
 
-    public traverseModule(properties: MeteorPackageProperty[], parentPath: string) {
+    public traverseModules(properties: MeteorPackageProperty[], parentPath: string) {
         properties.forEach((property) => {
             const path = `${parentPath}${property.key.value.toString()}`
             const module = new PackageModule({ path });
 
             if (property.value.type === 'ObjectExpression') {
-                return this.traverseModule(property.value.properties, `${path}/`);
+                return this.traverseModules(property.value.properties, `${path}/`);
             }
 
             property.value.body.body.forEach((node) => module.parse(node))
