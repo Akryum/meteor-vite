@@ -27,12 +27,29 @@ type ModuleMethodCall<
  * module.link('meteor/ostrio:cookies', {
  *     default: 'Cookies'
  * })
+ * @example
+ * module1.link("meteor/tracker", {
+ *     "*": "*"
+ * }, 1);
  */
 type ModuleLink = ModuleMethodCall<'link', [
     importPath: StringLiteral,
     exports: ObjectExpression,
     id: NumericLiteral
 ] | [importPath: StringLiteral]>;
+
+/**
+ * Meteor's `module.exportDefault()` method - seems to only be used primarily for modules that are written in
+ * TypeScript?
+ * @example
+ * function namedFunction() {
+ *   return 'foo';
+ * }
+ * module1.exportDefault(namedFunction);
+ */
+type ModuleExportDefault = ModuleMethodCall<'exportDefault', [
+    CallExpression['arguments'][number], // Can be anything, see ts_modules mock for example
+]>
 
 export type MeteorPackageProperty = KnownObjectProperty<{
     key: StringLiteral, // File name
