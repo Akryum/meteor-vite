@@ -5,6 +5,9 @@ import { getConfig, RuntimeConfig, ViteConnection } from './loading/vite-connect
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
+let subscription: Meteor.SubscriptionHandle;
+let initialConfig: RuntimeConfig;
+
 function checkServer(config: RuntimeConfig) {
     if (initialConfig.host === config.host && initialConfig.port === config.port) {
         return;
@@ -30,11 +33,7 @@ function checkServer(config: RuntimeConfig) {
     
     // todo: potentially trigger a refresh to clear out the old server config
     console.info('⚡  Not on startup screen. Letting the Vite server deal with this.', { config });
-    
 }
-
-let subscription: Meteor.SubscriptionHandle;
-let initialConfig: RuntimeConfig;
 
 Meteor.startup(() => {
     if (!Meteor.isDevelopment) {
@@ -43,8 +42,13 @@ Meteor.startup(() => {
     
     Tracker.autorun(function() {
         subscription = Meteor.subscribe(ViteConnection.publication);
+        const config = getConfig();
         if (!initialConfig && subscription.ready()) {
-            initialConfig = getConfig();
+            initialConfig = config;
+        }
+        
+        if (!initialConfig) {
+            return;
         }
         
         checkServer(getConfig());
