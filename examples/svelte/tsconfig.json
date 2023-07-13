@@ -1,20 +1,56 @@
 {
-  // see https://guide.meteor.com/build-tool.html#typescript for a config example
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true, // to be able to import eg meteor/mongo
-    "baseUrl": ".", // required by "paths"
-    "module": "esNext", // required by "preserveValueImports"
-    "moduleResolution": "node", // required by zodern:types (not documented)
+    /* Basic Options */
+    "target": "es2018",
+    "module": "esNext",
+    "lib": ["esnext", "dom"],
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "preserve",
+    "incremental": true,
+    "noEmit": true,
+
+    /* Strict Type-Checking Options */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+
+    /* Additional Checks */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+
+    /* Module Resolution Options */
+    "baseUrl": ".",
     "paths": {
-      "/*": ["*"], // support absolute /imports/* with a leading '/'
-      // support Meteor/Atmospehere packages, required by zodern:types
+      /* Support absolute /imports/* with a leading '/' */
+      "/*": ["*"],
       "meteor/*": [
         "node_modules/@types/meteor/*",
         ".meteor/local/types/packages.d.ts"
+      ],
+      "meteor/vite:bundler": [
+        "packages/vite-bundler/index.d.ts"
       ]
     },
-    "preserveSymlinks": true, // required by zodern:types
-    "preserveValueImports": true // otherwise TS will remove imported components
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "types": ["node", "mocha"],
+    "esModuleInterop": true,
+    "preserveSymlinks": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Vite setup */
+    "isolatedModules": true,
   },
-  "exclude": ["./.meteor/**", "./packages/**"] // this may solve VS Code Svelte plugin warnings
+  "include": [
+    "imports/**/*",
+    "tests/**/*",
+    "vite.config.mts",
+    "client/**/*",
+    ".meteor/local/types/packages.d.ts",
+    "node_modules/@types/meteor/**/*"
+  ],
 }
