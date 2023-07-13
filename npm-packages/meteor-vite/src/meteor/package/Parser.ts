@@ -297,27 +297,27 @@ class PackageModule {
      * {@link ModuleMethod.Link}
      */
     protected parseLink(node: NeedsArgValidation<'link'>) {
-        const args = node.arguments;
+        const [importPath, exports, id] = node.arguments;
 
-        if (args[0].type !== 'StringLiteral') {
-            throw new ModuleExportsError('Expected string as the first argument in module.link()!', args[0]);
+        if (importPath.type !== 'StringLiteral') {
+            throw new ModuleExportsError('Expected string as the first argument in module.link()!', importPath);
         }
 
         // Module.link('./some-path') without any arguments.
         // Translates to `import './some-path' - so no exports to be found here. 👍
-        if (!args[1]) return [];
+        if (!exports) return [];
 
-        if (args[1].type !== 'ObjectExpression') {
-            throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', args[0]);
+        if (exports.type !== 'ObjectExpression') {
+            throw new ModuleExportsError('Expected ObjectExpression as the second argument in module.link()!', importPath);
         }
-        if (args[2]?.type !== 'NumericLiteral') {
-            throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', args[0])
+        if (id?.type !== 'NumericLiteral') {
+            throw new ModuleExportsError('Expected NumericLiteral as the last argument in module.link()!', importPath)
         }
 
         return formatExports({
-            packageName: args[0],
-            expression: args[1],
-            id: args[2],
+            packageName: importPath,
+            expression: exports,
+            id,
         })
     }
 
