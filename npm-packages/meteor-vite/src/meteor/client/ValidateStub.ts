@@ -1,4 +1,15 @@
 import PackageJson from '../../../package.json';
+import { MeteorSettings } from '../Types';
+
+declare global {
+    interface Window {
+        Meteor: Meteor;
+    }
+    
+    interface Meteor {
+        settings: MeteorSettings
+    }
+}
 
 /**
  * Validate that the provided stub export key maps to a working export.
@@ -51,10 +62,8 @@ export function validateStub({ stubbedPackage, exportKeys, packageName, requestI
     
 }
 
-// @ts-ignore
-const meteor = typeof window !== 'undefined' ? window.Meteor : global.Meteor
-// Todo: Move settings into private namespace
-const settings: MeteorViteSettings = meteor?.settings?.public?.vite?.bundler || {};
+const meteor: Meteor = typeof window !== 'undefined' ? window.Meteor : (global as any).Meteor
+const settings = meteor?.settings?.public?.['vite:bundler'] || {};
 
 class MeteorViteError extends Error {
     public readonly name = '[meteor-vite] ⚠️ Error';
@@ -74,21 +83,6 @@ class MeteorViteError extends Error {
         
         super(message);
         this.stack += `\n\n${footerLines}`
-    }
-}
-
-interface MeteorViteSettings {
-    stubValidation?: {
-        /**
-         * list of packages to ignore export validation for.
-         */
-        ignorePackages?: string[];
-        
-        /**
-         * Will only emit warnings in the console instead of throwing an exception that may prevent the client app
-         * from loading.
-         */
-        warnOnly?: boolean;
     }
 }
 
