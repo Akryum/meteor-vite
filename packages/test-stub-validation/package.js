@@ -1,5 +1,5 @@
 Package.describe({
-  name: 'test:lazy',
+  name: 'test:stub-validation',
   version: '0.0.1',
   summary: 'summary',
   git: 'https://github.com/Akryum/meteor-vite',
@@ -8,5 +8,7 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.use('ecmascript')
-  api.mainModule('index.js', ['client', 'server'], { lazy: true });
+  api.use('zodern:types')
+  api.use('typescript')
+  api.mainModule('index.ts', ['client', 'server'], { lazy: true });
 })
