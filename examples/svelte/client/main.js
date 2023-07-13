@@ -1,9 +1,1 @@
-import { Meteor } from 'meteor/meteor';
-import App from '../imports/ui/App.svelte';
-
-
-Meteor.startup(() => {
-  new App({
-    target: document.getElementById('app')
-  });
-});
+// Leaving this empty so Vite can take care of application setup.
