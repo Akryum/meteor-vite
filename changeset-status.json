@@ -3,36 +3,23 @@
     {
       "releases": [
         {
-          "name": "vite-bundler",
-          "type": "minor"
-        },
-        {
           "name": "meteor-vite",
-          "type": "minor"
+          "type": "patch"
         }
       ],
-      "summary": "- Fixed an issue where Meteor builds with lazy-loaded packages would only work if Meteor had been run at least once in development mode.\n- Fixed an issue where some lazy-loaded packages would cause the Vite dev server to become unresponsive\n- Updated Vite dev server loggers.",
-      "id": "strong-sheep-drop"
+      "summary": "Fix error handling for non-MeteorVite errors",
+      "id": "chatty-gifts-hope"
     }
   ],
   "releases": [
     {
-      "name": "vite-bundler",
-      "type": "minor",
-      "oldVersion": "1.0.1",
-      "changesets": [
-        "strong-sheep-drop"
-      ],
-      "newVersion": "1.1.0"
-    },
-    {
       "name": "meteor-vite",
-      "type": "minor",
-      "oldVersion": "1.0.0",
+      "type": "patch",
+      "oldVersion": "1.1.0",
       "changesets": [
-        "strong-sheep-drop"
+        "chatty-gifts-hope"
       ],
-      "newVersion": "1.1.0"
+      "newVersion": "1.1.1"
     }
   ]
 }
