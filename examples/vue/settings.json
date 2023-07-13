@@ -1,0 +1,10 @@
+{
+  "vite:bundler": {
+    "warnOnly": true
+  },
+  "public":{
+    "vite:bundler": {
+      "warnOnly": true
+    }
+  }
+}
