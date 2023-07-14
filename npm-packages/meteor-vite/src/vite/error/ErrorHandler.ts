@@ -16,7 +16,7 @@ export function createErrorHandler(fallbackDescription: string, request?: ViteLo
 
 function formatError(fallbackDescription: string, error: unknown | Error) {
     if (!(error instanceof Error)) {
-        throw new MeteorViteError('Received an unexpected error format!', { cause: error });
+        return new MeteorViteError('Received an unexpected error format!', { cause: error });
     }
     
     if (!(error instanceof MeteorViteError)) {
