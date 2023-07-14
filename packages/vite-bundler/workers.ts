@@ -2,7 +2,6 @@ import { fork } from 'node:child_process'
 import { Meteor } from 'meteor/meteor';
 import Path from 'path';
 import FS from 'fs';
-import * as process from 'process';
 import pc from 'picocolors';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
 import type { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker';
