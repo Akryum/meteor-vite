@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import pc from 'picocolors';
 import Logger from '../Logger';
 
 type MeteorIPCTopic = 'webapp-reload-client' | 'webapp-pause-client' | 'client-refresh';
@@ -40,7 +41,8 @@ export default new class MeteorEvents {
                 this.events.once(topic, () => {
                     if (rejected || resolved) return;
                     resolved = true;
-                    resolve()
+                    resolve();
+                    Logger.debug(`MeteorEvents event listener received an awaited event: ${pc.yellow(topic)}`)
                 });
             })
             
