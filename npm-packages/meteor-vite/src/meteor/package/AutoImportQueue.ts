@@ -82,7 +82,6 @@ export default new class AutoImportQueue {
         return new Promise<void>((resolve, reject) => {
             this.onRestartWatchers.push(() => {
                 reject(
-                    // Todo: Look into a better way for forcing a restart without needing a potentially confusing error
                     new RefreshNeeded(`Terminating Vite server to load isopacks for new packages`, this.addedPackages)
                 )
             })
