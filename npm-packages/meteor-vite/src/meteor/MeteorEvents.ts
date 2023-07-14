@@ -52,7 +52,7 @@ export default new class MeteorEvents {
     }
     
     public ingest(event: MeteorIPCMessage) {
-        this.events.emit(event.type);
+        this.events.emit(event.topic);
     }
 }
 
