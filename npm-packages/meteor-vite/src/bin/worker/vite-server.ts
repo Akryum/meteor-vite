@@ -1,8 +1,8 @@
-import fs from 'node:fs/promises';
 import Path from 'path';
 import { createServer, resolveConfig, ViteDevServer } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
+import { ProjectJson } from '../../vite/plugin/MeteorStubs';
 import CreateIPCInterface, { IPCReply } from './IPC/interface';
 
 let server: ViteDevServer;
@@ -19,7 +19,7 @@ type Replies = IPCReply<{
 
 export default CreateIPCInterface({
     // todo: Add reply for triggering a server restart
-    async 'vite.startDevServer'(reply: Replies) {
+    async 'vite.startDevServer'(reply: Replies, { packageJson }: { packageJson: ProjectJson }) {
         
         const sendViteConfig = (config: MeteorViteConfig) => {
             reply({
@@ -32,17 +32,20 @@ export default CreateIPCInterface({
             })
         }
         
-        viteConfig = await resolveConfig({}, 'serve');
+        viteConfig = await resolveConfig({
+            configFile: packageJson?.meteor?.viteConfig,
+        }, 'serve');
         
         if (!server) {
             server = await createServer({
+                configFile: viteConfig.configFile,
                 plugins: [
                     MeteorStubs({
                         meteor: {
                             packagePath: Path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages'),
                             isopackPath: Path.join('.meteor', 'local', 'isopacks'),
                         },
-                        packageJson: JSON.parse(await fs.readFile('package.json', 'utf-8')),
+                        packageJson,
                         stubValidation: viteConfig.meteor?.stubValidation,
                     }),
                     {
