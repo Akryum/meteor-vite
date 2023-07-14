@@ -24,13 +24,17 @@ export default class ExportEntry implements ModuleExport {
      * Whether this entry needs to be placed at the top of a file, or at the bottom of a file.
      * Just so we don't end up placing `export { foo } from 'meteor/foo:bar'` statements at a place where it can
      * break syntax.
+     * // If the placement is 'none', the entry should just be omitted
      *
      * In short, we want re-exports from other modules to be at the top of the file, while normal exports are left
      * at the bottom of the file.
      */
-    public get placement(): 'top' | 'bottom' {
+    public get placement(): 'top' | 'bottom' | 'none' {
         if (this.type === 're-export' && this.from) {
             return 'top'
+        }
+        if (this.type === 'global-binding') {
+            return 'none'
         }
         return 'bottom';
     }
