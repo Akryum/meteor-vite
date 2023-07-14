@@ -2,12 +2,6 @@
   import { Meteor } from "meteor/meteor";
   import { LinksCollection } from '../api/links';
 
-  /**
-   * Meteor tracker for Svelte
-   * {@link https://github.com/rdb/svelte-meteor-data}
-   */
-  import { useTracker } from 'meteor/rdb:svelte-meteor-data';
-
   let counter = 0;
   const addToCounter = () => {
     counter += 1;
@@ -15,7 +9,7 @@
 
   $: links = LinksCollection.find({});
 
-  const remove = (linkId) => {
+  const reverseTitle = (linkId) => {
     Meteor.call('links.reverse-title', linkId)
   }
 </script>
@@ -35,7 +29,7 @@
       {#each $links as link (link._id)}
         <li>
           <a href={link.url} target="_blank" rel="noreferrer">{link.title}</a>
-          <button on:click={() => { remove(link._id) }}>Reverse</button>
+          <button on:click={() => { reverseTitle(link._id) }}>Reverse</button>
         </li>
       {/each}
     </ul>
