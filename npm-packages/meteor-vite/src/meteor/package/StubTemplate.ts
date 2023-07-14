@@ -69,7 +69,7 @@ ${serialized.module.bottom.join('\n')}
  * {@link https://regex101.com/r/shKDPE/1}
  * @type {RegExp}
  */
-const REGEX_AUTO_IMPORT_BLOCK = /(?<startBlock>\*\*\/[\r\n\s]+)(?<imports>(?:.*[\r\n])*)(?<endBlock>[\s\r\n]*\/\*\* End of vite:bundler auto-imports \*\*\/)/
+const REGEX_AUTO_IMPORT_BLOCK = /(?<startBlock>\*\*\/[\r\n\s]+)(?<imports>(?:.*[\r\n])*)(?<endBlock>[\s\r\n]*\/\*\* End of vite[\-:]bundler auto-imports \*\*\/)/
 
 export function viteAutoImportBlock({ content, id }: { content: string, id: string }) {
     let { startBlock, imports, endBlock } = content.match(REGEX_AUTO_IMPORT_BLOCK)?.groups || { imports: '' };
@@ -82,14 +82,14 @@ export function viteAutoImportBlock({ content, id }: { content: string, id: stri
     }
     
     return `/**
- * These modules are automatically imported by vite:bundler.
+ * These modules are automatically imported by jorgenvatle:vite-bundler.
  * You can commit these to your project or move them elsewhere if you'd like,
  * but they must be imported somewhere in your Meteor entrypoint file.
  *
  * More info: https://github.com/JorgenVatle/meteor-vite#lazy-loaded-meteor-packages
 **/
 ${imports}
-/** End of vite:bundler auto-imports **/
+/** End of vite-bundler auto-imports **/
 
 ${content}`;
 }
