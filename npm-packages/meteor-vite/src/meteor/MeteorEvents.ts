@@ -12,12 +12,24 @@ export type MeteorIPCMessage = {
 export default new class MeteorEvents {
     protected readonly events = new EventEmitter();
     
-    public awaitClientRefresh(timeoutMs: number) {
+    public awaitEvent(event: {
+        /**
+         * Meteor IPC event name.
+         * E.g. webapp-reload-client, client-refresh
+         */
+        topic: MeteorIPCTopic,
+        
+        /**
+         * How long to wait before rejecting the promise.
+         * Useful to prevent a promise from hanging indefinitely.
+         */
+        timeoutMs: number
+    }) {
         return new Promise<void>((resolve, reject) => {
             let rejected = false;
             let resolved = false;
             
-            this.events.once('webapp-reload-client', () => {
+            this.events.once(event.topic, () => {
                 if (rejected) return;
                 resolved = true;
                 resolve()
@@ -27,7 +39,7 @@ export default new class MeteorEvents {
                 if (resolved) return;
                 rejected = true;
                 reject(new EventTimeout('Timed out waiting for client refresh event'));
-            }, timeoutMs)
+            }, event.timeoutMs)
         })
     }
     
