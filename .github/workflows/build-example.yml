@@ -1,4 +1,4 @@
-name: 'Build Example Apps'
+name: 'Example Apps'
 
 on:
   push:
@@ -12,13 +12,13 @@ on:
 
 jobs:
   vue:
-    name: 'Vue Example'
+    name: 'Vue'
     uses: ./.github/workflows/_reuse_.build.yml
     with:
       name: 'vue'
 
   svelte:
-    name: 'Svelte Example'
+    name: 'Svelte'
     uses: ./.github/workflows/_reuse_.build.yml
     with:
       name: 'svelte'
