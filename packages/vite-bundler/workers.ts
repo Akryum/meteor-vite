@@ -2,8 +2,10 @@ import { fork } from 'node:child_process'
 import { Meteor } from 'meteor/meteor';
 import Path from 'path';
 import FS from 'fs';
+import * as process from 'process';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
 import { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker';
+import { ProjectJson } from '../../npm-packages/meteor-vite/src/vite/plugin/MeteorStubs';
 
 // Use a worker to skip reify and Fibers
 // Use a child process instead of worker to avoid WASM/archived threads error
@@ -52,8 +54,23 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     }
 }
 
-export const cwd = guessCwd();
+export const cwd = process.env.METEOR_VITE_CWD ?? guessCwd();
 export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/worker/index.mjs');
+export const projectPackageJson = getProjectPackageJson();
+function getProjectPackageJson(): ProjectJson {
+    const path = Path.join(cwd, 'package.json');
+    
+    if (!FS.existsSync(path)) {
+        const errorMessage = [
+            `[Meteor-Vite] Unable to locate package.json for your project in ${path}`,
+            `Make sure you run Meteor commands from the root of your project directory.`,
+            `Alternatively, you can supply a superficial CWD for Meteor-Vite to use: METEOR_VITE_CWD="./projects/my-meteor-project/"`
+        ]
+        throw new Error(errorMessage.join('\n    '))
+    }
+    
+    return JSON.parse(FS.readFileSync(path, 'utf-8'));
+}
 function guessCwd () {
     let cwd = process.env.PWD ?? process.cwd()
     const index = cwd.indexOf('.meteor')
