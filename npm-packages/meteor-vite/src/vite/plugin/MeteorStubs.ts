@@ -91,12 +91,13 @@ function setupPlugin<Context extends ViteLoadRequest, Settings>(setup: (settings
     shouldProcess(viteId: string): boolean;
     resolveId(viteId: string): string | undefined;
 }>): (settings: Settings) => Promise<Plugin> {
-    const createPlugin = async (settings: Settings) => {
+    const createPlugin = async (settings: Settings): Promise<Plugin> => {
         const plugin = await setup(settings);
         return {
             name: plugin.name,
             resolveId: plugin.resolveId,
-            load: async (viteId: string) => {
+            
+            async load(viteId: string) {
                 const shouldProcess = plugin.shouldProcess(viteId);
                 
                 if (!shouldProcess) {
