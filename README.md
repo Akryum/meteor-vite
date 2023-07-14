@@ -161,3 +161,14 @@ export default defineConfig({
   } satisfies MeteorViteConfig['meteor'],
 })
 ```
+
+## Package Details
+The Vite integration comes with two dependencies that work together to enable compatibility between Meteor and Vite.
+
+- [`meteor-vite`](/npm-packages/meteor-vite/) - Internal Vite plugin allowing compatibility with Meteor packages
+  - [View changelog](/npm-packages/meteor-vite/CHANGELOG.md)
+  - [View on npm](https://www.npmjs.com/package/meteor-vite)
+
+- [`jorgenvatle:vite-bundler`](/packages/vite-bundler/) - Meteor package for launching Vite workers and building production bundles.
+  - [View changelog](/packages/vite-bundler/CHANGELOG.md) 
+  - [View on Atmosphere](https://atmospherejs.com/jorgenvatle/vite-bundler)
