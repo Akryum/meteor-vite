@@ -1,4 +1,4 @@
-name: 'Meteor Build'
+name: 'Build Example App'
 
 on:
   push:
