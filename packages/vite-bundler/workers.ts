@@ -58,6 +58,28 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     }
 }
 
+export type MeteorIPCMessage = {
+    type: 'METEOR_IPC_MESSAGE',
+    responseId: string,
+    topic: 'webapp-reload-client' | 'webapp-pause-client' | 'client-refresh',
+    encodedPayload: string
+}
+
+export function isMeteorMessage<
+    Topic extends MeteorIPCMessage['topic']
+>(message: unknown, event: Topic): message is Omit<MeteorIPCMessage, 'topic'> & { topic: Topic }  {
+    if (!message || typeof message !== 'object') {
+        return false;
+    }
+    if (!('type' in message) || !('topic' in message)) {
+        return false;
+    }
+    if (message?.type !== 'METEOR_IPC_MESSAGE') {
+        return false;
+    }
+    return message.topic === event;
+}
+
 class MeteorViteError extends Error {
     constructor(message: string[] | string) {
         if (!Array.isArray(message)) {
