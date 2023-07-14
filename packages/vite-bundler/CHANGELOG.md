@@ -1,5 +1,11 @@
 # vite-bundler
 
+## 1.1.3
+
+### Patch Changes
+
+- 661d17d: Fix issue where production builds would fail for projects without a tsconfig.json file
+
 ## 1.1.2
 
 ### Patch Changes
