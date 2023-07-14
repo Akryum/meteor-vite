@@ -58,7 +58,11 @@ class ExportEntry implements ModuleExport {
         this.id = id;
     }
     
-    public serialize() {
+    /**
+     * The current export entry, converted into JavaScript for use as a Meteor stub.
+     * Essentially, converting from raw data back into JavaScript.
+     */
+    public get serialized() {
         if (this.type === 're-export') {
             let from = this.from?.startsWith('.')
                        ? `${this.parentModule.meteorPackage.packageId}/${this.from?.replace(/^[./]+/, '')}`
