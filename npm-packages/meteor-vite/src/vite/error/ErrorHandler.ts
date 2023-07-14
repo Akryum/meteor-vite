@@ -34,6 +34,14 @@ function formatError(fallbackDescription: string, error: unknown | Error) {
 }
 
 let lastEmittedWarning = Date.now();
+
+/**
+ * Only really gets to this point if the Vite worker times out waiting for Meteor to emit a "client refresh" IPC
+ * message.
+ * TODO: Forcefully restart Meteor server once the warning is emitted.
+ * @param {RefreshNeeded} error
+ * @returns {never}
+ */
 function handleRefreshNeeded(error: RefreshNeeded): never {
     if (1000 < Date.now() - lastEmittedWarning) {
         console.warn(error.message);
