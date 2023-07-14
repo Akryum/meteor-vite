@@ -14,7 +14,10 @@ const runtimeConfig: RuntimeConfig = {
 }
 
 export const ViteConnection = {
-    publication: 'meteor:vite' as const,
+    publication: '_meteor_vite' as const,
+    methods: {
+        refreshConfig: '_meteor_vite_refresh_config',
+    },
     configSelector: { _id: 'viteConfig' },
 }
 
@@ -44,39 +47,5 @@ export function setConfig<TConfig extends Partial<RuntimeConfig>>(config: TConfi
 }
 
 if (Meteor.isDevelopment) {
-    MeteorViteConfig = new Mongo.Collection('meteor:vite');
-    
-    /**
-     * Reset and refresh runtime config.
-     */
-    if (Meteor.isServer) {
-        Meteor.startup(() => setConfig(runtimeConfig));
-        Meteor.methods({
-            [ViteConnection.publication]() {
-                setConfig(runtimeConfig);
-            }
-        })
-    }
-    
-    /**
-     * Failsafe to force a refresh of the server's runtime config.
-     */
-    if (Meteor.isClient) {
-        const pollReadiness = () => {
-            setTimeout(() => {
-                Meteor.call(ViteConnection.publication, (error: Meteor.Error) => {
-                    if (!getConfig().ready) {
-                        pollReadiness();
-                    }
-                    if (error) {
-                        console.error(error);
-                    }
-                })
-            }, 5000);
-            
-            if (!getConfig().ready) {
-                pollReadiness();
-            }
-        }
-    }
+    MeteorViteConfig = new Mongo.Collection(ViteConnection.publication);
 }

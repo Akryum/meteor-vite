@@ -83,7 +83,29 @@ Meteor.startup(() => {
         }
         
         watchConfig(getConfig());
-    })
+    });
+    
+    /**
+     * Failsafe to force a refresh of the server's runtime config.
+     */
+    if (!hasLoadedVite()) {
+        const forceRefreshAfter = 5 * 1000 // 5 seconds
+        Meteor.setInterval(() => {
+            const lastUpdateMs = Date.now() - getConfig().lastUpdate;
+            if (lastUpdateMs < forceRefreshAfter) {
+                return;
+            }
+            Meteor.call(ViteConnection.methods.refreshConfig, (error?: Error, config?: RuntimeConfig) => {
+                if (error) {
+                    throw error;
+                }
+                if (!config) {
+                    console.error('Received no config from server!', { error, config })
+                }
+                watchConfig(config || getConfig());
+            })
+        }, 2500);
+    }
 });
 
 const log = {

@@ -43,6 +43,16 @@ if (Meteor.isDevelopment) {
         return MeteorViteConfig.find(ViteConnection.configSelector);
     });
     
+    Meteor.methods({
+        [ViteConnection.methods.refreshConfig]() {
+            console.log('⚡  Refreshing configuration from Vite dev server...')
+            viteServer.call({
+                method: 'vite.getDevServerConfig',
+                params: [],
+            });
+            return getConfig();
+        }
+    })
     
     /**
      * Builds the 'meteor-vite' npm package where the worker and Vite server is kept.
