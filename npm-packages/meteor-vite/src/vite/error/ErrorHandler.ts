@@ -40,5 +40,5 @@ function handleRefreshNeeded(error: RefreshNeeded): never {
         process.emitWarning('Refresh needed!', error.constructor.name);
         lastEmittedWarning = Date.now();
     }
-    return undefined as never;
+    throw error;
 }
