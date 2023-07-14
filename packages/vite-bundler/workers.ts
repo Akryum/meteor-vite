@@ -70,8 +70,7 @@ class MeteorViteError extends Error {
 
 export const cwd = process.env.METEOR_VITE_CWD ?? guessCwd();
 export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/worker/index.mjs');
-export const projectPackageJson = getProjectPackageJson();
-function getProjectPackageJson(): ProjectJson {
+export function getProjectPackageJson(): ProjectJson {
     const path = Path.join(cwd, 'package.json');
     
     if (!FS.existsSync(path)) {

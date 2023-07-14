@@ -3,7 +3,7 @@ import { performance } from 'node:perf_hooks'
 import fs from 'fs-extra'
 import { execaSync } from 'execa'
 import pc from 'picocolors'
-import { createWorkerFork, cwd, projectPackageJson } from './workers';
+import { createWorkerFork, cwd, getProjectPackageJson } from './workers';
 import os from 'node:os';
 
 if (process.env.NODE_ENV !== 'production') return
@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== 'production') return
 // Not in a project (publishing the package)
 if (!process.env.VITE_METEOR_DISABLED) return
 
-const pkg = projectPackageJson;
+const pkg = getProjectPackageJson();
 const meteorMainModule = pkg.meteor?.mainModule?.client
 
 // Meteor packages to omit or replace the temporary build.
