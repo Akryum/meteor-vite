@@ -42,7 +42,7 @@ jobs:
           meteor-release: '2.12'
 
       - name: 'Install Dependencies'
-        run: meteor npm run install:workspace
+        run: meteor npm run install:package
 
       - name: 'Create Release'
         id: changesets
