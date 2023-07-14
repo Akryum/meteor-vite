@@ -6,7 +6,7 @@ import { createLabelledLogger, LabelLogger } from '../Logger';
 import AutoImportQueue from '../meteor/package/AutoImportQueue';
 import { isSameModulePath } from '../meteor/package/Serialize';
 import { MeteorViteError } from './error/MeteorViteError';
-import type { PluginSettings, ValidProjectJson } from './plugin/MeteorStubs';
+import type { PluginSettings } from './plugin/MeteorStubs';
 
 export default class ViteLoadRequest {
     
@@ -186,7 +186,7 @@ export type FileRequestData = ReturnType<typeof ViteLoadRequest['loadFileData']>
 
 interface PreContextRequest {
     id: string;
-    pluginSettings: PluginSettings & { packageJson: ValidProjectJson };
+    pluginSettings: PluginSettings;
 }
 
 export interface RequestContext extends PreContextRequest {

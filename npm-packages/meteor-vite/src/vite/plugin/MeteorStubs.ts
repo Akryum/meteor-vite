@@ -149,7 +149,7 @@ export interface PluginSettings {
      * Full content of the user's Meteor project package.json.
      * Like the one found in {@link /examples/vue/package.json}
      */
-    packageJson: ValidProjectJson;
+    packageJson: ProjectJson;
     
     /**
      * Enabling debug mode will write all input and output files to a `.meteor-vite` directory.
@@ -163,8 +163,7 @@ export interface PluginSettings {
  * The user's Meteor project package.json content.
  * todo: expand types
  */
-export type ProjectJson = DeepPartial<ValidProjectJson>
-export type ValidProjectJson = {
+export type ProjectJson = {
     meteor: {
         mainModule: {
             client: string;
