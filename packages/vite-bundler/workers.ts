@@ -50,8 +50,6 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
         })
     });
     
-    ['SIG']
-    
     return {
         call(method: Omit<WorkerMethod, 'replies'>) {
             child.send(method);
