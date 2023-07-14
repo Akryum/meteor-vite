@@ -37,12 +37,7 @@ export function setConfig<TConfig extends Partial<RuntimeConfig>>(config: TConfi
         runtimeConfig.ready = true;
     }
     
-    if (!MeteorViteConfig.findOne(ViteConnection.configSelector)) {
-        MeteorViteConfig.insert(runtimeConfig);
-        return runtimeConfig;
-    }
-    
-    MeteorViteConfig.update(ViteConnection.configSelector, runtimeConfig);
+    MeteorViteConfig.upsert(ViteConnection.configSelector, runtimeConfig);
     return runtimeConfig;
 }
 
