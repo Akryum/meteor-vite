@@ -23,7 +23,7 @@ export const MeteorStubs = setupPlugin(async (pluginSettings: PluginSettings) =>
         async load(request) {
             const timeStarted = Date.now();
             
-            if (!pluginSettings?.packageJson?.meteor?.mainModule?.client || true) {
+            if (!pluginSettings?.packageJson?.meteor?.mainModule?.client) {
                 throw new MeteorViteError(`You need to specify a Meteor entrypoint in your package.json!`, {
                     subtitle: `See the following link for more info: ${PackageJSON.homepage}`
                 })
