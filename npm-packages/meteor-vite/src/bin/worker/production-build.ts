@@ -4,12 +4,13 @@ import { build, resolveConfig } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import MeteorVitePackage from '../../../package.json';
-import { PluginSettings } from '../../vite/plugin/MeteorStubs';
+import { PluginSettings, ProjectJson } from '../../vite/plugin/MeteorStubs';
 import CreateIPCInterface, { IPCReply } from './IPC/interface';
 
 interface BuildOptions {
     viteOutDir: string;
     meteor: PluginSettings['meteor'];
+    packageJson: ProjectJson;
 }
 
 type Replies = IPCReply<{
@@ -29,7 +30,7 @@ export default CreateIPCInterface({
         buildConfig: BuildOptions
     ) {
         const viteConfig: MeteorViteConfig = await resolveConfig({}, 'build');
-        const { viteOutDir, meteor } = buildConfig;
+        const { viteOutDir, meteor, packageJson } = buildConfig;
         
         Object.entries(buildConfig).forEach(([key, value]) => {
             if (!value) {
@@ -60,7 +61,7 @@ export default CreateIPCInterface({
                 MeteorStubs({
                     meteor,
                     stubValidation: viteConfig.meteor.stubValidation,
-                    packageJson: JSON.parse(await fs.readFile('package.json', 'utf-8')),
+                    packageJson,
                 }),
             ],
         });

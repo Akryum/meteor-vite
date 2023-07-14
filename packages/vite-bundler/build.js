@@ -126,6 +126,7 @@ try {
       method: 'buildForProduction',
       params: [{
         viteOutDir,
+        packageJson: pkg,
         meteor: {
           packagePath: path.join(tempMeteorOutDir, 'bundle', 'programs', 'web.browser', 'packages'),
           isopackPath: path.join(tempMeteorProject, '.meteor', 'local', 'isopacks'),
