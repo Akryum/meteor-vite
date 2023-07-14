@@ -51,6 +51,32 @@ if (Meteor.isDevelopment) {
      */
     if (Meteor.isServer) {
         Meteor.startup(() => setConfig(runtimeConfig));
+        Meteor.methods({
+            [ViteConnection.publication]() {
+                setConfig(runtimeConfig);
+            }
+        })
     }
     
+    /**
+     * Failsafe to force a refresh of the server's runtime config.
+     */
+    if (Meteor.isClient) {
+        const pollReadiness = () => {
+            setTimeout(() => {
+                Meteor.call(ViteConnection.publication, (error: Meteor.Error) => {
+                    if (!getConfig().ready) {
+                        pollReadiness();
+                    }
+                    if (error) {
+                        console.error(error);
+                    }
+                })
+            }, 5000);
+            
+            if (!getConfig().ready) {
+                pollReadiness();
+            }
+        }
+    }
 }
