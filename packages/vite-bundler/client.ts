@@ -76,6 +76,8 @@ Meteor.startup(() => {
             initialConfig = config;
         }
         
+        console.debug('Vite connection config changed', config);
+        
         if (!initialConfig) {
             return;
         }
