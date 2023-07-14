@@ -59,7 +59,7 @@ Make sure to have an import client entry (`meteor.mainModule.client`) in your `p
       "client": "client/main.ts",
       "server": "server/main.ts"
     },
-    "viteConfig": "", // If you want your Vite config to live in e.g. .tools/vite.config.js, specify that here, otherwise leave it empty
+    // "viteConfig": "", // If you want your Vite config to live in another directory (e.g. .tools/vite.config.js), specify that here.
     "testModule": "tests/main.js"
   }
 }
