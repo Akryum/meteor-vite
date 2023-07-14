@@ -15,6 +15,9 @@
     "version:vite-bundler": "meteor node .bin/release-meteor-package.mjs version",
     "publish:vite-bundler": "meteor node .bin/release-meteor-package.mjs publish",
     "version": "npm run version:vite-bundler && changeset version",
-    "release": "npm run publish:vite-bundler && changeset publish"
+    "release": "npm run publish:vite-bundler && changeset publish",
+    "build:npm": "cd npm-packages/meteor-vite && meteor npm run build",
+    "link:npm": "(cd examples/vue && meteor npm link ../../npm-packages/meteor-vite) && (cd examples/svelte && meteor npm link ../../npm-packages/meteor-vite)",
+    "start:vue": "meteor npm run build:npm && (cd examples/vue && meteor npm run meteor-vite-internal:start)"
   }
 }
