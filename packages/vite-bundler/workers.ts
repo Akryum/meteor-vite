@@ -4,14 +4,14 @@ import Path from 'path';
 import FS from 'fs';
 import * as process from 'process';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
-import { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker';
-import { ProjectJson } from '../../npm-packages/meteor-vite/src/vite/plugin/MeteorStubs';
+import type { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker';
+import type { ProjectJson } from '../../npm-packages/meteor-vite/src/vite/plugin/MeteorStubs';
 
 // Use a worker to skip reify and Fibers
 // Use a child process instead of worker to avoid WASM/archived threads error
 export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     if (!FS.existsSync(workerPath)) {
-        throw new Error(`Worker entrypoint doesn't exist! You may need to run "$ npm run build" in the '/npm-packages/meteor-vite' directory`)
+        throw new Error(`Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package: \n  $ npm i -D meteor-vite`)
     }
     
     const child = fork(workerPath, ['--enable-source-maps'], {
