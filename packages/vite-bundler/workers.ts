@@ -5,6 +5,7 @@ import FS from 'fs';
 import pc from 'picocolors';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
 import type { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker';
+import type { MeteorIPCMessage } from '../../npm-packages/meteor-vite/src/meteor/MeteorEvents';
 import type { ProjectJson } from '../../npm-packages/meteor-vite/src/vite/plugin/MeteorStubs';
 
 // Use a worker to skip reify and Fibers
@@ -56,6 +57,24 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
         },
         child,
     }
+}
+
+export function isMeteorIPCMessage<
+    Topic extends MeteorIPCMessage['topic']
+>(message: unknown): message is MeteorIPCMessage  {
+    if (!message || typeof message !== 'object') {
+        return false;
+    }
+    if (!('type' in message) || !('topic' in message)) {
+        return false;
+    }
+    if (message?.type !== 'METEOR_IPC_MESSAGE') {
+        return false;
+    }
+    if (typeof message.topic !== 'string') {
+        return false;
+    }
+    return true;
 }
 
 class MeteorViteError extends Error {

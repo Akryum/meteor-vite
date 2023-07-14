@@ -1,6 +1,8 @@
 import FS from 'fs/promises';
+import pc from 'picocolors';
 import Logger from '../../Logger';
 import { RefreshNeeded } from '../../vite/ViteLoadRequest';
+import MeteorEvents, { EventTimeout } from '../MeteorEvents';
 import { viteAutoImportBlock } from './StubTemplate';
 import PLimit from 'p-limit';
 
@@ -48,14 +50,23 @@ export default new class AutoImportQueue {
             await FS.writeFile(meteorEntrypoint, newContent);
             this.addedPackages.push(importString);
             const logMessage = skipRestart
-                               ? 'Added auto-import for "%s" - you need to restart the server for the package to be usable'
-                               : 'Added auto-import for "%s" - server will restart shortly';
+                               ? 'Added auto-import for "%s" - you may need to refresh your client manually'
+                               : 'Added auto-import for "%s" - waiting for Meteor to refresh the client';
             
             Logger.info(logMessage, importString);
         })
         
         if (this.addedPackages.length > lastPackageCount && !skipRestart) {
-            await this.scheduleRestart()
+            await MeteorEvents.waitForMessage({
+                topic: ['webapp-reload-client', 'client-refresh'],
+                timeoutMs: process.env.NODE_ENV === 'test' ? 50 : 5000, // todo: implement tests for this
+            }).catch((error: Error) => {
+                if (error instanceof EventTimeout) {
+                    Logger.warn(`Timed out waiting for Meteor to refresh the client for ${pc.yellow(importString)}!`)
+                    return this.scheduleRestart()
+                }
+                throw error
+            })
         }
     }
     
@@ -71,7 +82,6 @@ export default new class AutoImportQueue {
         return new Promise<void>((resolve, reject) => {
             this.onRestartWatchers.push(() => {
                 reject(
-                    // Todo: Look into a better way for forcing a restart without needing a potentially confusing error
                     new RefreshNeeded(`Terminating Vite server to load isopacks for new packages`, this.addedPackages)
                 )
             })

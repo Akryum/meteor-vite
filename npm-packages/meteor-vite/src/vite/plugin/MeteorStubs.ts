@@ -2,85 +2,62 @@ import FS from 'fs/promises';
 import Path from 'path';
 import pc from 'picocolors';
 import { Plugin } from 'vite';
+import PackageJSON from '../../../package.json';
+import { DeepPartial } from '../../HelperTypes';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
+import { createErrorHandler } from '../error/ErrorHandler';
 import { MeteorViteError } from '../error/MeteorViteError';
 import { StubValidationSettings } from '../MeteorViteConfig';
 import ViteLoadRequest from '../ViteLoadRequest';
 
-export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
+export const MeteorStubs = setupPlugin(async (pluginSettings: PluginSettings) => {
+    if (!pluginSettings?.packageJson?.meteor?.mainModule?.client) {
+        throw new MeteorViteError(`You need to specify a Meteor entrypoint in your package.json!`, {
+            subtitle: `See the following link for more info: ${PackageJSON.homepage}`
+        })
+    }
+    
     return {
         name: 'meteor-vite: stubs',
         resolveId: (id) => ViteLoadRequest.resolveId(id),
-        load: prepareLoad({
-            shouldProcess: (viteId) => ViteLoadRequest.isStubRequest(viteId),
+        shouldProcess: (viteId) => ViteLoadRequest.isStubRequest(viteId),
+        async setupContext(viteId) {
+            return ViteLoadRequest.prepareContext({ id: viteId, pluginSettings });
+        },
+        
+        async load(request) {
+            const timeStarted = Date.now();
             
-            async setupContext(viteId) {
-                return ViteLoadRequest.prepareContext({ id: viteId, pluginSettings });
-            },
-            
-            async load(request) {
-                const timeStarted = Date.now();
-                
-                if (request.isLazyLoaded) {
-                    await request.forceImport();
-                }
-                
-                const meteorPackage = await MeteorPackage.parse({
-                    filePath: request.context.file.sourcePath,
-                    fileContent: request.context.file.content,
-                });
-                
-                const template = stubTemplate({
-                    requestId: request.context.id,
-                    submodule: meteorPackage.getModule({ importPath: request.requestedModulePath }),
-                    meteorPackage,
-                    stubValidation: pluginSettings.stubValidation,
-                })
-                
-                request.log.debug(`Meteor stub created`, {
-                    'Parse time': meteorPackage.meta.timeSpent,
-                    'Request duration': `${Date.now() - timeStarted}ms`,
-                });
-                
-                if (pluginSettings.debug) {
-                    await storeDebugSnippet({ request, stubTemplate: template })
-                }
-                
-                return template;
-            }
-        })
-    }
-}
-
-function prepareLoad<Context extends ViteLoadRequest>(plugin: {
-    load(request: Context): Promise<string>;
-    setupContext(viteId: string): Promise<Context>;
-    shouldProcess(viteId: string): boolean;
-}) {
-    return async (viteId: string) => {
-        const shouldProcess = plugin.shouldProcess(viteId);
-        
-        if (!shouldProcess) {
-            return;
-        }
-        
-        const request = await plugin.setupContext(viteId);
-        
-        return plugin.load(request).catch(async (error) => {
-            if (!(error instanceof MeteorViteError)) {
-                error = new MeteorViteError(`Unable to parse package`, {
-                    cause: error,
-                    context: request.context
-                });
+            if (request.isLazyLoaded) {
+                await request.forceImport();
             }
             
-            error.setContext(request);
-            await error.beautify();
-            throw error;
-        })
+            const meteorPackage = await MeteorPackage.parse({
+                filePath: request.context.file.sourcePath,
+                fileContent: request.context.file.content,
+            });
+            
+            const template = stubTemplate({
+                requestId: request.context.id,
+                submodule: meteorPackage.getModule({ importPath: request.requestedModulePath }),
+                meteorPackage,
+                stubValidation: pluginSettings.stubValidation,
+            })
+            
+            request.log.debug(`Meteor stub created`, {
+                'Parse time': meteorPackage.meta.timeSpent,
+                'Request duration': `${Date.now() - timeStarted}ms`,
+            });
+            
+            if (pluginSettings.debug) {
+                await storeDebugSnippet({ request, stubTemplate: template })
+            }
+            
+            return template;
+        },
     }
-}
+})
 
 async function storeDebugSnippet({ request, stubTemplate }: {
     request: ViteLoadRequest,
@@ -100,6 +77,42 @@ async function storeDebugSnippet({ request, stubTemplate }: {
     request.log.info('Stored debug snippets', {
         File: pc.cyan(baseDir),
     })
+}
+
+/**
+ * Vite plugin options wrapper.
+ * Just a utility to set up catch blocks for nicer error handling as well as pre-populating the load() handler with
+ * the request context from {@link ViteLoadRequest}.
+ */
+function setupPlugin<Context extends ViteLoadRequest, Settings>(setup: (settings: Settings) => Promise<{
+    name: string;
+    load(request: Context): Promise<string>;
+    setupContext(viteId: string): Promise<Context>;
+    shouldProcess(viteId: string): boolean;
+    resolveId(viteId: string): string | undefined;
+}>): (settings: Settings) => Promise<Plugin> {
+    const createPlugin = async (settings: Settings) => {
+        const plugin = await setup(settings);
+        return {
+            name: plugin.name,
+            resolveId: plugin.resolveId,
+            load: async (viteId: string) => {
+                const shouldProcess = plugin.shouldProcess(viteId);
+                
+                if (!shouldProcess) {
+                    return;
+                }
+                
+                const request = await plugin.setupContext(viteId);
+                
+                return plugin.load(request).catch(
+                    createErrorHandler('Could not parse Meteor package', request)
+                )
+            },
+        }
+    }
+    
+    return (settings: Settings) => createPlugin(settings).catch(createErrorHandler('Could not set up Vite plugin!'))
 }
 
 
@@ -151,9 +164,9 @@ export interface PluginSettings {
  * todo: expand types
  */
 export type ProjectJson = {
-    meteor?: {
-        mainModule?: {
-            client?: string;
+    meteor: {
+        mainModule: {
+            client: string;
         },
         viteConfig?: string;
     }

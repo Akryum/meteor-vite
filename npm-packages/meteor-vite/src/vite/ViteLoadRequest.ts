@@ -146,11 +146,6 @@ export default class ViteLoadRequest {
      */
     public async forceImport() {
         const mainModule = this.context.pluginSettings.packageJson.meteor.mainModule;
-        
-        if (!mainModule?.client) {
-            throw new MeteorViteError(`No meteor.mainModule.client found in package.json`)
-        }
-        
         const meteorClientEntryFile = Path.resolve(process.cwd(), mainModule.client);
         
         if (!existsSync(meteorClientEntryFile)) {
