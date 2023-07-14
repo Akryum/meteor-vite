@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import MeteorPackage from '../src/meteor/package/MeteorPackage';
+import MeteorPackage from '../src/meteor/package/components/MeteorPackage';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, stubTemplate } from '../src/meteor/package/StubTemplate';
 
 describe('StubTemplate', () => {

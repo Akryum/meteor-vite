@@ -1,6 +1,6 @@
 import Path from 'path';
 import { describe, expect, it, test } from 'vitest';
-import MeteorPackage from '../../src/meteor/package/MeteorPackage';
+import MeteorPackage from '../../src/meteor/package/components/MeteorPackage';
 import { ModuleExport, parseMeteorPackage } from '../../src/meteor/package/Parser';
 import Serialize from '../../src/meteor/package/Serialize';
 import { AllMockPackages, LazyLoadedPackage } from '../__mocks';

@@ -4,7 +4,7 @@ import pc from 'picocolors';
 import { Plugin } from 'vite';
 import PackageJSON from '../../../package.json';
 import { DeepPartial } from '../../HelperTypes';
-import MeteorPackage from '../../meteor/package/MeteorPackage';
+import MeteorPackage from '../../meteor/package/components/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
 import { createErrorHandler } from '../error/ErrorHandler';
 import { MeteorViteError } from '../error/MeteorViteError';

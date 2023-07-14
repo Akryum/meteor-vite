@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import MeteorPackage from '../src/meteor/package/MeteorPackage';
+import MeteorPackage from '../src/meteor/package/components/MeteorPackage';
 import { TsModules } from './__mocks';
 
 describe('MeteorPackage', () => {

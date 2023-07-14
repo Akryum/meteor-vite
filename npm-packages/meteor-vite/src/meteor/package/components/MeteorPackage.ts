@@ -1,8 +1,8 @@
-import { MeteorViteError } from '../../vite/error/MeteorViteError';
+import { MeteorViteError } from '../../../vite/error/MeteorViteError';
 import { PackageSubmodule } from './PackageSubmodule';
-import { parseMeteorPackage } from './Parser';
-import type { ModuleList, ParsedPackage, PackageScopeExports } from './Parser';
-import { isSameModulePath } from './Serialize';
+import { parseMeteorPackage } from '../Parser';
+import type { ModuleList, ParsedPackage, PackageScopeExports } from '../Parser';
+import { isSameModulePath } from '../Serialize';
 
 export default class MeteorPackage implements ParsedPackage {
     
