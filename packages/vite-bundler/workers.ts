@@ -59,9 +59,9 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     }
 }
 
-export function isMeteorMessage<
+export function isMeteorIPCMessage<
     Topic extends MeteorIPCMessage['topic']
->(message: unknown, event: Topic): message is Omit<MeteorIPCMessage, 'topic'> & { topic: Topic }  {
+>(message: unknown): message is MeteorIPCMessage  {
     if (!message || typeof message !== 'object') {
         return false;
     }
@@ -71,7 +71,10 @@ export function isMeteorMessage<
     if (message?.type !== 'METEOR_IPC_MESSAGE') {
         return false;
     }
-    return message.topic === event;
+    if (typeof message.topic !== 'string') {
+        return false;
+    }
+    return true;
 }
 
 class MeteorViteError extends Error {

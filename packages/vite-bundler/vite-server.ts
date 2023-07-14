@@ -7,7 +7,7 @@ import {
     setConfig,
     ViteConnection,
 } from './loading/vite-connection-handler';
-import { createWorkerFork, getProjectPackageJson } from './workers';
+import { createWorkerFork, getProjectPackageJson, isMeteorIPCMessage } from './workers';
 
 if (Meteor.isDevelopment) {
     DevConnectionLog.info('Starting Vite server...');
@@ -41,6 +41,14 @@ if (Meteor.isDevelopment) {
             packageJson: getProjectPackageJson(),
         }]
     });
+    
+    process.on('message', (message) => {
+        if (!isMeteorIPCMessage(message)) return;
+        viteServer.call({
+            method: 'meteor.ipcMessage',
+            params: [message],
+        })
+    })
     
     Meteor.publish(ViteConnection.publication, () => {
         return MeteorViteConfig.find(ViteConnection.configSelector);
