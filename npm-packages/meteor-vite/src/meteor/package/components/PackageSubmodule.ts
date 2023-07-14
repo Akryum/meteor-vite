@@ -1,5 +1,5 @@
 import type MeteorPackage from './MeteorPackage';
-import type { ModuleExport } from '../Parser';
+import type { ModuleExport } from '../parser/Parser';
 
 export class PackageSubmodule {
     

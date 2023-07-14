@@ -2,7 +2,7 @@ import Path from 'path';
 import { inspect } from 'util';
 import Logger from '../../Logger';
 import { ErrorMetadata, MeteorViteError } from '../../vite/error/MeteorViteError';
-import { ModuleExport, PackageScopeExports } from './Parser';
+import { ModuleExport, PackageScopeExports } from './parser/Parser';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubTemplate';
 
 

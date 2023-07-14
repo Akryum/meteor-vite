@@ -1,5 +1,5 @@
 import { PackageSubmodule } from './PackageSubmodule';
-import { ModuleExport } from '../Parser';
+import { ModuleExport } from '../parser/Parser';
 import { METEOR_STUB_KEY } from '../StubTemplate';
 
 class ExportEntry implements ModuleExport {

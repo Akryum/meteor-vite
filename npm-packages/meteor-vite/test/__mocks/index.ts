@@ -1,6 +1,6 @@
 import FS from 'fs/promises';
 import Path from 'path';
-import { ModuleList, PackageScopeExports } from '../../src/meteor/package/Parser';
+import { ModuleList, PackageScopeExports } from '../../src/meteor/package/parser/Parser';
 
 export const AllMockPackages: MockModule<ModuleList>[] = [];
 
