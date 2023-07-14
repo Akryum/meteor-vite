@@ -2,7 +2,7 @@ import { PackageSubmodule } from './PackageSubmodule';
 import { ModuleExport } from '../parser/Parser';
 import { METEOR_STUB_KEY } from '../StubTemplate';
 
-class ExportEntry implements ModuleExport {
+export default class ExportEntry implements ModuleExport {
     public readonly parentModule: PackageSubmodule;
     public readonly from;
     public readonly as;
