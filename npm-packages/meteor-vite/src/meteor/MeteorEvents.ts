@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import Logger from '../Logger';
 
 type MeteorIPCTopic = 'webapp-reload-client' | 'webapp-pause-client' | 'client-refresh';
 
@@ -51,8 +52,9 @@ export default new class MeteorEvents {
         })
     }
     
-    public ingest(event: MeteorIPCMessage) {
-        this.events.emit(event.topic);
+    public ingest(message: MeteorIPCMessage) {
+        Logger.debug('Received Meteor IPC message:', message);
+        this.events.emit(message.topic);
     }
 }
 
