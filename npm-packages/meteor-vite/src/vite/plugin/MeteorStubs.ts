@@ -12,6 +12,12 @@ import { StubValidationSettings } from '../MeteorViteConfig';
 import ViteLoadRequest from '../ViteLoadRequest';
 
 export const MeteorStubs = setupPlugin(async (pluginSettings: PluginSettings) => {
+    if (!pluginSettings?.packageJson?.meteor?.mainModule?.client) {
+        throw new MeteorViteError(`You need to specify a Meteor entrypoint in your package.json!`, {
+            subtitle: `See the following link for more info: ${PackageJSON.homepage}`
+        })
+    }
+    
     return {
         name: 'meteor-vite: stubs',
         resolveId: (id) => ViteLoadRequest.resolveId(id),
@@ -22,12 +28,6 @@ export const MeteorStubs = setupPlugin(async (pluginSettings: PluginSettings) =>
         
         async load(request) {
             const timeStarted = Date.now();
-            
-            if (!pluginSettings?.packageJson?.meteor?.mainModule?.client) {
-                throw new MeteorViteError(`You need to specify a Meteor entrypoint in your package.json!`, {
-                    subtitle: `See the following link for more info: ${PackageJSON.homepage}`
-                })
-            }
             
             if (request.isLazyLoaded) {
                 await request.forceImport();
