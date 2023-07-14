@@ -1,4 +1,4 @@
-name: 'Meteor Build'
+name: 'Example Apps'
 
 on:
   push:
@@ -11,35 +11,14 @@ on:
       - release
 
 jobs:
-  build-vue-example:
-    name: 'Vue App'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-      - name: 'Setup Meteor'
-        uses: meteorengineer/setup-meteor@v1
-        with:
-          meteor-release: '2.12'
-      - name: 'Install dependencies'
-        run: cd examples/vue && meteor npm install
-      - name: 'Build for production'
-        run: cd examples/vue && meteor npm run build
+  vue:
+    name: 'Vue'
+    uses: ./.github/workflows/_reuse_.build.yml
+    with:
+      name: 'vue'
 
-  build-svelte-example:
-    name: 'Svelte App'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-      - name: 'Setup Meteor'
-        uses: meteorengineer/setup-meteor@v1
-        with:
-          meteor-release: '2.12'
-      - name: 'Install dependencies'
-        run: cd examples/svelte && meteor npm install
-      - name: 'Build for production'
-        run: cd examples/svelte && meteor npm run build
-
+  svelte:
+    name: 'Svelte'
+    uses: ./.github/workflows/_reuse_.build.yml
+    with:
+      name: 'svelte'
