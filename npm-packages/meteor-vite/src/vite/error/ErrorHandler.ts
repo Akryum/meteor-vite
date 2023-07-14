@@ -35,7 +35,7 @@ function formatError(fallbackDescription: string, error: unknown | Error) {
 
 let lastEmittedWarning = Date.now();
 function handleRefreshNeeded(error: RefreshNeeded): never {
-    if (5_000 < Date.now() - lastEmittedWarning) {
+    if (1000 < Date.now() - lastEmittedWarning) {
         console.warn(error.message);
         process.emitWarning('Refresh needed!', error.constructor.name);
         lastEmittedWarning = Date.now();
