@@ -7,7 +7,7 @@ import {
     setConfig,
     ViteConnection,
 } from './loading/vite-connection-handler';
-import { createWorkerFork } from './workers';
+import { createWorkerFork, getProjectPackageJson } from './workers';
 
 if (Meteor.isDevelopment) {
     console.log('⚡ Starting Vite server...');
@@ -32,10 +32,11 @@ if (Meteor.isDevelopment) {
         },
     });
     
-    
     viteServer.call({
         method: 'vite.startDevServer',
-        params: []
+        params: [{
+            packageJson: getProjectPackageJson(),
+        }]
     });
     
     Meteor.publish(ViteConnection.publication, () => {
