@@ -21,6 +21,21 @@ class ExportEntry implements ModuleExport {
     }
     
     /**
+     * Whether this entry needs to be placed at the top of a file, or at the bottom of a file.
+     * Just so we don't end up placing `export { foo } from 'meteor/foo:bar'` statements at a place where it can
+     * break syntax.
+     *
+     * In short, we want re-exports from other modules to be at the top of the file, while normal exports are left
+     * at the bottom of the file.
+     */
+    public get placement(): 'top' | 'bottom' {
+        if (this.type === 're-export' && this.from) {
+            return 'top'
+        }
+        return 'bottom';
+    }
+    
+    /**
      * The current export entry, converted into JavaScript for use as a Meteor stub.
      * Essentially, converting from raw data back into JavaScript.
      */
