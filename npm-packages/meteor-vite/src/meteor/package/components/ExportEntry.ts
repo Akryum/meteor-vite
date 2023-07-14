@@ -36,6 +36,27 @@ export default class ExportEntry implements ModuleExport {
     }
     
     /**
+     * The export key for the current entry.
+     * Undefined if not applicable.
+     *
+     * @example
+     * export const FooBar = '' // key is FooBar
+     * export * from './somewhere' // key is undefined
+     * export * as MyModule from './somewhere-else' // key is MyModule
+     */
+    public get key(): string | undefined  {
+        if (this.as) {
+            return this.as;
+        }
+        if (this.type === 'export-default') {
+            return 'default';
+        }
+        if (this.type === 'export') {
+            return this.name;
+        }
+    }
+    
+    /**
      * The current export entry, converted into JavaScript for use as a Meteor stub.
      * Essentially, converting from raw data back into JavaScript.
      */
