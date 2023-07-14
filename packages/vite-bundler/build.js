@@ -25,12 +25,12 @@ if (!meteorMainModule) {
   throw new Error('No meteor main module found, please add meteor.mainModule.client to your package.json')
 }
 
-// Temporary Meteor build
-
 const tempDir = getTempDir();
 const tempMeteorProject = path.resolve(tempDir, 'meteor')
 const tempMeteorOutDir = path.join(tempDir, 'bundle', 'meteor')
 const viteOutDir = path.join(tempDir, 'bundle', 'vite');
+
+// Temporary Meteor build
 
 const filesToCopy = [
   path.join('.meteor', '.finished-upgraders'),
