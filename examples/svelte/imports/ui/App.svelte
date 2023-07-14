@@ -16,7 +16,7 @@
   $: links = LinksCollection.find({});
 
   const remove = (linkId) => {
-    Meteor.call('links.remove', linkId)
+    Meteor.call('links.reverse-title', linkId)
   }
 </script>
 
@@ -35,7 +35,7 @@
       {#each $links as link (link._id)}
         <li>
           <a href={link.url} target="_blank" rel="noreferrer">{link.title}</a>
-          <button on:click={() => { remove(link._id) }}>✕</button>
+          <button on:click={() => { remove(link._id) }}>Reverse</button>
         </li>
       {/each}
     </ul>

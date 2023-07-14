@@ -10,8 +10,11 @@ Meteor.publish('links.all', function publishLinksAll() {
 })
 
 Meteor.methods({
-  async 'links.remove'(linkId) {
-    await LinksCollection.removeAsync(linkId);
+  async 'links.reverse-title'(linkId) {
+    const { title } = await LinksCollection.findOneAsync(linkId);
+    await LinksCollection.updateAsync(linkId, {
+      $set: { title: title.split('').reverse().join('') }
+    });
   }
 })
 
