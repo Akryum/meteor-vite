@@ -1,3 +1,4 @@
+import ExportEntry from './ExportEntry';
 import type MeteorPackage from './MeteorPackage';
 import type { ModuleExport } from '../parser/Parser';
 
@@ -15,7 +16,7 @@ export class PackageSubmodule {
      * @example
      * export const foo = '...'
      */
-    public readonly exports: ModuleExport[];
+    public readonly exports: ExportEntry[];
     
     /**
      * The Meteor package this submodule belongs to.
@@ -33,9 +34,9 @@ export class PackageSubmodule {
     };
     
     constructor({ meteorPackage, modulePath, exports }: PackageSubmoduleOptions) {
-        this.exports = exports;
         this.modulePath = modulePath;
         this.meteorPackage = meteorPackage;
+        this.exports = exports.map((entry) => new ExportEntry({ entry, parentModule: this }));
     }
 }
 
