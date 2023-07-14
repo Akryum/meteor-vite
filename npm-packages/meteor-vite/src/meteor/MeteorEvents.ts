@@ -16,8 +16,8 @@ export default new class MeteorEvents extends EventEmitter {
         })
     }
     
-    public transmit(event: MeteorIPCTopic) {
-        super.emit(event);
+    public transmit(event: MeteorIPCMessage) {
+        super.emit(event.type);
     }
     
     protected waitFor(eventName: MeteorIPCTopic, listener: (...args: any[]) => void) {

@@ -1,6 +1,7 @@
 import Path from 'path';
 import { createServer, resolveConfig, ViteDevServer } from 'vite';
 import Logger from '../../Logger';
+import MeteorEvents, { MeteorIPCMessage } from '../../meteor/MeteorEvents';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import { ProjectJson } from '../../vite/plugin/MeteorStubs';
@@ -25,6 +26,10 @@ type Replies = IPCReply<{
 export default CreateIPCInterface({
     async 'vite.getDevServerConfig'(replyInterface: Replies) {
         sendViteConfig(replyInterface);
+    },
+    
+    async 'meteor.ipcMessage'(reply, data: MeteorIPCMessage) {
+        MeteorEvents.transmit(data);
     },
     
     // todo: Add reply for triggering a server restart
