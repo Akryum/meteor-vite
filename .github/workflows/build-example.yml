@@ -13,12 +13,12 @@ on:
 jobs:
   vue:
     name: 'Vue App'
-    uses: .github/workflows/_reuse_.build.yml@latest
+    uses: ./.github/workflows/_reuse_.build.yml@latest
     with:
       name: 'vue'
 
   svelte:
     name: 'Svelte App'
-    uses: .github/workflows/_reuse_.build.yml@refactor-examples
+    uses: ./.github/workflows/_reuse_.build.yml@refactor-examples
     with:
       name: 'svelte'
