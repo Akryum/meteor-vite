@@ -1,9 +1,9 @@
 import FS from 'fs/promises';
 import pc from 'picocolors';
-import Logger from '../../Logger';
-import { RefreshNeeded } from '../../vite/ViteLoadRequest';
-import MeteorEvents, { EventTimeout } from '../MeteorEvents';
-import { viteAutoImportBlock } from './StubTemplate';
+import Logger from '../Logger';
+import { RefreshNeeded } from './ViteLoadRequest';
+import MeteorEvents, { EventTimeout } from '../meteor/MeteorEvents';
+import { viteAutoImportBlock } from '../meteor/package/StubTemplate';
 import PLimit from 'p-limit';
 
 export const wait = (waitMs: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), waitMs));
