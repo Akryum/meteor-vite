@@ -29,7 +29,7 @@ export default CreateIPCInterface({
     },
     
     async 'meteor.ipcMessage'(reply, data: MeteorIPCMessage) {
-        MeteorEvents.transmit(data);
+        MeteorEvents.ingest(data);
     },
     
     // todo: Add reply for triggering a server restart

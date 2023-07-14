@@ -9,18 +9,17 @@ export type MeteorIPCMessage = {
     encodedPayload: string
 }
 
-export default new class MeteorEvents extends EventEmitter {
+
+export default new class MeteorEvents {
+    protected readonly events = new EventEmitter();
+    
     public awaitClientRefresh() {
         return new Promise((resolve, reject) => {
-            this.once('webapp-reload-client', resolve);
+            this.events.once('webapp-reload-client', resolve);
         })
     }
     
-    public transmit(event: MeteorIPCMessage) {
-        super.emit(event.type);
-    }
-    
-    protected waitFor(eventName: MeteorIPCTopic, listener: (...args: any[]) => void) {
-        return super.once(eventName, listener);
+    public ingest(event: MeteorIPCMessage) {
+        this.events.emit(event.type);
     }
 }
