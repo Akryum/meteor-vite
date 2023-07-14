@@ -5,21 +5,34 @@
         {
           "name": "meteor-vite",
           "type": "patch"
+        },
+        {
+          "name": "vite-bundler",
+          "type": "patch"
         }
       ],
-      "summary": "Update parser to eagerly parse and export all available exports for a given Meteor package",
-      "id": "violet-sheep-lay"
+      "summary": "Update internal communication between the Vite server worker and Meteor.\n\nAdd fallback method for clients waiting on Vite server configuration from Meteor.\n\nAllow Vite config files to be stored outside of the project's root directory through package.json configuration. Details should be added to the README.",
+      "id": "curvy-tables-ring"
     }
   ],
   "releases": [
     {
       "name": "meteor-vite",
       "type": "patch",
-      "oldVersion": "1.2.0",
+      "oldVersion": "1.2.1",
       "changesets": [
-        "violet-sheep-lay"
+        "curvy-tables-ring"
       ],
-      "newVersion": "1.2.1"
+      "newVersion": "1.2.2"
+    },
+    {
+      "name": "vite-bundler",
+      "type": "patch",
+      "oldVersion": "1.1.1",
+      "changesets": [
+        "curvy-tables-ring"
+      ],
+      "newVersion": "1.1.2"
     }
   ]
 }
