@@ -2,6 +2,7 @@ import FS from 'fs/promises';
 import Path from 'path';
 import pc from 'picocolors';
 import { Plugin } from 'vite';
+import { DeepPartial } from '../../HelperTypes';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
 import { MeteorViteError } from '../error/MeteorViteError';
@@ -150,10 +151,11 @@ export interface PluginSettings {
  * The user's Meteor project package.json content.
  * todo: expand types
  */
-export type ProjectJson = {
-    meteor?: {
-        mainModule?: {
-            client?: string;
+export type ProjectJson = DeepPartial<ValidProjectJson>
+export type ValidProjectJson = {
+    meteor: {
+        mainModule: {
+            client: string;
         },
         viteConfig?: string;
     }
