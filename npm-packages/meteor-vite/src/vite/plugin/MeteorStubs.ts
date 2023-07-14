@@ -149,7 +149,7 @@ export interface PluginSettings {
      * Full content of the user's Meteor project package.json.
      * Like the one found in {@link /examples/vue/package.json}
      */
-    packageJson: ProjectJson;
+    packageJson: ValidProjectJson;
     
     /**
      * Enabling debug mode will write all input and output files to a `.meteor-vite` directory.
