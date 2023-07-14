@@ -44,6 +44,9 @@ jobs:
       - name: 'Install Dependencies'
         run: meteor npm run install:package
 
+      - name: 'Build package'
+        run: meteor npm run build:package
+
       - name: 'Create Release'
         id: changesets
         uses: changesets/action@v1
