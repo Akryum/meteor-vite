@@ -4,6 +4,7 @@ import Logger from '../../Logger';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import { ProjectJson } from '../../vite/plugin/MeteorStubs';
+import { RefreshNeeded } from '../../vite/ViteLoadRequest';
 import CreateIPCInterface, { IPCReply } from './IPC/interface';
 
 let server: ViteDevServer & { config: MeteorViteConfig };
@@ -16,6 +17,9 @@ type Replies = IPCReply<{
         port?: number;
         entryFile?: string
     }
+} | {
+    kind: 'refreshNeeded',
+    data: {},
 }>
 
 export default CreateIPCInterface({
@@ -52,7 +56,18 @@ export default CreateIPCInterface({
                     },
                 ],
             });
+            
+            process.on('warning', (warning) => {
+                if (warning.name !== RefreshNeeded.name) {
+                    return;
+                }
+                replyInterface({
+                    kind: 'refreshNeeded',
+                    data: {},
+                })
+            })
         }
+        
         
         let listening = false
         await server.listen()

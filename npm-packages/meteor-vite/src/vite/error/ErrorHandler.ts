@@ -1,4 +1,5 @@
-import ViteLoadRequest from '../ViteLoadRequest';
+import Logger from '../../Logger';
+import ViteLoadRequest, { RefreshNeeded } from '../ViteLoadRequest';
 import { MeteorViteError } from './MeteorViteError';
 
 export function createErrorHandler(fallbackDescription: string, request?: ViteLoadRequest) {
@@ -7,6 +8,10 @@ export function createErrorHandler(fallbackDescription: string, request?: ViteLo
         
         if (request) {
             viteError.setContext(request);
+        }
+        
+        if (viteError instanceof RefreshNeeded) {
+            return handleRefreshNeeded(viteError);
         }
         
         await viteError.beautify()
@@ -26,4 +31,14 @@ function formatError(fallbackDescription: string, error: unknown | Error) {
     }
     
     return error;
+}
+
+let lastEmittedWarning = Date.now();
+function handleRefreshNeeded(error: RefreshNeeded): never {
+    if (5_000 < Date.now() - lastEmittedWarning) {
+        console.warn(error.message);
+        process.emitWarning('Refresh needed!', error.constructor.name);
+        lastEmittedWarning = Date.now();
+    }
+    return undefined as never;
 }

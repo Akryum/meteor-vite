@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
 import type HTTP from 'http'
+import * as process from 'process';
 import {
     getConfig, DevConnectionLog,
     MeteorViteConfig,
@@ -30,6 +31,9 @@ if (Meteor.isDevelopment) {
                 DevConnectionLog.info(`Meteor-Vite ready for connections!`)
             }
         },
+        refreshNeeded() {
+            DevConnectionLog.info('Some lazy-loaded packages were imported, please refresh')
+        }
     });
     
     viteServer.call({
