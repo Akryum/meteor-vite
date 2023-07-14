@@ -63,7 +63,7 @@ class MeteorViteError extends Error {
         if (!Array.isArray(message)) {
             message = [message];
         }
-        super(`⚡  ${message.join('\n L ')}`);
+        super(`\n⚡  ${message.join('\n L ')}`);
         this.name = this.constructor.name;
     }
 }
@@ -77,7 +77,8 @@ export function getProjectPackageJson(): ProjectJson {
         throw new MeteorViteError([
             `Unable to locate package.json for your project in ${pc.yellow(path)}`,
             `Make sure you run Meteor commands from the root of your project directory.`,
-            `Alternatively, you can supply a superficial CWD for Meteor-Vite to use: METEOR_VITE_CWD="./projects/my-meteor-project/"`
+            `Alternatively, you can supply a superficial CWD for Meteor-Vite to use:`,
+            `$  cross-env METEOR_VITE_CWD="./projects/my-meteor-project/" meteor run`
         ])
     }
     
