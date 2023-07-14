@@ -30,6 +30,7 @@
       "client": "client/main.ts",
       "server": "server/main.ts"
     },
+    "viteConfig": ".vite.config.mts",
     "testModule": "tests/main.js"
   }
 }

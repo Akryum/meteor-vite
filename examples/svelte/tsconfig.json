@@ -45,7 +45,7 @@
   "include": [
     "imports/**/*",
     "tests/**/*",
-    "vite.config.mts",
+    ".vite.config.mts",
     "client/**/*",
     ".meteor/local/types/packages.d.ts",
     "node_modules/@types/meteor/**/*"

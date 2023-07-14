@@ -150,10 +150,11 @@ export interface PluginSettings {
  * The user's Meteor project package.json content.
  * todo: expand types
  */
-type ProjectJson = {
-    meteor: {
-        mainModule: {
-            client: string
-        }
+export type ProjectJson = {
+    meteor?: {
+        mainModule?: {
+            client?: string;
+        },
+        viteConfig?: string;
     }
 }

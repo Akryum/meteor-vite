@@ -3,16 +3,15 @@ import { performance } from 'node:perf_hooks'
 import fs from 'fs-extra'
 import { execaSync } from 'execa'
 import pc from 'picocolors'
-import { createWorkerFork, cwd } from './workers';
+import { createWorkerFork, cwd, getProjectPackageJson } from './workers';
 import os from 'node:os';
 
-if (process.env.VITE_METEOR_DISABLED) return
 if (process.env.NODE_ENV !== 'production') return
 
 // Not in a project (publishing the package)
-if (!fs.existsSync(path.join(cwd, 'package.json'))) return
+if (!process.env.VITE_METEOR_DISABLED) return
 
-const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'))
+const pkg = getProjectPackageJson();
 const meteorMainModule = pkg.meteor?.mainModule?.client
 
 // Meteor packages to omit or replace the temporary build.
@@ -127,6 +126,7 @@ try {
       method: 'buildForProduction',
       params: [{
         viteOutDir,
+        packageJson: pkg,
         meteor: {
           packagePath: path.join(tempMeteorOutDir, 'bundle', 'programs', 'web.browser', 'packages'),
           isopackPath: path.join(tempMeteorProject, '.meteor', 'local', 'isopacks'),

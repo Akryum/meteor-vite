@@ -1,17 +1,16 @@
 import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
 import type HTTP from 'http'
-import { getConfig, MeteorViteConfig, setConfig, ViteConnection } from './loading/vite-connection-handler';
-import { createWorkerFork } from './workers';
+import {
+    getConfig, DevConnectionLog,
+    MeteorViteConfig,
+    setConfig,
+    ViteConnection,
+} from './loading/vite-connection-handler';
+import { createWorkerFork, getProjectPackageJson } from './workers';
 
 if (Meteor.isDevelopment) {
-    console.log('⚡ Starting Vite server...')
-    setConfig({
-        ready: false,
-        host: 'localhost',
-        port: 0,
-        entryFile: '',
-    });
+    DevConnectionLog.info('Starting Vite server...');
     
     WebAppInternals.registerBoilerplateDataCallback('meteor-vite', (request: HTTP.IncomingMessage, data: BoilerplateData) => {
         const { host, port, entryFile, ready } = getConfig();
@@ -26,24 +25,34 @@ if (Meteor.isDevelopment) {
     
     const viteServer = createWorkerFork({
         viteConfig(config) {
-            const ready = !!(config.entryFile && config.port);
-            setConfig({ ...config, ready });
+            const { ready } = setConfig(config);
             if (ready) {
-                console.log(`⚡  Meteor-Vite ready for connections!`)
+                DevConnectionLog.info(`Meteor-Vite ready for connections!`)
             }
         },
     });
     
-    
     viteServer.call({
         method: 'vite.startDevServer',
-        params: []
+        params: [{
+            packageJson: getProjectPackageJson(),
+        }]
     });
     
     Meteor.publish(ViteConnection.publication, () => {
         return MeteorViteConfig.find(ViteConnection.configSelector);
     });
     
+    Meteor.methods({
+        [ViteConnection.methods.refreshConfig]() {
+            DevConnectionLog.info('Refreshing configuration from Vite dev server...')
+            viteServer.call({
+                method: 'vite.getDevServerConfig',
+                params: [],
+            });
+            return getConfig();
+        }
+    })
     
     /**
      * Builds the 'meteor-vite' npm package where the worker and Vite server is kept.
