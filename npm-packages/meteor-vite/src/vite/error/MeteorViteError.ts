@@ -20,7 +20,7 @@ export class MeteorViteError extends Error implements ErrorMetadata {
         this.context = context;
         this.package = meteorPackage;
         
-        if (cause && !subtitle) {
+        if (cause instanceof Error && !subtitle) {
             this.subtitle = `Caused by [${cause?.name}] ${cause?.message}`
         }
         if (cause) {
@@ -128,5 +128,5 @@ export interface ErrorMetadata {
     subtitle?: string;
     package?: Pick<MeteorPackage, 'packageId'>;
     context?: Pick<RequestContext, 'id'>;
-    cause?: Error;
+    cause?: Error | unknown;
 }
