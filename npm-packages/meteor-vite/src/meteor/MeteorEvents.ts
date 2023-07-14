@@ -9,13 +9,25 @@ export type MeteorIPCMessage = {
     encodedPayload: string
 }
 
-
 export default new class MeteorEvents {
     protected readonly events = new EventEmitter();
     
-    public awaitClientRefresh() {
-        return new Promise((resolve, reject) => {
-            this.events.once('webapp-reload-client', resolve);
+    public awaitClientRefresh(timeoutMs: number) {
+        return new Promise<void>((resolve, reject) => {
+            let rejected = false;
+            let resolved = false;
+            
+            this.events.once('webapp-reload-client', () => {
+                if (rejected) return;
+                resolved = true;
+                resolve()
+            });
+            
+            setTimeout(() => {
+                if (resolved) return;
+                rejected = true;
+                reject(new EventTimeout('Timed out waiting for client refresh event'));
+            }, timeoutMs)
         })
     }
     
@@ -23,3 +35,5 @@ export default new class MeteorEvents {
         this.events.emit(event.type);
     }
 }
+
+export class EventTimeout extends Error {}
