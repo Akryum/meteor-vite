@@ -18,12 +18,12 @@ export default new class MeteorEvents {
      * @param {{topics: MeteorIPCTopic[], timeoutMs: number}} event
      * @returns {Promise<void>}
      */
-    public awaitEvent(event: {
+    public waitForMessage(event: {
         /**
          * Meteor IPC event name.
          * E.g. webapp-reload-client, client-refresh
          */
-        topics: MeteorIPCTopic[],
+        topic: MeteorIPCTopic[],
         
         /**
          * How long to wait before rejecting the promise.
@@ -35,7 +35,7 @@ export default new class MeteorEvents {
             let rejected = false;
             let resolved = false;
             
-            event.topics.forEach((topic) => {
+            event.topic.forEach((topic) => {
                 this.events.once(topic, () => {
                     if (rejected || resolved) return;
                     resolved = true;
