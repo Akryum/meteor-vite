@@ -3,6 +3,7 @@ import { Meteor } from 'meteor/meteor';
 import Path from 'path';
 import FS from 'fs';
 import * as process from 'process';
+import pc from 'picocolors';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
 import type { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker';
 import type { ProjectJson } from '../../npm-packages/meteor-vite/src/vite/plugin/MeteorStubs';
@@ -11,7 +12,10 @@ import type { ProjectJson } from '../../npm-packages/meteor-vite/src/vite/plugin
 // Use a child process instead of worker to avoid WASM/archived threads error
 export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     if (!FS.existsSync(workerPath)) {
-        throw new Error(`Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package: \n  $ npm i -D meteor-vite`)
+        throw new MeteorViteError([
+                `Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package:`,
+                `Install it using: $ ${pc.yellow('npm i -D meteor-vite')}`
+            ])
     }
     
     const child = fork(workerPath, ['--enable-source-maps'], {
@@ -54,6 +58,16 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     }
 }
 
+class MeteorViteError extends Error {
+    constructor(message: string[] | string) {
+        if (!Array.isArray(message)) {
+            message = [message];
+        }
+        super(`⚡  ${message.join('\n    ')}`);
+        this.name = this.constructor.name;
+    }
+}
+
 export const cwd = process.env.METEOR_VITE_CWD ?? guessCwd();
 export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/worker/index.mjs');
 export const projectPackageJson = getProjectPackageJson();
@@ -61,12 +75,11 @@ function getProjectPackageJson(): ProjectJson {
     const path = Path.join(cwd, 'package.json');
     
     if (!FS.existsSync(path)) {
-        const errorMessage = [
-            `[Meteor-Vite] Unable to locate package.json for your project in ${path}`,
+        throw new MeteorViteError([
+            `Unable to locate package.json for your project in ${pc.yellow(path)}`,
             `Make sure you run Meteor commands from the root of your project directory.`,
             `Alternatively, you can supply a superficial CWD for Meteor-Vite to use: METEOR_VITE_CWD="./projects/my-meteor-project/"`
-        ]
-        throw new Error(errorMessage.join('\n    '))
+        ])
     }
     
     return JSON.parse(FS.readFileSync(path, 'utf-8'));
