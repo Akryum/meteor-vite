@@ -9,6 +9,15 @@ Meteor.publish('links.all', function publishLinksAll() {
   return LinksCollection.find();
 })
 
+Meteor.methods({
+  async 'links.reverse-title'(linkId) {
+    const { title } = await LinksCollection.findOneAsync(linkId);
+    await LinksCollection.updateAsync(linkId, {
+      $set: { title: title.split('').reverse().join('') }
+    });
+  }
+})
+
 Meteor.startup(async () => {
   // If the Links collection is empty, add some data.
   if (await LinksCollection.find().countAsync() === 0) {
