@@ -27,6 +27,11 @@ if (!meteorMainModule) {
 
 // Temporary Meteor build
 
+const tempDir = getTempDir();
+const tempMeteorProject = path.resolve(tempDir, 'meteor')
+const tempMeteorOutDir = path.join(tempDir, 'bundle', 'meteor')
+const viteOutDir = path.join(tempDir, 'bundle', 'vite');
+
 const filesToCopy = [
   path.join('.meteor', '.finished-upgraders'),
   path.join('.meteor', '.id'),
@@ -35,20 +40,26 @@ const filesToCopy = [
   path.join('.meteor', 'release'),
   path.join('.meteor', 'versions'),
   'package.json',
-  'tsconfig.json',
   meteorMainModule,
 ]
 
-const tempDir = getTempDir();
-const tempMeteorProject = path.resolve(tempDir, 'meteor')
-const tempMeteorOutDir = path.join(tempDir, 'bundle', 'meteor')
-const viteOutDir = path.join(tempDir, 'bundle', 'vite');
+const optionalFiles = [
+    'tsconfig.json'
+]
 
 try {
   // Temporary Meteor build
 
   console.log(pc.blue('⚡️ Building packages to make them available to export analyzer...'))
   let startTime = performance.now()
+
+  // Check for project files that may be important if available
+  for (const file of optionalFiles) {
+    if (fs.existsSync(path.join(cwd, file))) {
+      filesToCopy.push(file);
+    }
+  }
+
   // Copy files from `.meteor`
   for (const file of filesToCopy) {
     const from = path.join(cwd, file)
@@ -56,6 +67,7 @@ try {
     fs.ensureDirSync(path.dirname(to))
     fs.copyFileSync(from, to)
   }
+
   // Symblink to `packages` folder
   if (fs.existsSync(path.join(cwd, 'packages')) && !fs.existsSync(path.join(tempMeteorProject, 'packages'))) {
     fs.symlinkSync(path.join(cwd, 'packages'), path.join(tempMeteorProject, 'packages'))
