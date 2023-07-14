@@ -1,7 +1,6 @@
 import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
 import type HTTP from 'http'
-import * as process from 'process';
 import {
     getConfig, DevConnectionLog,
     MeteorViteConfig,
