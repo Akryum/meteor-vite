@@ -1,4 +1,5 @@
 import { MeteorViteError } from '../../../vite/error/MeteorViteError';
+import { PACKAGE_SCOPE_KEY, SerializedExports, TEMPLATE_GLOBAL_KEY } from '../StubTemplate';
 import { PackageSubmodule } from './PackageSubmodule';
 import { parseMeteorPackage } from '../parser/Parser';
 import type { ModuleList, ParsedPackage, PackageScopeExports } from '../parser/Parser';
@@ -72,6 +73,31 @@ export default class MeteorPackage implements ParsedPackage {
             modulePath,
             exports,
         });
+    }
+    
+    /**
+     * Package-scope exports for the current package.
+     * Serialized for use in the Meteor stub template.
+     * {@link PackageScopeExports}
+     */
+    public serializeScopedExports() {
+        const result: SerializedExports = {
+            bottomLines: [],
+            topLines: [],
+            exportKeys: []
+        }
+        
+        Object.entries(this.packageScopeExports).forEach(([packageName, exports]) => {
+            result.topLines.push(`const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${packageName}']`);
+            
+            exports.forEach((exportKey) => {
+                result.exportKeys.push(exportKey);
+                result.bottomLines.push(`export const ${exportKey} = ${PACKAGE_SCOPE_KEY}.${exportKey};`)
+            })
+            
+        });
+        
+        return result;
     }
 }
 
