@@ -38,6 +38,34 @@ export class PackageSubmodule {
         this.meteorPackage = meteorPackage;
         this.exports = exports.map((entry) => new ExportEntry({ entry, parentModule: this }));
     }
+    
+    public serialize() {
+        const topLines: string[] = [];
+        const bottomLines: string[] = [];
+        const exportKeys: string[] = [];
+        
+        this?.exports.forEach((module) => {
+            const line = module.serialized;
+            
+            if (module.placement !== 'none' && module.key) {
+                exportKeys.push(module.key);
+            }
+            
+            if (module.placement === 'top') {
+                topLines.push(line);
+            }
+            
+            if (module.placement === 'bottom') {
+                bottomLines.push(line);
+            }
+        });
+        
+        return {
+            topLines,
+            bottomLines,
+            exportKeys,
+        }
+    }
 }
 
 interface PackageSubmoduleOptions {
