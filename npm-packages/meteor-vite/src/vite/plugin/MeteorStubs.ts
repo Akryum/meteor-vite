@@ -2,6 +2,7 @@ import FS from 'fs/promises';
 import Path from 'path';
 import pc from 'picocolors';
 import { Plugin } from 'vite';
+import PackageJSON from '../../../package.json';
 import { DeepPartial } from '../../HelperTypes';
 import MeteorPackage from '../../meteor/package/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
@@ -22,6 +23,12 @@ export function MeteorStubs(pluginSettings: PluginSettings): Plugin {
             
             async load(request) {
                 const timeStarted = Date.now();
+                
+                if (!pluginSettings?.packageJson?.meteor?.mainModule?.client || true) {
+                    throw new MeteorViteError(`You need to specify a Meteor entrypoint in your package.json!`, {
+                        subtitle: `See the following link for more info: ${PackageJSON.homepage}`
+                    })
+                }
                 
                 if (request.isLazyLoaded) {
                     await request.forceImport();
