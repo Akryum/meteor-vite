@@ -12,12 +12,18 @@ export type MeteorIPCMessage = {
 export default new class MeteorEvents {
     protected readonly events = new EventEmitter();
     
+    /**
+     * Wait for one of the provided IPC message topics before resolving the promise.
+     *
+     * @param {{topics: MeteorIPCTopic[], timeoutMs: number}} event
+     * @returns {Promise<void>}
+     */
     public awaitEvent(event: {
         /**
          * Meteor IPC event name.
          * E.g. webapp-reload-client, client-refresh
          */
-        topic: MeteorIPCTopic,
+        topics: MeteorIPCTopic[],
         
         /**
          * How long to wait before rejecting the promise.
@@ -29,11 +35,13 @@ export default new class MeteorEvents {
             let rejected = false;
             let resolved = false;
             
-            this.events.once(event.topic, () => {
-                if (rejected) return;
-                resolved = true;
-                resolve()
-            });
+            event.topics.forEach((topic) => {
+                this.events.once(topic, () => {
+                    if (rejected || resolved) return;
+                    resolved = true;
+                    resolve()
+                });
+            })
             
             setTimeout(() => {
                 if (resolved) return;
