@@ -12,8 +12,9 @@ import type { ProjectJson } from '../../npm-packages/meteor-vite/src/vite/plugin
 export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     if (!FS.existsSync(workerPath)) {
         throw new MeteorViteError([
-                `Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package:`,
-                `Install it using: $ ${pc.yellow('npm i -D meteor-vite')}`
+                `Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package.`,
+                `Install it by running the following command:`,
+                `$  ${pc.yellow('npm i -D meteor-vite')}`
             ])
     }
     
@@ -62,7 +63,7 @@ class MeteorViteError extends Error {
         if (!Array.isArray(message)) {
             message = [message];
         }
-        super(`⚡  ${message.join('\n    ')}`);
+        super(`⚡  ${message.join('\n L ')}`);
         this.name = this.constructor.name;
     }
 }
