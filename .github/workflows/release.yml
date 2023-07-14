@@ -42,7 +42,9 @@ jobs:
           meteor-release: '2.12'
 
       - name: 'Install Dependencies'
-        run: meteor npm run install:package
+        run: |
+          meteor npm i
+          meteor npm run install:package
 
       - name: 'Build package'
         run: meteor npm run build:package
