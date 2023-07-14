@@ -1,3 +1,4 @@
+name: 'Build for production'
 on:
   workflow_call:
     inputs:
@@ -7,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: 'Build Example App'
+    name: 'Build'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

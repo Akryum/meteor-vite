@@ -12,13 +12,13 @@ on:
 
 jobs:
   vue:
-    name: 'Vue'
+    name: 'Vue Example'
     uses: ./.github/workflows/_reuse_.build.yml
     with:
       name: 'vue'
 
   svelte:
-    name: 'Svelte'
+    name: 'Svelte Example'
     uses: ./.github/workflows/_reuse_.build.yml
     with:
       name: 'svelte'
