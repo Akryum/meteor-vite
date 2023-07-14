@@ -1,4 +1,3 @@
-import fs from 'fs/promises'
 import { RollupOutput } from 'rollup';
 import { build, resolveConfig } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
