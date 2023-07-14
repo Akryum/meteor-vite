@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
 import type HTTP from 'http'
 import {
-    getConfig,
+    getConfig, DevConnectionLog,
     MeteorViteConfig,
     setConfig,
     ViteConnection,
@@ -10,7 +10,7 @@ import {
 import { createWorkerFork, getProjectPackageJson } from './workers';
 
 if (Meteor.isDevelopment) {
-    console.log('⚡ Starting Vite server...');
+    DevConnectionLog.info('Starting Vite server...');
     
     WebAppInternals.registerBoilerplateDataCallback('meteor-vite', (request: HTTP.IncomingMessage, data: BoilerplateData) => {
         const { host, port, entryFile, ready } = getConfig();
@@ -27,7 +27,7 @@ if (Meteor.isDevelopment) {
         viteConfig(config) {
             const { ready } = setConfig(config);
             if (ready) {
-                console.log(`⚡  Meteor-Vite ready for connections!`)
+                DevConnectionLog.info(`Meteor-Vite ready for connections!`)
             }
         },
     });
@@ -45,7 +45,7 @@ if (Meteor.isDevelopment) {
     
     Meteor.methods({
         [ViteConnection.methods.refreshConfig]() {
-            console.log('⚡  Refreshing configuration from Vite dev server...')
+            DevConnectionLog.info('Refreshing configuration from Vite dev server...')
             viteServer.call({
                 method: 'vite.getDevServerConfig',
                 params: [],

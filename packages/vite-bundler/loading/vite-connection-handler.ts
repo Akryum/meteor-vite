@@ -44,3 +44,11 @@ export function setConfig<TConfig extends Partial<RuntimeConfig>>(config: TConfi
 if (Meteor.isDevelopment) {
     MeteorViteConfig = new Mongo.Collection(ViteConnection.publication);
 }
+const logLabel = Meteor.isClient ? `[Meteor-Vite] ⚡ ` : '⚡  ';
+
+export const DevConnectionLog = {
+    info: (message: string, ...params: Parameters<typeof console.log>) => console.info(
+        `${logLabel} ${message}`,
+        ...params,
+    ),
+};

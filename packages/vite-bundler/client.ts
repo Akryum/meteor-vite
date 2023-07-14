@@ -1,9 +1,9 @@
 // Wait for Vite server to fire up before refreshing the client
 // Todo: omit this module entirely in production build to save space
 
-import { getConfig, RuntimeConfig, ViteConnection } from './loading/vite-connection-handler';
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
+import { getConfig, DevConnectionLog, RuntimeConfig, ViteConnection } from './loading/vite-connection-handler';
 
 let subscription: Meteor.SubscriptionHandle;
 let initialConfig: RuntimeConfig;
@@ -28,18 +28,18 @@ function watchConfig(config: RuntimeConfig) {
 
 function onReady(config: RuntimeConfig) {
     if (hasLoadedVite()) {
-        log.info('Vite has already been loaded. Waiting on changes before refreshing.', { config });
+        DevConnectionLog.info('Vite has already been loaded. Waiting on changes before refreshing.', { config });
         return;
     }
     
     // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
-    log.info('Refreshing client...');
+    DevConnectionLog.info('Refreshing client...');
     window.location.reload();
     return;
 }
 
 function onChange(config: RuntimeConfig) {
-    log.info(
+    DevConnectionLog.info(
         'Meteor-Vite dev server details changed from %s to %s',
         buildConnectionUri(initialConfig),
         buildConnectionUri(config),
@@ -47,12 +47,12 @@ function onChange(config: RuntimeConfig) {
     );
     
     if (!config.ready) {
-        log.info('Meteor-Vite dev server not ready yet. Waiting on server to become ready...');
+        DevConnectionLog.info('Meteor-Vite dev server not ready yet. Waiting on server to become ready...');
         return;
     }
     
     if (hasLoadedVite()) {
-        log.info('Attempting to refresh current Vite session to load new server config...')
+        DevConnectionLog.info('Attempting to refresh current Vite session to load new server config...')
         window.location.reload();
         return;
     }
@@ -107,10 +107,6 @@ Meteor.startup(() => {
         }, 2500);
     }
 });
-
-const log = {
-    info: (message: string, ...params: Parameters<typeof console.log>) => console.info(`[Meteor-Vite] ⚡ ${message}`, ...params),
-}
 
 declare global {
     interface Window {
