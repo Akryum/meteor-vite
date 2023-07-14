@@ -21,7 +21,10 @@
     "install:npm": "cd npm-packages/meteor-vite && meteor npm install",
 
     "build:npm": "cd npm-packages/meteor-vite && meteor npm run build",
-    "link:npm": "(cd examples/vue && meteor npm link ../../npm-packages/meteor-vite) && (cd examples/svelte && meteor npm link ../../npm-packages/meteor-vite)",
+
+    "link:npm": "meteor npm run link:vue && meteor npm run link:svelte",
+    "link:vue": "cd examples/vue && meteor npm link ../../npm-packages/meteor-vite",
+    "link:svelte": "cd examples/svelte && meteor npm link ../../npm-packages/meteor-vite",
 
     "start:vue": "meteor npm run build:npm && (cd examples/vue && meteor npm run meteor-vite-internal:start)",
     "start:svelte": "meteor npm run build:npm && (cd examples/svelte && meteor npm run meteor-vite-internal:start)"
