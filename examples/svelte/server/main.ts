@@ -9,6 +9,12 @@ Meteor.publish('links.all', function publishLinksAll() {
   return LinksCollection.find();
 })
 
+Meteor.methods({
+  async 'links.remove'(linkId) {
+    await LinksCollection.removeAsync(linkId);
+  }
+})
+
 Meteor.startup(async () => {
   // If the Links collection is empty, add some data.
   if (await LinksCollection.find().countAsync() === 0) {
