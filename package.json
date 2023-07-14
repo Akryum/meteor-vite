@@ -11,13 +11,13 @@
   },
   "devDependencies": {},
   "scripts": {
-    "install:workspace": "meteor npm install && cd npm-packages/meteor-vite && meteor npm install",
     "version:vite-bundler": "meteor node .bin/release-meteor-package.mjs version",
     "publish:vite-bundler": "meteor node .bin/release-meteor-package.mjs publish",
     "version": "npm run version:vite-bundler && changeset version",
     "release": "npm run publish:vite-bundler && changeset publish",
 
-    "install:examples": "(cd examples/svelte && meteor npm install) && (cd examples/vue && meteor npm install)",
+    "install:svelte": "cd examples/svelte && meteor npm install",
+    "install:vue": "cd examples/vue && meteor npm install",
     "install:npm": "cd npm-packages/meteor-vite && meteor npm install",
 
     "build:npm": "cd npm-packages/meteor-vite && meteor npm run build",
