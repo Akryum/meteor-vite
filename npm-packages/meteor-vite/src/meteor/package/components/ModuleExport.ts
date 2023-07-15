@@ -61,29 +61,35 @@ export default class ModuleExport implements ModuleExport {
         }
     }
     
+    protected isRelativeReExport() {
+        if (this.type !== 're-export') {
+            return false;
+        }
+        if (this.from?.startsWith('.')) {
+            return true;
+        }
+        return false;
+    }
+    
     /**
      * The current export entry, converted into JavaScript for use as a Meteor stub.
      * Essentially, converting from raw data back into JavaScript.
      */
     public serialize() {
-        if (this.type === 're-export') {
-            let from = this.from?.startsWith('.')
-                       ? `${this.parentModule.meteorPackage.packageId}/${this.from?.replace(/^[./]+/, '')}`
-                       : this.from;
-            
-            if (this.name?.trim() === '*' && !this.as) {
-                return `export * from '${from}';`;
-            }
-            
-            return `export { ${this.name} ${this.as && `as ${this.as} ` || ''}} from '${from}';`;
-        }
-        
         if (this.type === 'export-default' || (this.type === 'export' && this.name === 'default')) {
             return `export default ${METEOR_STUB_KEY}.default ?? ${METEOR_STUB_KEY};`;
         }
         
-        if (this.type === 'export') {
+        if (this.type === 'export' || this.isRelativeReExport() && this.name?.trim() !== '*') {
             return `export const ${this.name} = ${METEOR_STUB_KEY}.${this.name};`;
+        }
+        
+        if (this.type === 're-export') {
+            if (this.name?.trim() === '*' && !this.as) {
+                return `export * from '${this.from}';`;
+            }
+            
+            return `export { ${this.name} ${this.as && `as ${this.as} ` || ''}} from '${this.from}';`;
         }
         
         throw new ExportEntrySerializationError('Tried to format an non-supported module export!', { exportEntry: this });
