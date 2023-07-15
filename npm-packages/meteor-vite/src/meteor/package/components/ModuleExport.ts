@@ -90,7 +90,7 @@ export default class ModuleExport implements ModuleExport {
      */
     public serialize() {
         if (this.type === 're-export') {
-            if (!this.isReExportedByParent) {
+            if (this.isReExportedByParent) {
                 return `export const ${this.key} = ${METEOR_STUB_KEY}.${this.key};`
             }
             
