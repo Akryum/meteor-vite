@@ -40,8 +40,7 @@ export const MeteorStubs = setupPlugin(async (pluginSettings: PluginSettings) =>
             
             const template = stubTemplate({
                 requestId: request.context.id,
-                submodule: meteorPackage.getModule({ importPath: request.requestedModulePath }),
-                meteorPackage,
+                serializedPackage: meteorPackage.serialize({ importPath: request.requestedModulePath }),
                 stubValidation: pluginSettings.stubValidation,
             })
             
