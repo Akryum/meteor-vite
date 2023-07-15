@@ -1,6 +1,6 @@
 import { StubValidationSettings } from '../../vite/MeteorViteConfig';
 import { StubValidatorOptions } from '../client/ValidateStub';
-import { SerializedPackage } from './components/MeteorPackage';
+import MeteorPackage from './components/MeteorPackage';
 
 export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
@@ -11,14 +11,17 @@ export const TEMPLATE_GLOBAL_KEY = 'g';
  * Used to bridge imports for Meteor code that Vite doesn't have access to, to the below template that acts as a
  * proxy between Vite and Meteor's modules.
  */
-export function stubTemplate({ requestId, serializedPackage, stubValidation: validationSettings }: {
+export function stubTemplate({ requestId, meteorPackage, importPath, stubValidation: validationSettings }: {
     requestId: string;
     stubValidation?: StubValidationSettings,
-    serializedPackage: SerializedPackage;
+    meteorPackage: MeteorPackage;
+    importPath?: string;
 }) {
     const stubId = getStubId();
-    const { packageId } = serializedPackage.package;
-    const fullImportPath = serializedPackage.submodule?.fullImportPath || packageId;
+    const { packageId } = meteorPackage;
+    const submodule = meteorPackage.getModule({ importPath });
+    const serializedPackage = meteorPackage.serialize({ importPath });
+    const fullImportPath = submodule?.fullImportPath || packageId;
     
     const stubValidation = stubValidationTemplate({
         packageId,
@@ -131,10 +134,4 @@ function stubValidationTemplate({ settings, requestId, exportKeys, packageId }: 
 let nextStubId = 0;
 function getStubId() {
     return nextStubId++;
-}
-
-export interface SerializedExports {
-    topLines: string[];
-    bottomLines: string[];
-    exportKeys: string[];
 }

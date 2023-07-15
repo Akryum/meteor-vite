@@ -39,8 +39,9 @@ export const MeteorStubs = setupPlugin(async (pluginSettings: PluginSettings) =>
             
             const template = stubTemplate({
                 requestId: request.context.id,
-                serializedPackage: meteorPackage.serialize({ importPath: request.requestedModulePath }),
+                importPath: request.requestedModulePath,
                 stubValidation: pluginSettings.stubValidation,
+                meteorPackage,
             })
             
             request.log.debug(`Meteor stub created`, {

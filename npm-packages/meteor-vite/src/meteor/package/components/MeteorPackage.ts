@@ -1,9 +1,6 @@
-import pc from 'picocolors';
-import Logger from '../../../Logger';
 import { MeteorViteError } from '../../../vite/error/MeteorViteError';
-import {  SerializedExports } from '../StubTemplate';
 import PackageExport from './PackageExport';
-import { PackageSubmodule } from './PackageSubmodule';
+import { PackageSubmodule, SerializationStore } from './PackageSubmodule';
 import { parseMeteorPackage } from '../parser/Parser';
 import type { ModuleList, ParsedPackage, PackageScopeExports } from '../parser/Parser';
 import { ConflictingExportKeys, isSameModulePath } from '../Serialize';
@@ -87,74 +84,26 @@ export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeE
         });
     }
     
-    /**
-     * Package-scope exports for the current package.
-     * Serialized for use in the Meteor stub template.
-     * {@link PackageScopeExports}
-     */
-    public serializePackageExports(serialized: SerializedExports = {
-        topLines: [],
-        bottomLines: [],
-        exportKeys: []
-    }) {
-        const packageImports = new Set<string>();
-        
-        this.packageScopeExports.forEach((packageExport) => {
-            if (serialized.exportKeys.includes(packageExport.key)) {
-                console.warn(new ConflictingExportKeys(`Detected module export key conflict for ${pc.yellow(packageExport.key)} in ${this.packageId}!`, {
-                    conflict: {
-                        key: packageExport.key,
-                        moduleExports: [...serialized.topLines, ...serialized.bottomLines],
-                        packageScope: this.packageScopeExports,
-                    }
-                }))
-                return;
-            }
-            
-            serialized.exportKeys.push(packageExport.key);
-            packageImports.add(packageExport.serializeImport());
-            serialized.bottomLines.push(packageExport.serialize());
-        });
-        
-        serialized.topLines.push(...packageImports);
-        
-        return serialized;
-    }
     
     /**
      * Serialize package for the provided import path.
      * Converts all exports parsed for the package into an array of JavaScript import/export lines.
      */
-    public serialize({ importPath }: { importPath?: string }): SerializedPackage {
-        const serialized: SerializedExports = {
-            topLines: [],
-            bottomLines: [],
-            exportKeys: [],
+    public serialize({ importPath }: { importPath?: string }) {
+        const store = new SerializationStore();
+        
+        if (!importPath) {
+            this.packageScopeExports.forEach((entry) => store.addEntry(entry));
         }
         
         const submodule = this.getModule({ importPath });
-        const exports = submodule?.serialize() || serialized;
         
-        serialized.topLines.push(...exports.topLines);
-        serialized.bottomLines.push(...exports.bottomLines);
-        serialized.exportKeys.push(...exports.exportKeys);
-        
-        if (!importPath) {
-            this.serializePackageExports(serialized);
+        if (submodule) {
+            submodule.exports.forEach((entry) => store.addEntry(entry));
         }
         
-        return {
-            submodule,
-            package: this,
-            ...serialized,
-        };
+        return store.serialize();
     }
-}
-
-export interface SerializedPackage extends SerializedExports {
-    package: MeteorPackage,
-    submodule?: PackageSubmodule,
-    importPath?: string;
 }
 
 class MeteorPackageError extends MeteorViteError {
