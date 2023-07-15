@@ -1,3 +1,4 @@
+import { ErrorMetadata, MeteorViteError } from '../../../vite/error/MeteorViteError';
 import { PackageSubmodule } from './PackageSubmodule';
 import { ModuleExport } from '../parser/Parser';
 import { METEOR_STUB_KEY } from '../StubTemplate';
@@ -85,6 +86,13 @@ export default class ExportEntry implements ModuleExport {
             return `export const ${this.name} = ${METEOR_STUB_KEY}.${this.name};`;
         }
         
-        throw new Error('Tried to format an non-supported module export!');
+        throw new ExportEntrySerializationError('Tried to format an non-supported module export!', { exportEntry: this });
+    }
+}
+
+class ExportEntrySerializationError extends MeteorViteError {
+    constructor(message: string, meta: ErrorMetadata & { exportEntry: ExportEntry }) {
+        super(message, meta);
+        this.addSection('Cause', meta.exportEntry);
     }
 }
