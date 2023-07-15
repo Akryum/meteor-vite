@@ -65,7 +65,7 @@ export default class ModuleExport implements ModuleExport {
                     return 'export-all' as const;
                 }
                 if (this.isReExportedByParent) {
-                    if (this.name === 'default') {
+                    if (this.as === 'default') {
                         return 'export-default';
                     }
                     return 'export' as const;
@@ -75,7 +75,7 @@ export default class ModuleExport implements ModuleExport {
             
             // Named re-exports
             if (this.isReExportedByParent) {
-                if (this.name === 'default') {
+                if (this.as === 'default') {
                     return 'export-default' as const;
                 }
                 return 'export' as const;
