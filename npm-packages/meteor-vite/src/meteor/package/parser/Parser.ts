@@ -390,6 +390,11 @@ function formatExports({ expression, packageName, id }: {
             }
         }
         
+        if (result.type === 're-export' && result.from?.startsWith('.')) {
+            result.type = 'export';
+            result.name = result.as ?? result.name;
+        }
+        
         return result;
     })
     
