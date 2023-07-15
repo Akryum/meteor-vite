@@ -110,6 +110,8 @@ export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeE
                 });
             }
             
+            serialized.exportKeys.push(packageExport.key);
+            packageImports.add(packageExport.serializeImport());
             serialized.bottomLines.push(packageExport.serialize());
         });
         
