@@ -43,7 +43,7 @@ export default class ModuleExport implements ModuleExport {
     /**
      * Determine the export type to be used within a stub template for the current export.
      */
-    public get stubType() {
+    public get stubType(): ModuleExport['type'] | 'export-all' {
         
         // Standard exports
         if (this.type === 'export') {
