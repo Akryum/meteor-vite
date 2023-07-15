@@ -41,6 +41,47 @@ export default class ModuleExport implements ModuleExport {
     }
     
     /**
+     * Determine the export type to be used within a stub template for the current export.
+     */
+    public get stubType() {
+        
+        // Standard exports
+        if (this.type === 'export') {
+            if (this.name === 'default') {
+                return 'export-default' as const
+            }
+            return 'export' as const
+        }
+        
+        if (this.type === 'export-default') {
+            return 'export-default' as const;
+        }
+        
+        if (this.type === 're-export') {
+            
+            // Wildcard re-exports
+            if (this.name?.trim() === '*') {
+                if (!this.as) {
+                    return 'export-all' as const;
+                }
+                if (this.isReExportedByParent) {
+                    return 'export' as const;
+                }
+                return 're-export' as const;
+            }
+            
+            // Named re-exports
+            if (this.isReExportedByParent) {
+                return 'export' as const;
+            }
+            
+            return 're-export' as const;
+        }
+        
+        return this.type;
+    }
+    
+    /**
      * The export key for the current entry.
      * Undefined if not applicable.
      *
