@@ -132,9 +132,9 @@ export default class ModuleExport implements ModuleExport {
     public serialize() {
         switch (this.stubType) {
             case 're-export':
-                return `export { ${this.name} ${this.as && `as ${this.as} ` || ''}} from '${this.exportPath}';`
+                return `export { ${this.name} ${this.key && `as ${this.key} ` || ''}} from '${this.exportPath}';`
             case 'export':
-                return `export const ${this.name} = ${METEOR_STUB_KEY}.${this.name};`
+                return `export const ${this.key} = ${METEOR_STUB_KEY}.${this.key};`
             case 'export-default':
                 return `export default ${METEOR_STUB_KEY}.default ?? ${METEOR_STUB_KEY};`
             case 'export-all':
