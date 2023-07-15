@@ -45,8 +45,11 @@ export class PackageSubmodule {
         const exportKeys: string[] = [];
         
         this?.exports.forEach((module) => {
+            if (module.placement === 'none') {
+                return;
+            }
             
-            if (module.placement !== 'none' && module.key) {
+            if (module.key) {
                 exportKeys.push(module.key);
             }
             
