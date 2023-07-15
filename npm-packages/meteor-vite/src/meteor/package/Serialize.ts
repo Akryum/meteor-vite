@@ -2,13 +2,13 @@ import Path from 'path';
 import { inspect } from 'util';
 import Logger from '../../Logger';
 import { ErrorMetadata, MeteorViteError } from '../../vite/error/MeteorViteError';
-import { ModuleExport, PackageScopeExports } from './parser/Parser';
+import { ModuleExportData, PackageScopeExports } from './parser/Parser';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubTemplate';
 
 
 export default new class Serialize {
     
-    public moduleExport(module: ModuleExport, packageId: string) {
+    public moduleExport(module: ModuleExportData, packageId: string) {
         if (module.type === 're-export') {
             let from = module.from?.startsWith('.')
                        ? `${packageId}/${module.from?.replace(/^[./]+/, '')}`
@@ -43,7 +43,7 @@ export default new class Serialize {
     public parseModules({ packageId, packageScope, modules }: {
         packageId: string;
         packageScope: PackageScopeExports,
-        modules: ModuleExport[]
+        modules: ModuleExportData[]
     }) {
         type PlacementGroup = { top: string[], bottom: string[] }
         const result: {
@@ -144,7 +144,7 @@ export class ConflictingExportKeys extends MeteorViteError {
         public readonly meta: ErrorMetadata & {
             conflict: {
                 key: string,
-                moduleExports: ModuleExport[] | string[],
+                moduleExports: ModuleExportData[] | string[],
                 packageScope: PackageScopeExports | string[]
             }}
     ) {

@@ -1,6 +1,6 @@
 import { ErrorMetadata, MeteorViteError } from '../../../vite/error/MeteorViteError';
 import { PackageSubmodule } from './PackageSubmodule';
-import { ModuleExport } from '../parser/Parser';
+import { ModuleExportData } from '../parser/Parser';
 import { METEOR_STUB_KEY } from '../StubTemplate';
 
 export default class ModuleExport implements ModuleExport {
@@ -11,9 +11,9 @@ export default class ModuleExport implements ModuleExport {
     public readonly name;
     public readonly id;
     
-    constructor(details: { entry: ModuleExport, parentModule: PackageSubmodule }) {
+    constructor(details: { data: ModuleExportData, parentModule: PackageSubmodule }) {
         this.parentModule = details.parentModule;
-        const { from, as, type, name, id } = details.entry;
+        const { from, as, type, name, id } = details.data;
         this.from = from;
         this.as = as;
         this.type = type;

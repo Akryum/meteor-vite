@@ -1,7 +1,7 @@
 import Path from 'path';
 import { describe, expect, it, test } from 'vitest';
 import MeteorPackage from '../../src/meteor/package/components/MeteorPackage';
-import { ModuleExport, parseMeteorPackage } from '../../src/meteor/package/parser/Parser';
+import { ModuleExportData, parseMeteorPackage } from '../../src/meteor/package/parser/Parser';
 import Serialize from '../../src/meteor/package/Serialize';
 import { AllMockPackages, LazyLoadedPackage } from '../__mocks';
 
@@ -37,7 +37,7 @@ describe('Validate known exports for mock packages', () => {
             const exportedModules = Object.entries(mockPackage.modules);
             
             describe.runIf(exportedModules.length)('Files', () => {
-                exportedModules.forEach(([filePath, mockExports]: [string, ModuleExport[]]) => {
+                exportedModules.forEach(([filePath, mockExports]: [string, ModuleExportData[]]) => {
                     describe(filePath, () => {
                         const parsedExports =  parsedPackage.modules[filePath];
                         const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
