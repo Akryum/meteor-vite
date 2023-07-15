@@ -101,13 +101,14 @@ export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeE
         
         this.packageScopeExports.forEach((packageExport) => {
             if (serialized.exportKeys.includes(packageExport.key)) {
-                throw new ConflictingExportKeys(`Detected module export key conflict for ${pc.yellow(packageExport.key)} in ${this.packageId}!`, {
+                console.warn(new ConflictingExportKeys(`Detected module export key conflict for ${pc.yellow(packageExport.key)} in ${this.packageId}!`, {
                     conflict: {
                         key: packageExport.key,
                         moduleExports: [...serialized.topLines, ...serialized.bottomLines],
                         packageScope: this.packageScopeExports,
                     }
-                });
+                }))
+                return;
             }
             
             serialized.exportKeys.push(packageExport.key);
