@@ -1,7 +1,7 @@
 import pc from 'picocolors';
 import PackageJSON from '../../../../package.json';
 import Logger from '../../../Logger';
-import { PACKAGE_SCOPE_KEY } from '../StubTemplate';
+import { PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from '../StubTemplate';
 import MeteorPackage from './MeteorPackage';
 
 export default class PackageExport {
@@ -23,5 +23,9 @@ export default class PackageExport {
     
     public serialize() {
         return `export const ${this.key} = ${PACKAGE_SCOPE_KEY}.${this.key};`
+    }
+    
+    public serializeImport() {
+        return `const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${this.packageName}']`
     }
 }
