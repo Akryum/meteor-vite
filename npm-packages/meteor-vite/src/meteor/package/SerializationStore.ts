@@ -4,9 +4,46 @@ import { MeteorViteError } from '../../vite/error/MeteorViteError';
 import ModuleExport from './components/ModuleExport';
 import PackageExport from './components/PackageExport';
 
+/**
+ * Utility class for soaking up and validating all import/export lines for a given module or package-scope export.
+ * The properties here refer to the actual output within a stub.
+ * Meaning, an "import" more takes the form of a reference to the global Package type.
+ *
+ * @example import
+ * const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${this.packageName}']
+ */
 export class SerializationStore {
+    /**
+     * Collection of entries that serialize as a normal export.
+     * @example input
+     * export const foo = 'bar'
+     * export { foo as bar } from './foo/bar'
+     * export * as foobar from './foo/bar'
+     *
+     * @example output
+     * export const foo = ${METEOR_STUB_KEY}.foo
+     * export const bar = ${METEOR_STUB_KEY}.foo
+     * export const foobar = ${METEOR_STUB_KEY}.foobar
+     */
     protected exports = new Map<string, PackageExport | ModuleExport>;
+    
+    /**
+     * Any export that cannot be serialized using a unique key
+     * @example
+     * export * from './foo/bar'
+     */
     protected reExportWildcards = new Map<string, ModuleExport>;
+    
+    /**
+     * Package imports. These do not serialize to ES imports, but rather references to the global Package type where
+     * we will simulate a re-export from the given package.
+     *
+     * @example import
+     * const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['my:package']
+     *
+     * @example export
+     * export const foo = ${PACKAGE_SCOPE_KEY}.foo
+     */
     protected imports = new Map<string, PackageExport>();
     
     constructor() {
