@@ -3,7 +3,7 @@ import { PackageSubmodule } from './PackageSubmodule';
 import { ModuleExport } from '../parser/Parser';
 import { METEOR_STUB_KEY } from '../StubTemplate';
 
-export default class ExportEntry implements ModuleExport {
+export default class ModuleExport implements ModuleExport {
     public readonly parentModule: PackageSubmodule;
     public readonly from;
     public readonly as;
@@ -91,7 +91,7 @@ export default class ExportEntry implements ModuleExport {
 }
 
 class ExportEntrySerializationError extends MeteorViteError {
-    constructor(message: string, meta: ErrorMetadata & { exportEntry: ExportEntry }) {
+    constructor(message: string, meta: ErrorMetadata & { exportEntry: ModuleExport }) {
         super(message, meta);
         this.addSection('Cause', meta.exportEntry);
     }
