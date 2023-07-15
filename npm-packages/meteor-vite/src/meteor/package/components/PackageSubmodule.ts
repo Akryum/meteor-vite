@@ -1,3 +1,4 @@
+import { ModuleExportData } from '../parser/Parser';
 import ModuleExport from './ModuleExport';
 import type MeteorPackage from './MeteorPackage';
 
@@ -35,7 +36,7 @@ export class PackageSubmodule {
     constructor({ meteorPackage, modulePath, exports }: PackageSubmoduleOptions) {
         this.modulePath = modulePath;
         this.meteorPackage = meteorPackage;
-        this.exports = exports.map((entry) => new ModuleExport({ entry, parentModule: this }));
+        this.exports = exports.map((data) => new ModuleExport({ data, parentModule: this }));
     }
     
     public serialize() {
@@ -77,7 +78,7 @@ interface PackageSubmoduleOptions {
      * @example
      * export const foo = '...'
      */
-    exports: ModuleExport[];
+    exports: ModuleExportData[];
     
     /**
      * Path relative to the current package to the module containing the these exports.
