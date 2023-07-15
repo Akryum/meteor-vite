@@ -54,7 +54,7 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub${stubId}.js')
 
-${serializedPackage.reExports.join('\n')}
+${serializedPackage.exports.join('\n')}
 `
 }
 
