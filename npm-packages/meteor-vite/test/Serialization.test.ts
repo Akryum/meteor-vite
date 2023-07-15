@@ -40,6 +40,7 @@ describe('Serialization', () => {
                 }
             });
             
+            expect(exportEntry.isReExportedByParent, 'is re-exported by parent').toBe(true);
             expect(exportEntry.serialize(), 'serialized output').not.toContain(exportEntry.exportPath);
         })
     })
