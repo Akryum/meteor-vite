@@ -74,12 +74,26 @@ export default class ModuleExport implements ModuleExport {
         return this.from;
     }
     
+    public get isReExportedByParent() {
+        if (this.type !== 're-export') {
+            return false;
+        }
+        if (this.from?.startsWith('./')) {
+            return true;
+        }
+        return false;
+    }
+    
     /**
      * The current export entry, converted into JavaScript for use as a Meteor stub.
      * Essentially, converting from raw data back into JavaScript.
      */
     public serialize() {
         if (this.type === 're-export') {
+            if (!this.isReExportedByParent) {
+                return `export const ${this.key} = ${METEOR_STUB_KEY}.${this.key};`
+            }
+            
             if (this.name?.trim() === '*' && !this.as) {
                 return `export * from '${this.exportPath}';`;
             }
