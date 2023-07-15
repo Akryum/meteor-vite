@@ -119,9 +119,11 @@ export class SerializationStore {
         const reExports = new Set<string>;
         const imports = new Set<string>;
         
-        this.exports.forEach((entry) => exports.add(entry.serialize()));
         this.reExports.forEach((entry) => reExports.add(entry.serialize()));
+        this.reExportWildcards.forEach((entry) => reExports.add(entry.serialize()));
+        
         this.imports.forEach((entry) => imports.add(entry.serializeImport()));
+        this.exports.forEach((entry) => exports.add(entry.serialize()));
         
         return {
             imports: [...imports],
