@@ -21,7 +21,7 @@ describe('StubTemplate', () => {
         const template = stubTemplate({
             requestId: '',
             meteorPackage,
-            submodule: meteorPackage.getModule({ importPath: 'defaultExport.js' }),
+            importPath: 'defaultExport.js',
         });
         
         expect(template).toContain(`export default ${METEOR_STUB_KEY}.default`)
@@ -31,7 +31,7 @@ describe('StubTemplate', () => {
         const template = stubTemplate({
             requestId: '',
             meteorPackage,
-            submodule: meteorPackage.getModule({ importPath: 'defaultExport.js' }),
+            importPath: 'defaultExport.js',
         });
         expect(template).not.toContain(`const ${PACKAGE_SCOPE_KEY}`);
         expect(template).not.toContain(`${PACKAGE_SCOPE_KEY}.Package`);
