@@ -126,23 +126,27 @@ export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeE
      * Converts all exports parsed for the package into an array of JavaScript import/export lines.
      */
     public serialize({ importPath }: { importPath?: string }): SerializedPackage {
-        const result: SerializedExports = {
+        const serialized: SerializedExports = {
             topLines: [],
             bottomLines: [],
             exportKeys: [],
         }
         
         const submodule = this.getModule({ importPath });
-        const exports = submodule?.serialize() || result;
+        const exports = submodule?.serialize() || serialized;
         
-        result.topLines.push(...exports.topLines);
-        result.bottomLines.push(...exports.bottomLines);
-        result.exportKeys.push(...exports.exportKeys);
+        serialized.topLines.push(...exports.topLines);
+        serialized.bottomLines.push(...exports.bottomLines);
+        serialized.exportKeys.push(...exports.exportKeys);
+        
+        if (!importPath) {
+            this.serializePackageExports(serialized);
+        }
         
         return {
             submodule,
             package: this,
-            ...this.serializePackageExports(result)
+            ...serialized,
         };
     }
 }
