@@ -1,10 +1,10 @@
 import pc from 'picocolors';
-import { MeteorViteError } from '../../../vite/error/MeteorViteError';
+import { ErrorMetadata, MeteorViteError } from '../../../vite/error/MeteorViteError';
 import { PACKAGE_SCOPE_KEY, SerializedExports, TEMPLATE_GLOBAL_KEY } from '../StubTemplate';
 import { PackageSubmodule } from './PackageSubmodule';
 import { parseMeteorPackage } from '../parser/Parser';
 import type { ModuleList, ParsedPackage, PackageScopeExports } from '../parser/Parser';
-import { isSameModulePath } from '../Serialize';
+import { ConflictingExportKeys, isSameModulePath } from '../Serialize';
 
 export default class MeteorPackage implements ParsedPackage {
     
@@ -88,13 +88,25 @@ export default class MeteorPackage implements ParsedPackage {
     }) {
         Object.entries(this.packageScopeExports).forEach(([packageName, exports]) => {
             if (serialized.exportKeys.includes(PACKAGE_SCOPE_KEY)) {
-                throw new MeteorViteError(`Detected package-scope key conflict with package scope key: ${PACKAGE_SCOPE_KEY} already exists in template`);
+                throw new ConflictingExportKeys(`Detected package-scope key conflict with package scope key: ${PACKAGE_SCOPE_KEY} already exists in template`, {
+                    conflict: {
+                        key: PACKAGE_SCOPE_KEY,
+                        moduleExports: [...serialized.topLines, ...serialized.bottomLines],
+                        packageScope: this.packageScopeExports,
+                    }
+                });
             }
             serialized.topLines.push(`const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${packageName}']`);
             
             exports.forEach((exportKey) => {
                 if (serialized.exportKeys.includes(exportKey)) {
-                    throw new MeteorViteError(`Detected module export key conflict for ${pc.yellow(exportKey)} in ${this.packageId}!`);
+                    throw new ConflictingExportKeys(`Detected module export key conflict for ${pc.yellow(exportKey)} in ${this.packageId}!`, {
+                        conflict: {
+                            key: exportKey,
+                            packageScope: this.packageScopeExports,
+                            moduleExports: [...serialized.topLines, ...serialized.bottomLines],
+                        }
+                    });
                 }
                 serialized.exportKeys.push(exportKey);
                 serialized.bottomLines.push(`export const ${exportKey} = ${PACKAGE_SCOPE_KEY}.${exportKey};`)
