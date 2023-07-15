@@ -3,7 +3,7 @@ import { PackageSubmodule } from './PackageSubmodule';
 import { ModuleExportData } from '../parser/Parser';
 import { METEOR_STUB_KEY } from '../StubTemplate';
 
-export default class ModuleExport implements ModuleExportData {
+export default class ModuleExport implements Omit<ModuleExportData, 'type'> {
     public readonly parentModule: PackageSubmodule;
     public readonly from;
     public readonly as;
@@ -16,9 +16,9 @@ export default class ModuleExport implements ModuleExportData {
         const { from, as, type, name, id } = details.data;
         this.from = from;
         this.as = as;
-        this.type = type;
         this.name = name;
         this.id = id;
+        this.type = this.determineStubType(type);
     }
     
     /**
@@ -31,10 +31,10 @@ export default class ModuleExport implements ModuleExportData {
      * at the bottom of the file.
      */
     public get placement(): 'top' | 'bottom' | 'none' {
-        if (this.stubType === 're-export') {
+        if (this.type === 're-export') {
             return 'top'
         }
-        if (this.stubType === 'global-binding') {
+        if (this.type === 'global-binding') {
             return 'none'
         }
         return 'bottom';
@@ -43,21 +43,20 @@ export default class ModuleExport implements ModuleExportData {
     /**
      * Determine the export type to be used within a stub template for the current export.
      */
-    public get stubType(): ModuleExport['type'] | 'export-all' {
-        
+    protected determineStubType(type: ModuleExportData['type']): ModuleExportData['type'] | 'export-all' {
         // Standard exports
-        if (this.type === 'export') {
+        if (type === 'export') {
             if (this.name === 'default') {
                 return 'export-default' as const
             }
             return 'export' as const
         }
         
-        if (this.type === 'export-default') {
+        if (type === 'export-default') {
             return 'export-default' as const;
         }
         
-        if (this.type === 're-export') {
+        if (type === 're-export') {
             
             // Wildcard re-exports
             if (this.name?.trim() === '*') {
@@ -84,7 +83,7 @@ export default class ModuleExport implements ModuleExportData {
             return 're-export' as const;
         }
         
-        return this.type;
+        return type;
     }
     
     /**
@@ -139,7 +138,7 @@ export default class ModuleExport implements ModuleExportData {
      * Essentially, converting from raw data back into JavaScript.
      */
     public serialize() {
-        switch (this.stubType) {
+        switch (this.type) {
             case 're-export':
                 return `export { ${this.name} ${this.key && `as ${this.key} ` || ''}} from '${this.exportPath}';`
             case 'export':
