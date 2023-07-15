@@ -130,27 +130,20 @@ export default class ModuleExport implements ModuleExport {
      * Essentially, converting from raw data back into JavaScript.
      */
     public serialize() {
-        if (this.type === 're-export') {
-            if (this.name?.trim() === '*' && !this.as) {
-                return `export * from '${this.exportPath}';`;
-            }
-            
-            if (this.isReExportedByParent) {
-                return `export const ${this.key} = ${METEOR_STUB_KEY}.${this.key};`
-            }
-            
-            return `export { ${this.name} ${this.as && `as ${this.as} ` || ''}} from '${this.exportPath}';`;
+        switch (this.stubType) {
+            case 're-export':
+                return `export { ${this.name} ${this.as && `as ${this.as} ` || ''}} from '${this.exportPath}';`
+            case 'export':
+                return `export const ${this.name} = ${METEOR_STUB_KEY}.${this.name};`
+            case 'export-default':
+                return `export default ${METEOR_STUB_KEY}.default ?? ${METEOR_STUB_KEY};`
+            case 'export-all':
+                return `export * from '${this.exportPath}';`
+            case 'global-binding':
+                return `/* global binding: ${this.name} */`;
         }
         
-        if (this.type === 'export-default' || (this.type === 'export' && this.name === 'default')) {
-            return `export default ${METEOR_STUB_KEY}.default ?? ${METEOR_STUB_KEY};`;
-        }
-        
-        if (this.type === 'export') {
-            return `export const ${this.name} = ${METEOR_STUB_KEY}.${this.name};`;
-        }
-        
-        throw new ExportEntrySerializationError('Tried to format an non-supported module export!', { exportEntry: this });
+        throw new ExportEntrySerializationError(`Unexpected export classification for export: ${this.name} in ${this.parentModule.modulePath}`, { exportEntry: this })
     }
 }
 
