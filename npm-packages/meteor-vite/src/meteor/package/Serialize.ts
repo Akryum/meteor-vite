@@ -2,6 +2,7 @@ import Path from 'path';
 import { inspect } from 'util';
 import Logger from '../../Logger';
 import { ErrorMetadata, MeteorViteError } from '../../vite/error/MeteorViteError';
+import PackageExport from './components/PackageExport';
 import { ModuleExportData, PackageScopeExports } from './parser/Parser';
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, TEMPLATE_GLOBAL_KEY } from './StubTemplate';
 
@@ -145,7 +146,7 @@ export class ConflictingExportKeys extends MeteorViteError {
             conflict: {
                 key: string,
                 moduleExports: ModuleExportData[] | string[],
-                packageScope: PackageScopeExports | string[]
+                packageScope: PackageScopeExports | string[] | PackageExport[]
             }}
     ) {
         super(message, meta);
