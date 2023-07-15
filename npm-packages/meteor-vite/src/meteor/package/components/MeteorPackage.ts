@@ -1,10 +1,10 @@
+import Path from 'path';
 import { MeteorViteError } from '../../../vite/error/MeteorViteError';
+import type { ModuleList, ParsedPackage } from '../parser/Parser';
+import { parseMeteorPackage } from '../parser/Parser';
 import { SerializationStore } from '../SerializationStore';
 import PackageExport from './PackageExport';
 import { PackageSubmodule } from './PackageSubmodule';
-import { parseMeteorPackage } from '../parser/Parser';
-import type { ModuleList, ParsedPackage, PackageScopeExports } from '../parser/Parser';
-import { ConflictingExportKeys, isSameModulePath } from '../Serialize';
 
 export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeExports'> {
     
@@ -106,6 +106,31 @@ export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeE
         
         return store.serialize();
     }
+}
+
+/**
+ * Check if the two provided module paths are the same.
+ * Todo: this may end up causing issues if a package has say a "myModule.ts" and a "myModule.ts" file.
+ */
+const REGEX_LEADING_SLASH = /^\/+/;
+
+export function isSameModulePath(options: {
+    filepathA: string,
+    filepathB: string,
+    compareExtensions: boolean;
+}) {
+    const fileA = Path.parse(options.filepathA.replace(REGEX_LEADING_SLASH, ''));
+    const fileB = Path.parse(options.filepathB.replace(REGEX_LEADING_SLASH, ''));
+    
+    if (fileA.dir !== fileB.dir) {
+        return false;
+    }
+    
+    if (options.compareExtensions && fileA.ext !== fileB.ext) {
+        return false;
+    }
+    
+    return fileA.name === fileB.name;
 }
 
 class MeteorPackageError extends MeteorViteError {

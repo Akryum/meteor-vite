@@ -3,8 +3,8 @@ import FS from 'fs/promises';
 import Path from 'path';
 import pc from 'picocolors';
 import { createLabelledLogger, LabelLogger } from '../Logger';
+import { isSameModulePath } from '../meteor/package/components/MeteorPackage';
 import AutoImportQueue from './AutoImportQueue';
-import { isSameModulePath } from '../meteor/package/Serialize';
 import { MeteorViteError } from './error/MeteorViteError';
 import type { PluginSettings } from './plugin/MeteorStubs';
 

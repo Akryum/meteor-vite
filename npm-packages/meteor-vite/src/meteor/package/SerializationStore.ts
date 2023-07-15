@@ -1,8 +1,9 @@
 import pc from 'picocolors';
 import Logger from '../../Logger';
-import { MeteorViteError } from '../../vite/error/MeteorViteError';
+import { ErrorMetadata, MeteorViteError } from '../../vite/error/MeteorViteError';
 import ModuleExport from './components/ModuleExport';
 import PackageExport from './components/PackageExport';
+import { ModuleExportData, PackageScopeExports } from './parser/Parser';
 
 /**
  * Utility class for soaking up and validating all import/export lines for a given module or package-scope export.
@@ -136,5 +137,29 @@ export class SerializationStore {
                 ...this.exports.keys()
             ],
         };
+    }
+}
+
+export class ConflictingExportKeys extends MeteorViteError {
+    constructor(
+        message: string,
+        public readonly meta: ErrorMetadata & {
+            conflict: {
+                key: string,
+                moduleExports: ModuleExportData[] | string[],
+                packageScope: PackageScopeExports | string[] | PackageExport[]
+            }
+        },
+    ) {
+        super(message, meta);
+    }
+    
+    protected async formatLog() {
+        const { key, packageScope, moduleExports } = this.meta.conflict;
+        this.addSection('Conflict', {
+            exportKey: key,
+        });
+        this.addSection('Package Exports', packageScope);
+        this.addSection('Module Exports', moduleExports);
     }
 }
