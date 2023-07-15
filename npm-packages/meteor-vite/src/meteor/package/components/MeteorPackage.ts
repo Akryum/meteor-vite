@@ -92,14 +92,16 @@ export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeE
     public serialize({ importPath }: { importPath?: string }) {
         const store = new SerializationStore();
         
-        if (!importPath) {
-            this.packageScopeExports.forEach((entry) => store.addEntry(entry));
-        }
-        
         const submodule = this.getModule({ importPath });
         
         if (submodule) {
             submodule.exports.forEach((entry) => store.addEntry(entry));
+        }
+        
+        // Package exports are only available at the package's mainModule, so if an import path is provided,
+        // we want to omit any of these exports and only use the module-specific exports
+        if (!importPath) {
+            this.packageScopeExports.forEach((entry) => store.addEntry(entry));
         }
         
         return store.serialize();
