@@ -104,15 +104,15 @@ export class SerializationStore {
         const existingReExport = this.reExports.get(entry.key)
         
         if (existing instanceof ModuleExport) {
-            throw new MeteorViteError(
+            throw new ConflictingExportKeys(
                 `Duplicate module export detected in ${pc.yellow(entry.parentModule.meteorPackage.packageId)}!`,
-                { cause: { existing, entry } },
+                { conflict: { thisExport: entry, conflictedWith: existing } },
             );
         }
         if (existingReExport) {
-            throw new MeteorViteError(
+            throw new ConflictingExportKeys(
                 `Export key is conflicting with a module re-export in ${pc.yellow(entry.parentModule.meteorPackage.packageId)}!`,
-                { cause: { existing, entry } },
+                { conflict: { thisExport: entry, conflictedWith: existingReExport } },
             );
         }
     }
@@ -145,9 +145,8 @@ export class ConflictingExportKeys extends MeteorViteError {
         message: string,
         public readonly meta: ErrorMetadata & {
             conflict: {
-                key: string,
-                moduleExports: ModuleExportData[] | string[],
-                packageScope: PackageScopeExports | string[] | PackageExport[]
+                thisExport: ModuleExport | PackageExport
+                conflictedWith: ModuleExport | PackageExport;
             }
         },
     ) {
@@ -155,11 +154,11 @@ export class ConflictingExportKeys extends MeteorViteError {
     }
     
     protected async formatLog() {
-        const { key, packageScope, moduleExports } = this.meta.conflict;
+        const { thisExport, conflictedWith } = this.meta.conflict;
         this.addSection('Conflict', {
-            exportKey: key,
+            exportKey: thisExport.key,
         });
-        this.addSection('Package Exports', packageScope);
-        this.addSection('Module Exports', moduleExports);
+        this.addSection('This export', thisExport);
+        this.addSection('Conflicted with', conflictedWith);
     }
 }
