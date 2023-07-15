@@ -136,7 +136,7 @@ export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeE
         
         result.topLines.push(...exports.topLines);
         result.bottomLines.push(...exports.bottomLines);
-        result.exportKeys.push(...exports.bottomLines);
+        result.exportKeys.push(...exports.exportKeys);
         
         return {
             submodule,
