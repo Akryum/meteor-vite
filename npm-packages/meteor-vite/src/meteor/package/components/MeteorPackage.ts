@@ -1,3 +1,4 @@
+import pc from 'picocolors';
 import { MeteorViteError } from '../../../vite/error/MeteorViteError';
 import { PACKAGE_SCOPE_KEY, SerializedExports, TEMPLATE_GLOBAL_KEY } from '../StubTemplate';
 import { PackageSubmodule } from './PackageSubmodule';
@@ -80,24 +81,48 @@ export default class MeteorPackage implements ParsedPackage {
      * Serialized for use in the Meteor stub template.
      * {@link PackageScopeExports}
      */
-    public serializeScopedExports() {
-        const result: SerializedExports = {
-            bottomLines: [],
-            topLines: [],
-            exportKeys: []
-        }
-        
+    public serializeScopedExports(serialized: SerializedExports = {
+        topLines: [],
+        bottomLines: [],
+        exportKeys: []
+    }) {
         Object.entries(this.packageScopeExports).forEach(([packageName, exports]) => {
-            result.topLines.push(`const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${packageName}']`);
+            if (serialized.exportKeys.includes(PACKAGE_SCOPE_KEY)) {
+                throw new MeteorViteError(`Detected package-scope key conflict with package scope key: ${PACKAGE_SCOPE_KEY} already exists in template`);
+            }
+            serialized.topLines.push(`const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${packageName}']`);
             
             exports.forEach((exportKey) => {
-                result.exportKeys.push(exportKey);
-                result.bottomLines.push(`export const ${exportKey} = ${PACKAGE_SCOPE_KEY}.${exportKey};`)
+                if (serialized.exportKeys.includes(exportKey)) {
+                    throw new MeteorViteError(`Detected module export key conflict for ${pc.yellow(exportKey)} in ${this.packageId}!`);
+                }
+                serialized.exportKeys.push(exportKey);
+                serialized.bottomLines.push(`export const ${exportKey} = ${PACKAGE_SCOPE_KEY}.${exportKey};`)
             })
             
         });
         
-        return result;
+        return serialized;
+    }
+    
+    /**
+     * Serialize package for the provided import path.
+     * Converts all exports parsed for the package into an array of JavaScript import/export lines.
+     */
+    public serialize({ importPath }: { importPath?: string }): SerializedExports {
+        const result: SerializedExports = {
+            topLines: [],
+            bottomLines: [],
+            exportKeys: [],
+        }
+        
+        const module = this.getModule({ importPath })?.serialize() || result;
+        
+        result.topLines.push(...module.topLines);
+        result.bottomLines.push(...module.bottomLines);
+        result.exportKeys.push(...module.bottomLines);
+        
+        return this.serializeScopedExports(result);
     }
 }
 
