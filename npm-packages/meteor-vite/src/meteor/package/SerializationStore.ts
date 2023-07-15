@@ -60,7 +60,7 @@ export class SerializationStore {
         const existing = this.exports.get(entry.key);
         
         if (existing) {
-            return Logger.warn(
+            return Logger.debug(
                 `Discarded submodule entry for package export as there already is an export for it`,
                 { existing, entry },
             );
