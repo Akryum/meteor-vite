@@ -109,21 +109,32 @@ export default class MeteorPackage implements ParsedPackage {
      * Serialize package for the provided import path.
      * Converts all exports parsed for the package into an array of JavaScript import/export lines.
      */
-    public serialize({ importPath }: { importPath?: string }): SerializedExports {
+    public serialize({ importPath }: { importPath?: string }): SerializedPackage {
         const result: SerializedExports = {
             topLines: [],
             bottomLines: [],
             exportKeys: [],
         }
         
-        const module = this.getModule({ importPath })?.serialize() || result;
+        const submodule = this.getModule({ importPath });
+        const exports = submodule?.serialize() || result;
         
-        result.topLines.push(...module.topLines);
-        result.bottomLines.push(...module.bottomLines);
-        result.exportKeys.push(...module.bottomLines);
+        result.topLines.push(...exports.topLines);
+        result.bottomLines.push(...exports.bottomLines);
+        result.exportKeys.push(...exports.bottomLines);
         
-        return this.serializeScopedExports(result);
+        return {
+            submodule,
+            package: this,
+            ...this.serializeScopedExports(result)
+        };
     }
+}
+
+export interface SerializedPackage extends SerializedExports {
+    package: MeteorPackage,
+    submodule?: PackageSubmodule,
+    importPath?: string;
 }
 
 class MeteorPackageError extends MeteorViteError {
