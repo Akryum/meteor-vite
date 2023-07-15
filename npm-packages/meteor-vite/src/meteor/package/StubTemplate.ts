@@ -37,7 +37,8 @@ export function stubTemplate({ requestId, meteorPackage, importPath, stubValidat
 
 ${stubValidation.importString}
 const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global;
-${serializedPackage.topLines.join('\n')}
+${serializedPackage.imports.join('\n')}
+${serializedPackage.reExports.join('\n')}
 
 let ${METEOR_STUB_KEY};
 const require = Package.modules.meteorInstall({
@@ -53,7 +54,7 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub${stubId}.js')
 
-${serializedPackage.bottomLines.join('\n')}
+${serializedPackage.reExports.join('\n')}
 `
 }
 
