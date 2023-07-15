@@ -1,6 +1,7 @@
 import { MeteorViteError } from '../../../vite/error/MeteorViteError';
+import { SerializationStore } from '../SerializationStore';
 import PackageExport from './PackageExport';
-import { PackageSubmodule, SerializationStore } from './PackageSubmodule';
+import { PackageSubmodule } from './PackageSubmodule';
 import { parseMeteorPackage } from '../parser/Parser';
 import type { ModuleList, ParsedPackage, PackageScopeExports } from '../parser/Parser';
 import { ConflictingExportKeys, isSameModulePath } from '../Serialize';
