@@ -90,12 +90,12 @@ export default class ModuleExport implements ModuleExport {
      */
     public serialize() {
         if (this.type === 're-export') {
-            if (this.isReExportedByParent) {
-                return `export const ${this.key} = ${METEOR_STUB_KEY}.${this.key};`
-            }
-            
             if (this.name?.trim() === '*' && !this.as) {
                 return `export * from '${this.exportPath}';`;
+            }
+            
+            if (this.isReExportedByParent) {
+                return `export const ${this.key} = ${METEOR_STUB_KEY}.${this.key};`
             }
             
             return `export { ${this.name} ${this.as && `as ${this.as} ` || ''}} from '${this.exportPath}';`;
