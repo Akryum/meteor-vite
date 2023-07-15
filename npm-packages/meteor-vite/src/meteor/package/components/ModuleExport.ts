@@ -3,13 +3,14 @@ import { PackageSubmodule } from './PackageSubmodule';
 import { ModuleExportData } from '../parser/Parser';
 import { METEOR_STUB_KEY } from '../StubTemplate';
 
-export default class ModuleExport implements Omit<ModuleExportData, 'type'> {
+export default class ModuleExport implements ModuleExportData {
     public readonly parentModule: PackageSubmodule;
     public readonly from;
     public readonly as;
     public readonly type;
     public readonly name;
     public readonly id;
+    public readonly stubType;
     
     constructor(details: { data: ModuleExportData, parentModule: PackageSubmodule }) {
         this.parentModule = details.parentModule;
@@ -18,7 +19,8 @@ export default class ModuleExport implements Omit<ModuleExportData, 'type'> {
         this.as = as;
         this.name = name;
         this.id = id;
-        this.type = this.determineStubType(type);
+        this.type = type;
+        this.stubType = this.determineStubType(type);
     }
     
     /**
@@ -31,10 +33,10 @@ export default class ModuleExport implements Omit<ModuleExportData, 'type'> {
      * at the bottom of the file.
      */
     public get placement(): 'top' | 'bottom' | 'none' {
-        if (this.type === 're-export') {
+        if (this.stubType === 're-export') {
             return 'top'
         }
-        if (this.type === 'global-binding') {
+        if (this.stubType === 'global-binding') {
             return 'none'
         }
         return 'bottom';
@@ -138,7 +140,7 @@ export default class ModuleExport implements Omit<ModuleExportData, 'type'> {
      * Essentially, converting from raw data back into JavaScript.
      */
     public serialize() {
-        switch (this.type) {
+        switch (this.stubType) {
             case 're-export':
                 return `export { ${this.name} ${this.key && `as ${this.key} ` || ''}} from '${this.exportPath}';`
             case 'export':
