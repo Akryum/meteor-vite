@@ -42,6 +42,24 @@ describe('Serialization', () => {
             
             expect(exportEntry.isReExportedByParent, 'is re-exported by parent').toBe(true);
             expect(exportEntry.serialize(), 'serialized output').not.toContain(exportEntry.exportPath);
+        });
+        
+        it('will re-export relative modules if they are exported using a wildcard key', () => {
+            const exportEntry = new ModuleExport({
+                parentModule: submodule!,
+                data: {
+                    type: 're-export',
+                    from: './otherExports',
+                    name: '*',
+                }
+            });
+            const serialized = exportEntry.serialize();
+            
+            expect(serialized).toContain(`export`);
+            expect(serialized).toContain(`*`);
+            expect(serialized).toContain(`from`);
+            expect(serialized).not.toContain(`as`);
+            expect(serialized).toContain(`/otherExports`);
         })
     })
 })
