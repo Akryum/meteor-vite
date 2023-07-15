@@ -1,13 +1,12 @@
 import pc from 'picocolors';
 import Logger from '../../../Logger';
 import { MeteorViteError } from '../../../vite/error/MeteorViteError';
-import { PACKAGE_SCOPE_KEY, SerializedExports, TEMPLATE_GLOBAL_KEY } from '../StubTemplate';
+import {  SerializedExports } from '../StubTemplate';
 import PackageExport from './PackageExport';
 import { PackageSubmodule } from './PackageSubmodule';
 import { parseMeteorPackage } from '../parser/Parser';
 import type { ModuleList, ParsedPackage, PackageScopeExports } from '../parser/Parser';
 import { ConflictingExportKeys, isSameModulePath } from '../Serialize';
-import PackageJSON from '../../../../package.json';
 
 export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeExports'> {
     
@@ -24,11 +23,13 @@ export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeE
         this.packageId = parsedPackage.packageId;
         
         Object.entries(parsedPackage.packageScopeExports).forEach(([packageName, exports]) => {
-            exports.forEach((key) => new PackageExport({
-                packageName,
-                meteorPackage: this,
-                key,
-            }));
+            exports.forEach((key) => {
+                this.packageScopeExports.push(new PackageExport({
+                    packageName,
+                    meteorPackage: this,
+                    key,
+                }));
+            });
         })
     }
     
