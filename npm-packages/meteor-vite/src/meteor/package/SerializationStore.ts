@@ -35,6 +35,13 @@ export class SerializationStore {
     protected reExportWildcards = new Map<string, ModuleExport>;
     
     /**
+     * Any named export that originates from another module.
+     * @example
+     * export * as FooBar from './foo/bar';
+     */
+    protected reExports = new Map<string, ModuleExport>;
+    
+    /**
      * Package imports. These do not serialize to ES imports, but rather references to the global Package type where
      * we will simulate a re-export from the given package.
      *
@@ -72,16 +79,26 @@ export class SerializationStore {
             return;
         }
         
-        if (!entry.key && !entry.from) {
+        if (entry.stubType === 'export-all') {
+            this.reExportWildcards.set(entry.from!, entry);
+        }
+        
+        this.validateNewKey(entry);
+        
+        if (entry.stubType === 're-export') {
+            this.reExports.set(entry.key, entry);
+        }
+        
+        this.exports.set(entry.key, entry);
+    }
+    
+    public validateNewKey(entry: ModuleExport): asserts entry is ModuleExport & { key: string } {
+        if (!entry.key) {
             throw new MeteorViteError('Unable to determine type for module export!', { cause: entry });
         }
         
-        if (!entry.key) {
-            this.reExportWildcards.set(entry.from!, entry);
-            return;
-        }
-        
         const existing = this.exports.get(entry.key);
+        const existingReExport = this.reExports.get(entry.key)
         
         if (existing instanceof ModuleExport) {
             throw new MeteorViteError(
@@ -89,39 +106,31 @@ export class SerializationStore {
                 { cause: { existing, entry } },
             );
         }
-        
-        this.exports.set(entry.key, entry);
+        if (existingReExport) {
+            throw new MeteorViteError(
+                `Export key is conflicting with a module re-export in ${pc.yellow(entry.parentModule.meteorPackage.packageId)}!`,
+                { cause: { existing, entry } },
+            );
+        }
     }
     
     public serialize() {
-        const topLines = new Set<string>();
-        const bottomLines = new Set<string>();
-        const exportKeys = new Set<string>();
+        const exports = new Set<string>;
+        const reExports = new Set<string>;
+        const imports = new Set<string>;
         
-        for (const [packageName, entry] of this.imports) {
-            topLines.add(entry.serializeImport());
-        }
-        
-        for (const [path, entry] of this.reExportWildcards) {
-            topLines.add(entry.serialize());
-        }
-        
-        for (const [key, entry] of this.exports) {
-            exportKeys.add(entry.key!);
-            
-            if (entry instanceof PackageExport) {
-                bottomLines.add(entry.serialize());
-            } else if (entry.type === 're-export') {
-                topLines.add(entry.serialize());
-            } else {
-                bottomLines.add(entry.serialize());
-            }
-        }
+        this.exports.forEach((entry) => exports.add(entry.serialize()));
+        this.reExports.forEach((entry) => reExports.add(entry.serialize()));
+        this.imports.forEach((entry) => imports.add(entry.serializeImport()));
         
         return {
-            topLines: [...topLines],
-            bottomLines: [...bottomLines],
-            exportKeys: [...exportKeys],
+            imports: [...imports],
+            reExports: [...reExports],
+            exports: [...exports],
+            exportKeys: [
+                ...this.reExports.keys(),
+                ...this.exports.keys()
+            ],
         };
     }
 }
