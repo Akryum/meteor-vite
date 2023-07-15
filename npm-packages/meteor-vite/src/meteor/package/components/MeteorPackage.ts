@@ -1,25 +1,35 @@
 import pc from 'picocolors';
-import { ErrorMetadata, MeteorViteError } from '../../../vite/error/MeteorViteError';
+import Logger from '../../../Logger';
+import { MeteorViteError } from '../../../vite/error/MeteorViteError';
 import { PACKAGE_SCOPE_KEY, SerializedExports, TEMPLATE_GLOBAL_KEY } from '../StubTemplate';
+import PackageExport from './PackageExport';
 import { PackageSubmodule } from './PackageSubmodule';
 import { parseMeteorPackage } from '../parser/Parser';
 import type { ModuleList, ParsedPackage, PackageScopeExports } from '../parser/Parser';
 import { ConflictingExportKeys, isSameModulePath } from '../Serialize';
+import PackageJSON from '../../../../package.json';
 
-export default class MeteorPackage implements ParsedPackage {
+export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeExports'> {
     
     public readonly name: string;
     public readonly modules: ModuleList;
     public readonly mainModulePath?: string;
-    public readonly packageScopeExports: PackageScopeExports;
+    public readonly packageScopeExports: PackageExport[] = [];
     public readonly packageId: string;
     
     constructor(public readonly parsedPackage: ParsedPackage, public readonly meta: { timeSpent: string; }) {
         this.name = parsedPackage.name;
         this.modules = parsedPackage.modules;
-        this.packageScopeExports = parsedPackage.packageScopeExports;
         this.mainModulePath = parsedPackage.mainModulePath;
         this.packageId = parsedPackage.packageId;
+        
+        Object.entries(parsedPackage.packageScopeExports).forEach(([packageName, exports]) => {
+            exports.forEach((key) => new PackageExport({
+                packageName,
+                meteorPackage: this,
+                key,
+            }));
+        })
     }
     
     public static async parse(...options: Parameters<typeof parseMeteorPackage>) {
@@ -81,38 +91,26 @@ export default class MeteorPackage implements ParsedPackage {
      * Serialized for use in the Meteor stub template.
      * {@link PackageScopeExports}
      */
-    public serializeScopedExports(serialized: SerializedExports = {
+    public serializePackageExports(serialized: SerializedExports = {
         topLines: [],
         bottomLines: [],
         exportKeys: []
     }) {
-        Object.entries(this.packageScopeExports).forEach(([packageName, exports]) => {
-            if (serialized.exportKeys.includes(PACKAGE_SCOPE_KEY)) {
-                throw new ConflictingExportKeys(`Detected package-scope key conflict with package scope key: ${PACKAGE_SCOPE_KEY} already exists in template`, {
+        const packageImports = new Set<string>();
+        
+        this.packageScopeExports.forEach((packageExport) => {
+            if (serialized.exportKeys.includes(packageExport.key)) {
+                throw new ConflictingExportKeys(`Detected module export key conflict for ${pc.yellow(packageExport.key)} in ${this.packageId}!`, {
                     conflict: {
-                        key: PACKAGE_SCOPE_KEY,
+                        key: packageExport.key,
                         moduleExports: [...serialized.topLines, ...serialized.bottomLines],
                         packageScope: this.packageScopeExports,
                     }
                 });
             }
-            serialized.topLines.push(`const ${PACKAGE_SCOPE_KEY} = ${TEMPLATE_GLOBAL_KEY}.Package['${packageName}']`);
-            
-            exports.forEach((exportKey) => {
-                if (serialized.exportKeys.includes(exportKey)) {
-                    throw new ConflictingExportKeys(`Detected module export key conflict for ${pc.yellow(exportKey)} in ${this.packageId}!`, {
-                        conflict: {
-                            key: exportKey,
-                            packageScope: this.packageScopeExports,
-                            moduleExports: [...serialized.topLines, ...serialized.bottomLines],
-                        }
-                    });
-                }
-                serialized.exportKeys.push(exportKey);
-                serialized.bottomLines.push(`export const ${exportKey} = ${PACKAGE_SCOPE_KEY}.${exportKey};`)
-            })
-            
         });
+        
+        serialized.topLines.push(...packageImports);
         
         return serialized;
     }
@@ -138,7 +136,7 @@ export default class MeteorPackage implements ParsedPackage {
         return {
             submodule,
             package: this,
-            ...this.serializeScopedExports(result)
+            ...this.serializePackageExports(result)
         };
     }
 }
