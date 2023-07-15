@@ -81,12 +81,14 @@ export class SerializationStore {
         
         if (entry.stubType === 'export-all') {
             this.reExportWildcards.set(entry.from!, entry);
+            return;
         }
         
         this.validateNewKey(entry);
         
         if (entry.stubType === 're-export') {
             this.reExports.set(entry.key, entry);
+            return;
         }
         
         this.exports.set(entry.key, entry);
