@@ -87,8 +87,7 @@ export default class MeteorPackage implements Omit<ParsedPackage, 'packageScopeE
     
     
     /**
-     * Serialize package for the provided import path.
-     * Converts all exports parsed for the package into an array of JavaScript import/export lines.
+     * Converts all exports parsed for the package into an array of JavaScript stub-related import/export lines.
      */
     public serialize({ importPath }: { importPath?: string }) {
         const store = new SerializationStore();
