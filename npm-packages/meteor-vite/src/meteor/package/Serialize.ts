@@ -138,14 +138,14 @@ export function isSameModulePath(options: {
     return fileA.name === fileB.name;
 }
 
-class ConflictingExportKeys extends MeteorViteError {
+export class ConflictingExportKeys extends MeteorViteError {
     constructor(
         message: string,
         public readonly meta: ErrorMetadata & {
             conflict: {
                 key: string,
-                moduleExports: ModuleExport[],
-                packageScope: PackageScopeExports
+                moduleExports: ModuleExport[] | string[],
+                packageScope: PackageScopeExports | string[]
             }}
     ) {
         super(message, meta);
@@ -153,6 +153,9 @@ class ConflictingExportKeys extends MeteorViteError {
     
     protected async formatLog() {
         const { key, packageScope, moduleExports } = this.meta.conflict;
+        this.addSection('Conflict', {
+            exportKey: key,
+        })
         this.addSection('Package Exports', packageScope);
         this.addSection('Module Exports', moduleExports);
     }
