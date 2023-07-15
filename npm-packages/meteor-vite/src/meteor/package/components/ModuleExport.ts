@@ -31,10 +31,10 @@ export default class ModuleExport implements ModuleExport {
      * at the bottom of the file.
      */
     public get placement(): 'top' | 'bottom' | 'none' {
-        if (this.type === 're-export' && this.from) {
+        if (this.stubType === 're-export') {
             return 'top'
         }
-        if (this.type === 'global-binding') {
+        if (this.stubType === 'global-binding') {
             return 'none'
         }
         return 'bottom';
