@@ -1,5 +1,12 @@
 # meteor-vite
 
+## 1.3.0
+
+### Minor Changes
+
+- 9bcd19f: - Update MeteorStubs plugin error handler to emit errors when a Meteor client entrypoint isn't specified
+  - Wrap MeteorStubs plugin around plugin setup helper function to catch and format exceptions whenever possible
+
 ## 1.2.2
 
 ### Patch Changes
