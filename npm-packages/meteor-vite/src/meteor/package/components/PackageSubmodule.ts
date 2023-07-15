@@ -45,11 +45,12 @@ export class PackageSubmodule {
         const exportKeys: string[] = [];
         
         this?.exports.forEach((module) => {
-            const line = module.serialized;
             
             if (module.placement !== 'none' && module.key) {
                 exportKeys.push(module.key);
             }
+            
+            const line = module.serialize();
             
             if (module.placement === 'top') {
                 topLines.push(line);
