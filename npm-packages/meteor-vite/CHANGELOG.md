@@ -1,5 +1,11 @@
 # meteor-vite
 
+## 1.3.1
+
+### Patch Changes
+
+- 835dbd5: Fix package re-exports being re-exported once more within the Meteor stub template
+
 ## 1.3.0
 
 ### Minor Changes
