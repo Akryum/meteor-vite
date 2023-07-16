@@ -42,9 +42,9 @@ describe('Validate known exports for mock packages', () => {
         })
         
         
-        describe('Files', () => {
-            const files = Object.entries(mockPackage.modules);
-            describe.runIf(files.length).each(files)('%s', (filePath, mockExports) => {
+        const files = Object.entries(mockPackage.modules);
+        describe.skipIf(!files.length)('Files', () => {
+            describe.each(files)('%s', (filePath, mockExports) => {
                 const parsedExports =  parsedPackage.modules[filePath];
                 
                 
@@ -54,10 +54,9 @@ describe('Validate known exports for mock packages', () => {
                 });
                 
                 
-                describe('Named exports', () => {
-                    const exports = mockExports?.filter(({ type }) => type === 'export');
-                    
-                    describe.runIf(exports?.length).each(exports)(`export const $name`, (mockExport) => {
+                const namedExports = mockExports?.filter(({ type }) => type === 'export');
+                describe.skipIf(!namedExports?.length)('Named exports', () => {
+                    describe.each(namedExports)(`export const $name`, (mockExport) => {
                         it('exists in parser results', () => {
                             expect(parsedExports).toEqual(
                                 expect.arrayContaining([mockExport])
@@ -66,13 +65,12 @@ describe('Validate known exports for mock packages', () => {
                     })
                 })
                 
-                describe('Re-exports', () => {
-                    const exports = mockExports?.filter(({ type }) => type === 're-export').map((entry) => [
-                        `export ${entry.name} ${entry.as ? `as ${entry.as} ` : ''}from '${entry.from}'`,
-                        entry,
-                    ]);
-                    
-                    describe.runIf(exports?.length).each(exports)(`%s`, (testName, mockExport) => {
+                const reExports = mockExports?.filter(({ type }) => type === 're-export').map((entry) => [
+                    `export ${entry.name} ${entry.as ? `as ${entry.as} ` : ''}from '${entry.from}'`,
+                    entry,
+                ]);
+                describe.skipIf(!reExports?.length)('Re-exports', () => {
+                    describe.each(reExports)(`%s`, (testName, mockExport) => {
                         it('exists in parser results', () => {
                             expect(parsedExports).toEqual(
                                 expect.arrayContaining([mockExport]),
