@@ -38,10 +38,6 @@ describe('Validate known exports for mock packages', () => {
         describe('Files', () => {
             describe.each(exportedModules)('%s', (filePath, mockExports) => {
                 const parsedExports =  parsedPackage.modules[filePath];
-                const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
-                const mockReExports: [string, ModuleExportData][] = mockExports?.filter(({ type }) => type === 're-export').map((entry) => {
-                    return [`export ${entry.name} ${entry.as ? `as ${entry.as} ` : ''}from '${entry.from}'`, entry];
-                })
                 
                 
                 it('has an array of exports', () => {
@@ -51,7 +47,9 @@ describe('Validate known exports for mock packages', () => {
                 
                 
                 describe('Named exports', () => {
-                    it.each(namedMockExports)(`export const $name`, (mockExport) => {
+                    it.each(
+                        mockExports?.filter(({ type }) => type === 'export')
+                    )(`export const $name`, (mockExport) => {
                         expect(parsedExports).toEqual(
                             expect.arrayContaining([mockExport])
                         )
@@ -59,12 +57,17 @@ describe('Validate known exports for mock packages', () => {
                 })
                 
                 describe('Re-exports', () => {
-                    test.each(mockReExports)(`%s`, (testName, mockExport) => {
+                    test.each(
+                        mockExports?.filter(({ type }) => type === 're-export').map((entry) => [
+                            `export ${entry.name} ${entry.as ? `as ${entry.as} ` : ''}from '${entry.from}'`,
+                            entry,
+                        ])
+                    )(`%s`, (testName, mockExport) => {
                         expect(parsedExports).toEqual(
-                            expect.arrayContaining([mockExport, { foo: 'bar' }])
-                        )
+                            expect.arrayContaining([mockExport]),
+                        );
                     });
-                })
+                });
             })
         })
     })
