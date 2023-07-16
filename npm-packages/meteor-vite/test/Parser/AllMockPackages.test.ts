@@ -12,26 +12,29 @@ describe('Validate known exports for mock packages', () => {
             fileContent: mockPackage.fileContent,
         });
         
-        it('parsed the package name', () => {
-            expect(parsedPackage.name).toEqual(mockPackage.packageName)
-        });
-        
-        it('has a packageId', () => {
-            expect(parsedPackage.packageId).toEqual(mockPackage.packageId);
-        })
-        
-        it('detected the correct main module path', () => {
-            expect(parsedPackage.mainModulePath).toEqual(mockPackage.mainModulePath);
-        });
-        
-        it('has the correct mainModule exports', () => {
-            const mainModule = new MeteorPackage(parsedPackage, { timeSpent: 'none' }).mainModule;
-            const parsedPath = Path.parse(mockPackage.mainModulePath);
-            const fileName = parsedPath.base as keyof typeof mockPackage['modules'];
-            const mockModuleExports = mockPackage.modules[fileName];
+        describe('Parsed Metadata', () => {
+            it('has the package name', () => {
+                expect(parsedPackage.name).toEqual(mockPackage.packageName)
+            });
             
-            expect(mainModule?.exports).toEqual(mockModuleExports);
+            it('has a packageId', () => {
+                expect(parsedPackage.packageId).toEqual(mockPackage.packageId);
+            })
+            
+            it('detected the correct main module path', () => {
+                expect(parsedPackage.mainModulePath).toEqual(mockPackage.mainModulePath);
+            });
+            
+            it('has the correct mainModule exports', () => {
+                const mainModule = new MeteorPackage(parsedPackage, { timeSpent: 'none' }).mainModule;
+                const parsedPath = Path.parse(mockPackage.mainModulePath);
+                const fileName = parsedPath.base as keyof typeof mockPackage['modules'];
+                const mockModuleExports = mockPackage.modules[fileName];
+                
+                expect(mainModule?.exports).toEqual(mockModuleExports);
+            })
         })
+        
         
         const exportedModules: [string, ModuleExportData[]][] = Object.entries(mockPackage.modules);
         
