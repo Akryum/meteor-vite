@@ -139,7 +139,7 @@ export default class ModuleExport implements ModuleExportData {
      * The current export entry, converted into JavaScript for use as a Meteor stub.
      * Essentially, converting from raw data back into JavaScript.
      */
-    public serialize({ chainedReExport = false }) {
+    public serialize({ chainedReExport = false } = {}) {
         switch (this.stubType) {
             case 're-export':
                 const key = `${this.name}${this.key && ` as ${this.key}` || ''}`
