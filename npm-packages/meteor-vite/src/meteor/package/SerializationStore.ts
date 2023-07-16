@@ -3,7 +3,6 @@ import Logger from '../../Logger';
 import { ErrorMetadata, MeteorViteError } from '../../vite/error/MeteorViteError';
 import ModuleExport from './components/ModuleExport';
 import PackageExport from './components/PackageExport';
-import { ModuleExportData, PackageScopeExports } from './parser/Parser';
 
 /**
  * Utility class for soaking up and validating all import/export lines for a given module or package-scope export.
