@@ -35,7 +35,7 @@ describe('Validate known exports for mock packages', () => {
         
         const exportedModules: [string, ModuleExportData[]][] = Object.entries(mockPackage.modules);
         
-        describe.runIf(exportedModules.length)('Files', () => {
+        describe('Files', () => {
             describe.each(exportedModules)('%s', (filePath, mockExports) => {
                 const parsedExports =  parsedPackage.modules[filePath];
                 const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
@@ -50,7 +50,7 @@ describe('Validate known exports for mock packages', () => {
                 });
                 
                 
-                describe.runIf(namedMockExports?.length)('Named exports', () => {
+                describe('Named exports', () => {
                     it.each(namedMockExports)(`export const $name`, (mockExport) => {
                         expect(parsedExports).toEqual(
                             expect.arrayContaining([mockExport])
@@ -58,10 +58,10 @@ describe('Validate known exports for mock packages', () => {
                     })
                 })
                 
-                describe.runIf(mockReExports?.length)('Re-exports', () => {
+                describe('Re-exports', () => {
                     test.each(mockReExports)(`%s`, (testName, mockExport) => {
                         expect(parsedExports).toEqual(
-                            expect.arrayContaining([mockExport])
+                            expect.arrayContaining([mockExport, { foo: 'bar' }])
                         )
                     });
                 })
