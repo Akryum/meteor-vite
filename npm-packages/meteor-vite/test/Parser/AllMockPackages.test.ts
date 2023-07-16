@@ -36,10 +36,8 @@ describe('Validate known exports for mock packages', () => {
         })
         
         
-        const exportedModules: [string, ModuleExportData[]][] = Object.entries(mockPackage.modules);
-        
         describe('Files', () => {
-            describe.each(exportedModules)('%s', (filePath, mockExports) => {
+            describe.each(Object.entries(mockPackage.modules))('%s', (filePath, mockExports) => {
                 const parsedExports =  parsedPackage.modules[filePath];
                 
                 
