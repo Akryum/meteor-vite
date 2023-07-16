@@ -2,8 +2,7 @@ import Path from 'path';
 import { describe, expect, it, test } from 'vitest';
 import MeteorPackage from '../../src/meteor/package/components/MeteorPackage';
 import { ModuleExportData, parseMeteorPackage } from '../../src/meteor/package/parser/Parser';
-import Serialize from '../../src/meteor/package/Serialize';
-import { AllMockPackages, LazyLoadedPackage } from '../__mocks';
+import { AllMockPackages } from '../__mocks';
 
 describe('Validate known exports for mock packages', () => {
     AllMockPackages.forEach((mockPackage) => {
@@ -53,15 +52,16 @@ describe('Validate known exports for mock packages', () => {
                         describe.runIf(namedMockExports?.length)('Named exports', () => {
                             namedMockExports?.forEach((mockExport) => {
                                 it(`export const ${mockExport.name}`, ({ expect }) => {
-                                    const expectation = expect.arrayContaining([mockExport])
-                                    expect(parsedExports).toEqual(expectation)
+                                    expect(parsedExports).toEqual(
+                                        expect.arrayContaining([mockExport])
+                                    )
                                 })
                             })
                         })
                         
                         describe.runIf(mockReExports?.length)('Re-exports', () => {
                             mockReExports?.forEach((mockExport) => {
-                                test(Serialize.moduleExport(mockExport, mockPackage.packageName), ({ expect }) => {
+                                test(`export ${mockExport.as || mockExport.name} from ${mockExport.from}`, ({ expect }) => {
                                     expect(parsedExports).toEqual(
                                         expect.arrayContaining([mockExport])
                                     )
