@@ -12,6 +12,7 @@ describe('Validate known exports for mock packages', () => {
             fileContent: mockPackage.fileContent,
         });
         
+        
         describe('Parsed Metadata', () => {
             it('has the package name', () => {
                 expect(parsedPackage.name).toEqual(mockPackage.packageName)
@@ -53,25 +54,29 @@ describe('Validate known exports for mock packages', () => {
                 
                 
                 describe('Named exports', () => {
-                    it.each(
+                    describe.each(
                         mockExports?.filter(({ type }) => type === 'export')
                     )(`export const $name`, (mockExport) => {
-                        expect(parsedExports).toEqual(
-                            expect.arrayContaining([mockExport])
-                        )
+                        it('exists in parser results', () => {
+                            expect(parsedExports).toEqual(
+                                expect.arrayContaining([mockExport])
+                            )
+                        })
                     })
                 })
                 
                 describe('Re-exports', () => {
-                    test.each(
+                    describe.each(
                         mockExports?.filter(({ type }) => type === 're-export').map((entry) => [
                             `export ${entry.name} ${entry.as ? `as ${entry.as} ` : ''}from '${entry.from}'`,
                             entry,
                         ])
                     )(`%s`, (testName, mockExport) => {
-                        expect(parsedExports).toEqual(
-                            expect.arrayContaining([mockExport]),
-                        );
+                        it('exists in parser results', () => {
+                            expect(parsedExports).toEqual(
+                                expect.arrayContaining([mockExport]),
+                            );
+                        })
                     });
                 });
             })
