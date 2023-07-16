@@ -1,7 +1,7 @@
 import Path from 'path';
 import { describe, expect, it, test } from 'vitest';
 import MeteorPackage from '../../src/meteor/package/components/MeteorPackage';
-import { ModuleExportData, parseMeteorPackage } from '../../src/meteor/package/parser/Parser';
+import { parseMeteorPackage } from '../../src/meteor/package/parser/Parser';
 import { AllMockPackages } from '../__mocks';
 
 describe('Validate known exports for mock packages', () => {
@@ -26,12 +26,17 @@ describe('Validate known exports for mock packages', () => {
             });
             
             it('has the correct mainModule exports', () => {
-                const mainModule = new MeteorPackage(parsedPackage, { timeSpent: 'none' }).mainModule;
+                const meteorPackage = new MeteorPackage(parsedPackage, { timeSpent: 'none' });
                 const parsedPath = Path.parse(mockPackage.mainModulePath);
                 const fileName = parsedPath.base as keyof typeof mockPackage['modules'];
                 const mockModuleExports = mockPackage.modules[fileName];
+                const mainModuleExports = meteorPackage.modules[meteorPackage.mainModule?.modulePath as any];
                 
-                expect(mainModule?.exports).toEqual(mockModuleExports);
+                if (meteorPackage.mainModule) {
+                    expect(mainModuleExports.length).toBeGreaterThan(0)
+                }
+                
+                expect(mainModuleExports).toEqual(mockModuleExports);
             })
         })
         
