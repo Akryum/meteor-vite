@@ -33,25 +33,13 @@ export default new class MeteorEvents {
          */
         timeoutMs: number
     }) {
-        return new Promise<void>((resolve, reject) => {
-            let rejected = false;
-            let resolved = false;
-            
-            event.topic.forEach((topic) => {
-                this.events.once(topic, () => {
-                    if (rejected || resolved) return;
-                    resolved = true;
-                    resolve();
-                    Logger.debug(`MeteorEvents event listener received an awaited event: ${pc.yellow(topic)}`)
-                });
-            })
-            
-            setTimeout(() => {
-                if (resolved) return;
-                rejected = true;
-                reject(new EventTimeout('Timed out waiting for client refresh event'));
-            }, event.timeoutMs)
-        })
+        const awaitedEvents = event.topic.map((topic) => awaitEvent({
+            emitter: this.events,
+            name: topic,
+            timeoutMs: event.timeoutMs,
+        }));
+        
+        return Promise.race(awaitedEvents);
     }
     
     public ingest(message: MeteorIPCMessage) {
@@ -64,7 +52,6 @@ export default new class MeteorEvents {
 function awaitEvent<
     Emitter extends EventEmitter,
     EventParams extends Parameters<Emitter['once']>,
-    EventName extends EventParams[0],
     ListenerArgs extends Parameters<EventParams[1]>
 >(event: {
     name: EventParams[0];
