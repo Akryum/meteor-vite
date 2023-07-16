@@ -4,35 +4,41 @@
       "releases": [
         {
           "name": "meteor-vite",
-          "type": "patch"
-        },
-        {
-          "name": "vite-bundler",
-          "type": "patch"
+          "type": "minor"
         }
       ],
-      "summary": "Update internal communication between the Vite server worker and Meteor.\n\nAdd fallback method for clients waiting on Vite server configuration from Meteor.\n\nAllow Vite config files to be stored outside of the project's root directory through package.json configuration. Details should be added to the README.",
-      "id": "curvy-tables-ring"
+      "summary": "- Update MeteorStubs plugin error handler to emit errors when a Meteor client entrypoint isn't specified\n- Wrap MeteorStubs plugin around plugin setup helper function to catch and format exceptions whenever possible",
+      "id": "lemon-queens-buy"
+    },
+    {
+      "releases": [
+        {
+          "name": "vite-bundler",
+          "type": "minor"
+        }
+      ],
+      "summary": "Transmit Meteor's IPC messages through to Vite worker process, enabling Meteor-Vite to gracefully import lazy-loaded packages for the client without throwing errors.",
+      "id": "olive-taxis-divide"
     }
   ],
   "releases": [
     {
       "name": "meteor-vite",
-      "type": "patch",
-      "oldVersion": "1.2.1",
+      "type": "minor",
+      "oldVersion": "1.2.2",
       "changesets": [
-        "curvy-tables-ring"
+        "lemon-queens-buy"
       ],
-      "newVersion": "1.2.2"
+      "newVersion": "1.3.0"
     },
     {
       "name": "vite-bundler",
-      "type": "patch",
-      "oldVersion": "1.1.1",
+      "type": "minor",
+      "oldVersion": "1.1.3",
       "changesets": [
-        "curvy-tables-ring"
+        "olive-taxis-divide"
       ],
-      "newVersion": "1.1.2"
+      "newVersion": "1.2.0"
     }
   ]
 }
