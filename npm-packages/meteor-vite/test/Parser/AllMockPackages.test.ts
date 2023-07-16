@@ -39,7 +39,9 @@ describe('Validate known exports for mock packages', () => {
             describe.each(exportedModules)('%s', (filePath, mockExports) => {
                 const parsedExports =  parsedPackage.modules[filePath];
                 const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
-                const mockReExports = mockExports?.filter(({ type }) => type === 're-export')
+                const mockReExports: [string, ModuleExportData][] = mockExports?.filter(({ type }) => type === 're-export').map((entry) => {
+                    return [`export ${entry.name} ${entry.as ? `as ${entry.as} ` : ''}from '${entry.from}'`, entry];
+                })
                 
                 
                 it('has an array of exports', () => {
@@ -57,13 +59,11 @@ describe('Validate known exports for mock packages', () => {
                 })
                 
                 describe.runIf(mockReExports?.length)('Re-exports', () => {
-                    mockReExports?.forEach((mockExport) => {
-                        test(`export ${mockExport.as || mockExport.name} from ${mockExport.from}`, ({ expect }) => {
-                            expect(parsedExports).toEqual(
-                                expect.arrayContaining([mockExport])
-                            )
-                        })
-                    })
+                    test.each(mockReExports)(`%s`, (testName, mockExport) => {
+                        expect(parsedExports).toEqual(
+                            expect.arrayContaining([mockExport])
+                        )
+                    });
                 })
             })
         })
