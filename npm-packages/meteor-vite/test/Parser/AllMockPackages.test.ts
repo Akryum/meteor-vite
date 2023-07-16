@@ -33,39 +33,37 @@ describe('Validate known exports for mock packages', () => {
             expect(mainModule?.exports).toEqual(mockModuleExports);
         })
         
-        const exportedModules = Object.entries(mockPackage.modules);
+        const exportedModules: [string, ModuleExportData[]][] = Object.entries(mockPackage.modules);
         
         describe.runIf(exportedModules.length)('Files', () => {
-            exportedModules.forEach(([filePath, mockExports]: [string, ModuleExportData[]]) => {
-                describe(filePath, () => {
-                    const parsedExports =  parsedPackage.modules[filePath];
-                    const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
-                    const mockReExports = mockExports?.filter(({ type }) => type === 're-export')
-                    
-                    
-                    it('has an array of exports', () => {
-                        expect(Object.keys(parsedPackage.modules)).toContain(filePath);
-                        expect(parsedExports).toBeDefined();
-                    });
-                    
-                    
-                    describe.runIf(namedMockExports?.length)('Named exports', () => {
-                        namedMockExports?.forEach((mockExport) => {
-                            it(`export const ${mockExport.name}`, ({ expect }) => {
-                                expect(parsedExports).toEqual(
-                                    expect.arrayContaining([mockExport])
-                                )
-                            })
+            describe.each(exportedModules)('%s', (filePath, mockExports) => {
+                const parsedExports =  parsedPackage.modules[filePath];
+                const namedMockExports = mockExports?.filter(({ type }) => type === 'export')
+                const mockReExports = mockExports?.filter(({ type }) => type === 're-export')
+                
+                
+                it('has an array of exports', () => {
+                    expect(Object.keys(parsedPackage.modules)).toContain(filePath);
+                    expect(parsedExports).toBeDefined();
+                });
+                
+                
+                describe.runIf(namedMockExports?.length)('Named exports', () => {
+                    namedMockExports?.forEach((mockExport) => {
+                        it(`export const ${mockExport.name}`, ({ expect }) => {
+                            expect(parsedExports).toEqual(
+                                expect.arrayContaining([mockExport])
+                            )
                         })
                     })
-                    
-                    describe.runIf(mockReExports?.length)('Re-exports', () => {
-                        mockReExports?.forEach((mockExport) => {
-                            test(`export ${mockExport.as || mockExport.name} from ${mockExport.from}`, ({ expect }) => {
-                                expect(parsedExports).toEqual(
-                                    expect.arrayContaining([mockExport])
-                                )
-                            })
+                })
+                
+                describe.runIf(mockReExports?.length)('Re-exports', () => {
+                    mockReExports?.forEach((mockExport) => {
+                        test(`export ${mockExport.as || mockExport.name} from ${mockExport.from}`, ({ expect }) => {
+                            expect(parsedExports).toEqual(
+                                expect.arrayContaining([mockExport])
+                            )
                         })
                     })
                 })
