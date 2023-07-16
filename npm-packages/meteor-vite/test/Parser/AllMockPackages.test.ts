@@ -49,12 +49,10 @@ describe('Validate known exports for mock packages', () => {
                 
                 
                 describe.runIf(namedMockExports?.length)('Named exports', () => {
-                    namedMockExports?.forEach((mockExport) => {
-                        it(`export const ${mockExport.name}`, ({ expect }) => {
-                            expect(parsedExports).toEqual(
-                                expect.arrayContaining([mockExport])
-                            )
-                        })
+                    it.each(mockExports)(`export const $name`, (mockExport) => {
+                        expect(parsedExports).toEqual(
+                            expect.arrayContaining([mockExport])
+                        )
                     })
                 })
                 
