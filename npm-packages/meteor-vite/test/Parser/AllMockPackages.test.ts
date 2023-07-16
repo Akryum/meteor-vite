@@ -54,9 +54,9 @@ describe('Validate known exports for mock packages', () => {
                 
                 
                 describe('Named exports', () => {
-                    describe.each(
-                        mockExports?.filter(({ type }) => type === 'export')
-                    )(`export const $name`, (mockExport) => {
+                    const exports = mockExports?.filter(({ type }) => type === 'export');
+                    
+                    describe.skipIf(!exports?.length).each(exports)(`export const $name`, (mockExport) => {
                         it('exists in parser results', () => {
                             expect(parsedExports).toEqual(
                                 expect.arrayContaining([mockExport])
@@ -66,12 +66,12 @@ describe('Validate known exports for mock packages', () => {
                 })
                 
                 describe('Re-exports', () => {
-                    describe.each(
-                        mockExports?.filter(({ type }) => type === 're-export').map((entry) => [
-                            `export ${entry.name} ${entry.as ? `as ${entry.as} ` : ''}from '${entry.from}'`,
-                            entry,
-                        ])
-                    )(`%s`, (testName, mockExport) => {
+                    const exports = mockExports?.filter(({ type }) => type === 're-export').map((entry) => [
+                        `export ${entry.name} ${entry.as ? `as ${entry.as} ` : ''}from '${entry.from}'`,
+                        entry,
+                    ]);
+                    
+                    describe.skipIf(!exports?.length).each(exports)(`%s`, (testName, mockExport) => {
                         it('exists in parser results', () => {
                             expect(parsedExports).toEqual(
                                 expect.arrayContaining([mockExport]),
