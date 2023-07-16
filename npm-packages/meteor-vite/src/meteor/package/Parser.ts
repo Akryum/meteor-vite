@@ -390,17 +390,6 @@ function formatExports({ expression, packageName, id }: {
             }
         }
         
-        /**
-         * Relative re-exports within a Meteor package should count as just a standard import as Meteor has already
-         * made everything that was re-exported available to that module.
-         * Todo: Detect this at the serialization level rather than parser level.
-         */
-        if (result.type === 're-export' && result.from?.startsWith('.') && result.name?.trim() !== '*') {
-            result.type = 'export';
-            result.name = result.as ?? result.name;
-            result.from = undefined;
-        }
-        
         return result;
     })
     
