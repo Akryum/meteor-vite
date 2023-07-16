@@ -1,5 +1,11 @@
 # vite-bundler
 
+## 1.2.0
+
+### Minor Changes
+
+- c5467ef: Transmit Meteor's IPC messages through to Vite worker process, enabling Meteor-Vite to gracefully import lazy-loaded packages for the client without throwing errors.
+
 ## 1.1.3
 
 ### Patch Changes
