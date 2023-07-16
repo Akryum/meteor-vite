@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import MeteorPackage from '../src/meteor/package/components/MeteorPackage';
+import { PackageSubmodule } from '../src/meteor/package/components/PackageSubmodule';
 import { TsModules } from './__mocks';
 
 describe('MeteorPackage', () => {
@@ -13,9 +14,14 @@ describe('MeteorPackage', () => {
                 });
                 const file = meteorPackage.getModule({
                     importPath: '/explicit-relative-path'
+                });
+                const mockModule = new PackageSubmodule({
+                    meteorPackage,
+                    modulePath: 'explicit-relative-path.ts',
+                    exports: TsModules.modules['explicit-relative-path.ts']
                 })
                 
-                expect(file?.exports).toEqual(TsModules.modules['explicit-relative-path.ts'])
+                expect(file?.exports).toEqual(mockModule.exports)
                 expect(file?.modulePath).toEqual('explicit-relative-path.ts');
             });
             
@@ -27,8 +33,13 @@ describe('MeteorPackage', () => {
                 const file = meteorPackage.getModule({
                     importPath: '/explicit-relative-path'
                 })
+                const mockModule = new PackageSubmodule({
+                    meteorPackage,
+                    modulePath: 'explicit-relative-path.ts',
+                    exports: TsModules.modules['explicit-relative-path.ts']
+                })
                 
-                expect(file?.exports).toEqual(TsModules.modules['explicit-relative-path.ts'])
+                expect(file?.exports).toEqual(mockModule.exports);
                 expect(file?.modulePath).toEqual('explicit-relative-path.ts');
             })
             
