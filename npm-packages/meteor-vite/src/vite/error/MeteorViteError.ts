@@ -1,5 +1,5 @@
 import { inspect } from 'util';
-import MeteorPackage from '../../meteor/package/MeteorPackage';
+import MeteorPackage from '../../meteor/package/components/MeteorPackage';
 import ViteLoadRequest, { RequestContext } from '../ViteLoadRequest';
 import PackageJson from '../../../package.json';
 import pc from 'picocolors';

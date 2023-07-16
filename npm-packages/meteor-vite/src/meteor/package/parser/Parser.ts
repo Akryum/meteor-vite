@@ -9,8 +9,8 @@ import {
 } from '@babel/types';
 import FS from 'fs/promises';
 import { inspect } from 'util';
-import Logger from '../../Logger';
-import { MeteorViteError } from '../../vite/error/MeteorViteError';
+import Logger from '../../../Logger';
+import { MeteorViteError } from '../../../vite/error/MeteorViteError';
 import {
     KnownModuleMethodNames,
     MeteorPackageProperty,
@@ -232,7 +232,7 @@ class MeteorInstall {
  * {@link https://github.com/JorgenVatle/meteor-vite/blob/78a451fa311989d10cbb061bb929d8feb795ea2c/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L20 `explicit-relative-path.ts`} would count as a module here.
  */
 class PackageModule {
-    public readonly exports: ModuleExport[] = [];
+    public readonly exports: ModuleExportData[] = [];
     // Todo: Accept module metadata from callee to provide more insightful error messages
     constructor() {}
 
@@ -340,7 +340,7 @@ class PackageModule {
         }
 
         // todo: test for default exports with `export default { foo: 'bar' }`
-        return [{ type: 'export-default', name: args[0].name, } satisfies ModuleExport];
+        return [{ type: 'export-default', name: args[0].name, } satisfies ModuleExportData];
     }
 }
 
@@ -364,7 +364,7 @@ function formatExports({ expression, packageName, id }: {
 }) {
     return expression.properties.map((property) => {
         if (property.type === "SpreadElement") throw new ModuleExportsError('Unexpected property type!', property);
-        const result: ModuleExport = {
+        const result: ModuleExportData = {
             name: propParser.getKey(property),
             type: 'export',
             ...id && { id: id.value }
@@ -434,8 +434,8 @@ class ModuleExportsError extends ParserError {
  * {@link https://docs.meteor.com/api/packagejs.html#PackageAPI-export}
  */
 export type PackageScopeExports = Record<string, string[]>;
-export type ModuleList = { [key in string]: ModuleExport[] };
-export type ModuleExport = {
+export type ModuleList = { [key in string]: ModuleExportData[] };
+export type ModuleExportData = {
     /**
      * "Name" of the object to be exported.
      * @example ts

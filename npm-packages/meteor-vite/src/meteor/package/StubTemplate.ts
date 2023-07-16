@@ -1,8 +1,6 @@
 import { StubValidationSettings } from '../../vite/MeteorViteConfig';
 import { StubValidatorOptions } from '../client/ValidateStub';
-import MeteorPackage from './MeteorPackage';
-import { PackageSubmodule } from './PackageSubmodule';
-import Serialize from './Serialize';
+import MeteorPackage from './components/MeteorPackage';
 
 export const METEOR_STUB_KEY = `m2`;
 export const PACKAGE_SCOPE_KEY = 'm';
@@ -13,41 +11,39 @@ export const TEMPLATE_GLOBAL_KEY = 'g';
  * Used to bridge imports for Meteor code that Vite doesn't have access to, to the below template that acts as a
  * proxy between Vite and Meteor's modules.
  */
-export function stubTemplate({ requestId, submodule, meteorPackage, stubValidation: validationSettings }: {
-    submodule?: PackageSubmodule;
-    meteorPackage: MeteorPackage;
+export function stubTemplate({ requestId, meteorPackage, importPath, stubValidation: validationSettings }: {
     requestId: string;
     stubValidation?: StubValidationSettings,
+    meteorPackage: MeteorPackage;
+    importPath?: string;
 }) {
     const stubId = getStubId();
-    const packageId = meteorPackage.packageId;
-    const importPath = submodule?.fullImportPath || packageId;
-    const serialized = Serialize.parseModules({
-        packageId,
-        modules: submodule?.exports || [],
-        packageScope: meteorPackage.packageScopeExports,
-    });
+    const { packageId } = meteorPackage;
+    const submodule = meteorPackage.getModule({ importPath });
+    const serializedPackage = meteorPackage.serialize({ importPath });
+    const fullImportPath = submodule?.fullImportPath || packageId;
+    
     const stubValidation = stubValidationTemplate({
         packageId,
         requestId,
         settings: validationSettings,
-        exportKeys: serialized.exportedKeys
+        exportKeys: serializedPackage.exportKeys,
     });
-    
     
     // language="js"
     return`
 // requestId: ${requestId}
 // packageId: ${packageId}
+
 ${stubValidation.importString}
 const ${TEMPLATE_GLOBAL_KEY} = typeof window !== 'undefined' ? window : global;
-${serialized.package.top.join('\n')}
-${serialized.module.top.join('\n')}
+${serializedPackage.imports.join('\n')}
+${serializedPackage.reExports.join('\n')}
 
 let ${METEOR_STUB_KEY};
 const require = Package.modules.meteorInstall({
   '__vite_stub${stubId}.js': (require, exports, module) => {
-      ${METEOR_STUB_KEY} = require('${importPath}');
+      ${METEOR_STUB_KEY} = require('${fullImportPath}');
       
       ${stubValidation.validateStub}
   }
@@ -58,8 +54,7 @@ const require = Package.modules.meteorInstall({
 })
 require('/__vite_stub${stubId}.js')
 
-${serialized.package.bottom.join('\n')}
-${serialized.module.bottom.join('\n')}
+${serializedPackage.exports.join('\n')}
 `
 }
 

@@ -3,8 +3,7 @@ import Path from 'path';
 import pc from 'picocolors';
 import { Plugin } from 'vite';
 import PackageJSON from '../../../package.json';
-import { DeepPartial } from '../../HelperTypes';
-import MeteorPackage from '../../meteor/package/MeteorPackage';
+import MeteorPackage from '../../meteor/package/components/MeteorPackage';
 import { stubTemplate } from '../../meteor/package/StubTemplate';
 import { createErrorHandler } from '../error/ErrorHandler';
 import { MeteorViteError } from '../error/MeteorViteError';
@@ -40,9 +39,9 @@ export const MeteorStubs = setupPlugin(async (pluginSettings: PluginSettings) =>
             
             const template = stubTemplate({
                 requestId: request.context.id,
-                submodule: meteorPackage.getModule({ importPath: request.requestedModulePath }),
-                meteorPackage,
+                importPath: request.requestedModulePath,
                 stubValidation: pluginSettings.stubValidation,
+                meteorPackage,
             })
             
             request.log.debug(`Meteor stub created`, {
@@ -91,12 +90,13 @@ function setupPlugin<Context extends ViteLoadRequest, Settings>(setup: (settings
     shouldProcess(viteId: string): boolean;
     resolveId(viteId: string): string | undefined;
 }>): (settings: Settings) => Promise<Plugin> {
-    const createPlugin = async (settings: Settings) => {
+    const createPlugin = async (settings: Settings): Promise<Plugin> => {
         const plugin = await setup(settings);
         return {
             name: plugin.name,
             resolveId: plugin.resolveId,
-            load: async (viteId: string) => {
+            
+            async load(viteId: string) {
                 const shouldProcess = plugin.shouldProcess(viteId);
                 
                 if (!shouldProcess) {
