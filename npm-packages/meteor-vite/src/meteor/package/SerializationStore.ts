@@ -54,6 +54,18 @@ export class SerializationStore {
      */
     protected imports = new Map<string, PackageExport>();
     
+    /**
+     * Re-exports mapped by the path they are exporting from.
+     *
+     * @example source input
+     * export { foo, bar } from 'meteor/foobar'
+     * export * as Hello from 'meteor/hello'
+     * @example map output
+     * ['meteor/foobar', [ModuleExport, ModuleExport]]
+     * ['meteor/hello', [ModuleExport]]
+     */
+    protected reExportsPathMap = new Map<string, ModuleExport[]>;
+    
     constructor() {
     }
     
@@ -88,7 +100,10 @@ export class SerializationStore {
         this.validateNewKey(entry);
         
         if (entry.stubType === 're-export') {
+            if (!entry.from) throw new ReExportWithoutPath('Detected a re-export entry without a "from" path!', { export: entry });
+            const pathMap = this.reExportsPathMap.get(entry.from) || this.reExportsPathMap.set(entry.from, []).get(entry.from)!;
             this.reExports.set(entry.key, entry);
+            pathMap.push(entry);
             return;
         }
         
@@ -122,8 +137,11 @@ export class SerializationStore {
         const reExports = new Set<string>;
         const imports = new Set<string>;
         
-        this.reExports.forEach((entry) => reExports.add(entry.serialize()));
         this.reExportWildcards.forEach((entry) => reExports.add(entry.serialize()));
+        this.reExportsPathMap.forEach((entry, path) => {
+            const exportKeys = entry.map(entry => entry.serialize({ chainedReExport: true })).join(', ')
+            return reExports.add(`export { ${exportKeys} } from '${path}';`);
+        });
         
         this.imports.forEach((entry) => imports.add(entry.serializeImport()));
         this.exports.forEach((entry) => exports.add(entry.serialize()));
@@ -137,6 +155,13 @@ export class SerializationStore {
                 ...this.exports.keys()
             ],
         };
+    }
+}
+
+export class ReExportWithoutPath extends MeteorViteError {
+    constructor(message: string, meta: ErrorMetadata & { export: ModuleExport }) {
+        super(message, meta);
+        this.addSection('Offending export', meta.export);
     }
 }
 
