@@ -1,5 +1,11 @@
 # vite-bundler
 
+## 1.2.1
+
+### Patch Changes
+
+- 0c29f67: Hotfix: Vite-Bundler builds being skipped due to invalid environment variable check
+
 ## 1.2.0
 
 ### Minor Changes
