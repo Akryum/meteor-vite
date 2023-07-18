@@ -3,23 +3,23 @@
     {
       "releases": [
         {
-          "name": "meteor-vite",
+          "name": "vite-bundler",
           "type": "patch"
         }
       ],
-      "summary": "Fix package re-exports being re-exported once more within the Meteor stub template",
-      "id": "purple-bats-camp"
+      "summary": "Hotfix: Vite-Bundler builds being skipped due to invalid environment variable check",
+      "id": "hotfix"
     }
   ],
   "releases": [
     {
-      "name": "meteor-vite",
+      "name": "vite-bundler",
       "type": "patch",
-      "oldVersion": "1.3.0",
+      "oldVersion": "1.2.0",
       "changesets": [
-        "purple-bats-camp"
+        "hotfix"
       ],
-      "newVersion": "1.3.1"
+      "newVersion": "1.2.1"
     }
   ]
 }
