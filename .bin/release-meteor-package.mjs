@@ -91,5 +91,5 @@ function shell(command, options) {
         console.error(stderr.toString());
     }
 
-    throw error;
+    process.exit(1);
 });
