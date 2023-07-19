@@ -11,7 +11,7 @@
     "visualize": "meteor --production --extra-packages bundle-visualizer",
     "meteor-vite-internal:setup-env": "cross-env-shell METEOR_PACKAGE_DIRS=\"../../packages/\" BUILD_METEOR_VITE_DEPENDENCY='true'",
     "meteor-vite-internal:start": "npm run meteor-vite-internal:setup-env meteor npm start",
-    "meteor-vite-internal:build": "npm run meteor-vite-internal:setup-env meteor npm build"
+    "meteor-vite-internal:build": "npm run meteor-vite-internal:setup-env meteor npm run build"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.13",
