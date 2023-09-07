@@ -52,6 +52,7 @@ export default CreateIPCInterface({
                         meteor: {
                             packagePath: Path.join('.meteor', 'local', 'build', 'programs', 'web.browser', 'packages'),
                             isopackPath: Path.join('.meteor', 'local', 'isopacks'),
+                            globalMeteorPackagesDir,
                         },
                         packageJson,
                         stubValidation: viteConfig.meteor?.stubValidation,
