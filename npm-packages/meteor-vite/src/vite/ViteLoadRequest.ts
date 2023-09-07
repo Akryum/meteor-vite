@@ -1,5 +1,6 @@
 import { existsSync } from 'fs';
 import FS from 'fs/promises';
+import NodeFS from 'fs';
 import Path from 'path';
 import pc from 'picocolors';
 import { createLabelledLogger, LabelLogger } from '../Logger';
@@ -74,6 +75,13 @@ export default class ViteLoadRequest {
         const sourceName = packageName.replace(':', '_');
         const sourceFile = `${sourceName}.js`;
         const sourcePath = Path.join(pluginSettings.meteor.packagePath, sourceFile);
+        const resolverResultCache: ResolverResultCache = JSON.parse(NodeFS.readFileSync(Path.join(pluginSettings.meteor.isopackPath, '../resolver-result-cache.json'), 'utf-8'));
+        const packageVersion = resolverResultCache.lastOutput.answer[packageName];
+        
+        const manifestPath = {
+            local: Path.join(pluginSettings.meteor.isopackPath, sourceName, 'web.browser.json'),
+            globalCache: Path.join(pluginSettings.meteor.globalMeteorPackagesDir, sourceName, packageVersion, 'web.browser.json'),
+        }
         
         /**
          * Raw file content for the current file request.
@@ -90,7 +98,9 @@ export default class ViteLoadRequest {
             packageId,
             importPath,
             sourcePath,
-            manifestPath: Path.join(pluginSettings.meteor.isopackPath, sourceName, 'web.browser.json')
+            manifestPath: NodeFS.existsSync(manifestPath.local)
+                          ? manifestPath.local
+                          : manifestPath.globalCache,
         }
     }
     
@@ -212,6 +222,21 @@ interface ManifestResource {
     length: number;
     type: string;
     hash: string
+}
+
+type VersionString = `${string}.${string}.${string}`;
+
+interface ResolverResultCache {
+    lastInput: {
+        dependencies: string[],
+        constraints: `${string}@${VersionString}`[],
+        previousSolution: Record<string, VersionString>;
+    },
+    lastOutput: {
+        neededToUseUnanticipatedPrereleases: boolean;
+        answer: Record<string, VersionString>;
+    }
+    
 }
 
 export class RefreshNeeded extends MeteorViteError {
