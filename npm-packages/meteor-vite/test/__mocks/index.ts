@@ -86,10 +86,10 @@ export const ReactMeteorData = prepareMock({
     modules: {
         'index.js': [
             { type: 'global-binding', name: 'default', from: 'react', id: 0, },
-            { type: 're-export', name: 'useTracker', as: 'useTracker', from: './useTracker', id: 1, },
-            { type: 're-export', name: 'withTracker', as: 'withTracker', from: './withTracker.tsx', id: 2, },
-            { type: 're-export', name: 'useFind', as: 'useFind', from: './useFind', id: 3, },
-            { type: 're-export', name: 'useSubscribe', as: 'useSubscribe', from: './useSubscribe', id: 4, },
+            { type: 're-export', name: 'useTracker', from: './useTracker', id: 1, },
+            { type: 're-export', name: 'withTracker', from: './withTracker.tsx', id: 2, },
+            { type: 're-export', name: 'useFind', from: './useFind', id: 3, },
+            { type: 're-export', name: 'useSubscribe', from: './useSubscribe', id: 4, },
         ]
     },
     mainModulePath: '',
