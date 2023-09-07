@@ -1,5 +1,13 @@
 # meteor-vite
 
+## 1.3.2
+
+### Patch Changes
+
+- d883954: Read Isopack metadata from global Meteor package cache
+
+  Fixes #26
+
 ## 1.3.1
 
 ### Patch Changes
