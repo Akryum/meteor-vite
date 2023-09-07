@@ -3,6 +3,7 @@ import { Meteor } from 'meteor/meteor';
 import Path from 'path';
 import FS from 'fs';
 import pc from 'picocolors';
+import * as process from 'process';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
 import type { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker';
 import type { MeteorIPCMessage } from '../../npm-packages/meteor-vite/src/meteor/MeteorEvents';
@@ -88,6 +89,7 @@ class MeteorViteError extends Error {
 }
 
 export const cwd = process.env.METEOR_VITE_CWD ?? guessCwd();
+export const meteorPackagePath = guessMeteorPackagePath();
 export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/worker/index.mjs');
 export function getProjectPackageJson(): ProjectJson {
     const path = Path.join(cwd, 'package.json');
@@ -110,4 +112,17 @@ function guessCwd () {
         cwd = cwd.substring(0, index)
     }
     return cwd
+}
+function guessMeteorPackagePath() {
+    const [root, ...parts] = process.argv0.split(/[\/\\]/);
+    let packagePath = root || '/';
+    
+    parts.forEach((part) => {
+        if (packagePath.includes('/.meteor/packages/meteor-tool')) {
+            return;
+        }
+        packagePath = Path.posix.join(packagePath, part);
+    });
+    
+    return Path.join(packagePath, '../');
 }
