@@ -3,7 +3,6 @@ import { Meteor } from 'meteor/meteor';
 import Path from 'path';
 import FS from 'fs';
 import pc from 'picocolors';
-import * as process from 'process';
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite';
 import type { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker';
 import type { MeteorIPCMessage } from '../../npm-packages/meteor-vite/src/meteor/MeteorEvents';
