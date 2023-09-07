@@ -132,13 +132,25 @@ export interface PluginSettings {
         packagePath: string;
         
         /**
-         * Path to Meteor's Isopacks store. Used to determine where a package's mainModule is located and whether
+         * Path to Meteor's local Isopacks store. Used to determine where a package's mainModule is located and whether
          * the package has lazy-loaded modules. During production builds this would be pulled from a temporary
          * Meteor build, so that we have solid metadata to use when creating Meteor package stubs.
          *
          * @example {@link /examples/vue/.meteor/local/isopacks/}
          */
         isopackPath: string;
+        
+        /**
+         * Path to the current user's Meteor package cache. (e.g. /home/john/.meteor/packages)
+         * This is used to build up a fallback path for isopack manifests.
+         *
+         * Some packages, like `react-meteor-data` do not emit a isopack metadata file within the current project's
+         * .meteor/local directory. So we have to resort to pulling in Isopack metadata from the `meteor-tool` cache.
+         *
+         * @example `react-meteor-data` path
+         * /home/john/.meteor/packages/react-meteor-data/2.7.2/web.browser.json
+         */
+        globalMeteorPackagesDir: string;
     }
     
     /**
