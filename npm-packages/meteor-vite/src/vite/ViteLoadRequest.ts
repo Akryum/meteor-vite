@@ -215,7 +215,7 @@ interface ManifestContent {
 
 interface ManifestResource {
     path: string;
-    fileOptions: { lazy: boolean; mainModule: boolean };
+    fileOptions?: { lazy: boolean; mainModule: boolean };
     extension: string;
     file: string;
     offset: number;
