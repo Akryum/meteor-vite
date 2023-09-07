@@ -90,6 +90,12 @@ export const ReactMeteorData = prepareMock({
             { type: 're-export', name: 'withTracker', from: './withTracker.tsx', id: 2, },
             { type: 're-export', name: 'useFind', from: './useFind', id: 3, },
             { type: 're-export', name: 'useSubscribe', from: './useSubscribe', id: 4, },
+        ],
+        'useFind.ts': [
+            { type: 'export', name: 'useFind' },
+        ],
+        'useSubscribe.ts': [
+            { type: 'export', name: 'useSubscribe' },
         ]
     },
     mainModulePath: '',
