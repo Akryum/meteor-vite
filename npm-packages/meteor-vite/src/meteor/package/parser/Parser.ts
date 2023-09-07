@@ -339,7 +339,7 @@ class PackageModule {
         if (args[0].type === 'Identifier') {
             name = args[0].name;
         } else if (args[0].type === 'ConditionalExpression') {
-            name = 'conditionalDefaultExport';
+            name = 'CONDITIONAL_EXPORT_DEFAULT';
         } else {
             new ModuleExportsError('Unexpected default export value!', args[0]);
         }
