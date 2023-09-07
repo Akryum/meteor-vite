@@ -96,6 +96,12 @@ export const ReactMeteorData = prepareMock({
         ],
         'useSubscribe.ts': [
             { type: 'export', name: 'useSubscribe' },
+        ],
+        'useTracker.ts': [
+            { type: 'export', name: 'useTracker' },
+        ],
+        'withTracker.tsx': [
+            { type: 'export', name: 'withTracker' },
         ]
     },
     mainModulePath: '',
