@@ -130,19 +130,19 @@ export default class ViteLoadRequest {
         this.log = createLabelledLogger(`[${pc.yellow(context.id.replace('meteor/', ''))}]`);
         
         context.manifest?.resources.forEach((resource) => {
-            const isMainModule = resource.fileOptions.mainModule;
+            const isMainModule = resource.fileOptions?.mainModule;
             if (isMainModule) {
                 this.mainModulePath = resource.path
             }
             if (!this.context.file.importPath && isMainModule) {
-                this.isLazyLoaded = resource.fileOptions.lazy;
+                this.isLazyLoaded = resource.fileOptions?.lazy || false;
             }
             if (isSameModulePath({
                 filepathA: this.context.file.importPath || '',
                 filepathB: resource.path,
                 compareExtensions: false,
             })) {
-                this.isLazyLoaded = resource.fileOptions.lazy;
+                this.isLazyLoaded = resource.fileOptions?.lazy || false;
             }
         })
     };
