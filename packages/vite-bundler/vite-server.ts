@@ -7,7 +7,7 @@ import {
     setConfig,
     ViteConnection,
 } from './loading/vite-connection-handler';
-import { createWorkerFork, getProjectPackageJson, isMeteorIPCMessage } from './workers';
+import { createWorkerFork, getProjectPackageJson, isMeteorIPCMessage, meteorPackagePath } from './workers';
 
 if (Meteor.isDevelopment) {
     DevConnectionLog.info('Starting Vite server...');
@@ -39,6 +39,7 @@ if (Meteor.isDevelopment) {
         method: 'vite.startDevServer',
         params: [{
             packageJson: getProjectPackageJson(),
+            globalMeteorPackagesDir: meteorPackagePath,
         }]
     });
     

@@ -23,6 +23,11 @@ type Replies = IPCReply<{
     data: {},
 }>
 
+interface DevServerOptions {
+    packageJson: ProjectJson,
+    globalMeteorPackagesDir: string;
+}
+
 export default CreateIPCInterface({
     async 'vite.getDevServerConfig'(replyInterface: Replies) {
         sendViteConfig(replyInterface);
@@ -33,7 +38,7 @@ export default CreateIPCInterface({
     },
     
     // todo: Add reply for triggering a server restart
-    async 'vite.startDevServer'(replyInterface: Replies, { packageJson }: { packageJson: ProjectJson }) {
+    async 'vite.startDevServer'(replyInterface: Replies, { packageJson, globalMeteorPackagesDir }: DevServerOptions) {
         
         viteConfig = await resolveConfig({
             configFile: packageJson?.meteor?.viteConfig,
