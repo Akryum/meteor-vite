@@ -335,12 +335,17 @@ class PackageModule {
      */
     protected parseExportDefault(node: ModuleMethod.WithoutArgs<'exportDefault'>) {
         const args = node.arguments;
-        if (args[0].type !== 'Identifier') {
-            throw new ModuleExportsError('Unexpected default export value!', args[0]);
+        let name = 'default';
+        if (args[0].type === 'Identifier') {
+            name = args[0].name;
+        } else if (args[0].type === 'ConditionalExpression') {
+            name = 'conditionalDefaultExport';
+        } else {
+            new ModuleExportsError('Unexpected default export value!', args[0]);
         }
 
         // todo: test for default exports with `export default { foo: 'bar' }`
-        return [{ type: 'export-default', name: args[0].name, } satisfies ModuleExportData];
+        return [{ type: 'export-default', name, } satisfies ModuleExportData];
     }
 }
 
