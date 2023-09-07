@@ -3,7 +3,7 @@ import { performance } from 'node:perf_hooks'
 import fs from 'fs-extra'
 import { execaSync } from 'execa'
 import pc from 'picocolors'
-import { createWorkerFork, cwd, getProjectPackageJson } from './workers';
+import { createWorkerFork, cwd, getProjectPackageJson, meteorPackagePath } from './workers';
 import os from 'node:os';
 
 if (process.env.NODE_ENV !== 'production') return
@@ -142,6 +142,7 @@ try {
         meteor: {
           packagePath: path.join(tempMeteorOutDir, 'bundle', 'programs', 'web.browser', 'packages'),
           isopackPath: path.join(tempMeteorProject, '.meteor', 'local', 'isopacks'),
+          globalMeteorPackagesDir: meteorPackagePath,
         },
       }],
     })
