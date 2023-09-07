@@ -1,5 +1,13 @@
 # vite-bundler
 
+## 1.2.2
+
+### Patch Changes
+
+- d883954: Read Isopack metadata from global Meteor package cache
+
+  Fixes #26
+
 ## 1.2.1
 
 ### Patch Changes
