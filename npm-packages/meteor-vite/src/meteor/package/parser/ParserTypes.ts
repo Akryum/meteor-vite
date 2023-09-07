@@ -96,7 +96,7 @@ type MeteorNestedPackageProperty = KnownObjectExpression<{
     properties: MeteorPackageProperty[]
 }>
 
-export const KnownModuleMethodNames = ['export', 'link', 'exportDefault'] as const;
+export const KnownModuleMethodNames = ['export', 'link', 'exportDefault', 'runSetters', 'runModuleSetters'] as const;
 export type ModuleMethodName = typeof KnownModuleMethodNames[number];
 
 /**
