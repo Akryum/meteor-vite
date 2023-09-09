@@ -1,5 +1,11 @@
 # vite-bundler
 
+## 1.2.3
+
+### Patch Changes
+
+- 74d9bab: Refresh page if the Vite dev server entrypoint fails to load in the browser
+
 ## 1.2.2
 
 ### Patch Changes
