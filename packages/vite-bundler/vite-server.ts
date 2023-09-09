@@ -5,17 +5,29 @@ import {
     getConfig, DevConnectionLog,
     MeteorViteConfig,
     setConfig,
-    ViteConnection,
+    ViteConnection, RuntimeConfig,
 } from './loading/vite-connection-handler';
 import { createWorkerFork, getProjectPackageJson, isMeteorIPCMessage, meteorPackagePath } from './workers';
+
+function viteHtml({ host, port, entryFile }: RuntimeConfig) {
+    return `
+<script id="vite-entrypoint" defer type="module" src="http://${host}:${port}/${entryFile}"></script>
+<script>
+document.getElementById('vite-entrypoint').onerror = (error) => {
+    console.error('Vite entrypoint module failed to load! Refreshing page...', error);
+    window.location.reload();
+}
+</script>
+`
+}
 
 if (Meteor.isDevelopment) {
     DevConnectionLog.info('Starting Vite server...');
     
     WebAppInternals.registerBoilerplateDataCallback('meteor-vite', (request: HTTP.IncomingMessage, data: BoilerplateData) => {
-        const { host, port, entryFile, ready } = getConfig();
-        if (ready) {
-            data.dynamicBody = `${data.dynamicBody || ""}\n<script type="module" src="http://${host}:${port}/${entryFile}"></script>\n`
+        const config = getConfig();
+        if (config.ready) {
+            data.dynamicBody = `${data.dynamicBody || ""}\n${viteHtml(config)}\n`
         } else {
             // Vite not ready yet
             // Refresh page after some time
