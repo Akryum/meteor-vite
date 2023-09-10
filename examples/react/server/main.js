@@ -7,5 +7,5 @@ import './react-refresh';
 /**
  * Import all your Meteor methods and publications.
  */
-import '../../api/links/server';
+import '../imports/api/links/server';
 // ...
