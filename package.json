@@ -19,17 +19,21 @@
 
     "install:svelte": "cd examples/svelte && meteor npm install",
     "install:vue": "cd examples/vue && meteor npm install",
+    "install:react": "cd examples/react && meteor npm install",
     "install:package": "cd npm-packages/meteor-vite && meteor npm install",
 
     "build:package": "cd npm-packages/meteor-vite && meteor npm run build",
     "build:vue": "meteor npm run build:package && (cd examples/vue && meteor npm run meteor-vite-internal:build)",
+    "build:react": "meteor npm run build:package && (cd examples/react && meteor npm run meteor-vite-internal:build)",
     "build:svelte": "meteor npm run build:package && (cd examples/svelte && meteor npm run meteor-vite-internal:build)",
 
     "link:package": "meteor npm run link:vue && meteor npm run link:svelte",
     "link:vue": "cd examples/vue && meteor npm link ../../npm-packages/meteor-vite",
     "link:svelte": "cd examples/svelte && meteor npm link ../../npm-packages/meteor-vite",
+    "link:react": "cd examples/react && meteor npm link ../../npm-packages/meteor-vite",
 
     "start:vue": "meteor npm run build:package && (cd examples/vue && meteor npm run meteor-vite-internal:start)",
     "start:svelte": "meteor npm run build:package && (cd examples/svelte && meteor npm run meteor-vite-internal:start)"
+    "start:react": "meteor npm run build:package && (cd examples/react && meteor npm run meteor-vite-internal:start)"
   }
 }
