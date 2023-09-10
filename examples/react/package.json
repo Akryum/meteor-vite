@@ -25,6 +25,7 @@
     "testModule": "tests/main.js"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "meteor-vite": "^1.3.2",
     "vite": "^4.4.9"
   }
