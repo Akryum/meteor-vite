@@ -3,36 +3,23 @@
     {
       "releases": [
         {
-          "name": "meteor-vite",
-          "type": "patch"
-        },
-        {
           "name": "vite-bundler",
           "type": "patch"
         }
       ],
-      "summary": "Read Isopack metadata from global Meteor package cache\n\nFixes #26",
-      "id": "wise-squids-tap"
+      "summary": "Refresh page if the Vite dev server entrypoint fails to load in the browser",
+      "id": "cold-trains-tie"
     }
   ],
   "releases": [
     {
-      "name": "meteor-vite",
-      "type": "patch",
-      "oldVersion": "1.3.1",
-      "changesets": [
-        "wise-squids-tap"
-      ],
-      "newVersion": "1.3.2"
-    },
-    {
       "name": "vite-bundler",
       "type": "patch",
-      "oldVersion": "1.2.1",
+      "oldVersion": "1.2.2",
       "changesets": [
-        "wise-squids-tap"
+        "cold-trains-tie"
       ],
-      "newVersion": "1.2.2"
+      "newVersion": "1.2.3"
     }
   ]
 }
