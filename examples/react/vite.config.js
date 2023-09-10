@@ -5,6 +5,6 @@ export default defineConfig({
   plugins: [react()],
 
   meteor: {
-    clientEntry: "client/main.jsx",
+    clientEntry: "imports/vite-entrypoint.jsx",
   },
 });
