@@ -1,5 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { LinksCollection } from '/imports/api/links';
+import { WebAppInternals } from 'meteor/webapp';
+import { getConfig } from 'meteor/jorgenvatle:vite-bundler/loading/vite-connection-handler';
 
 async function insertLink({ title, url }) {
   await LinksCollection.insertAsync({ title, url, createdAt: new Date() });
@@ -35,3 +37,19 @@ Meteor.startup(async () => {
     return LinksCollection.find();
   });
 });
+
+if (Meteor.isDevelopment) {
+  WebAppInternals.registerBoilerplateDataCallback('react-preamble', (request, data) => {
+    const { host, port } = getConfig();
+    data.dynamicHead = data.dynamicHead || '';
+    data.dynamicHead += `
+<script type="module">
+  import RefreshRuntime from "http://${host}:${port}/@react-refresh"
+  RefreshRuntime.injectIntoGlobalHook(window)
+  window.$RefreshReg$ = () => {}
+  window.$RefreshSig$ = () => (type) => type
+  window.__vite_plugin_react_preamble_installed__ = true
+</script>
+    `
+  })
+}
