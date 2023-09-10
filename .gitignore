@@ -3,3 +3,5 @@ output/
 .npm/
 .idea/
 .meteor-vite
+examples/*/vite
+examples/*/.meteor/local
