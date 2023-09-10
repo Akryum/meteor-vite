@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFind, useSubscribe } from 'meteor/react-meteor-data';
-import { LinksCollection } from '../api/links';
+import { LinksCollection } from '../api/links/links';
 
 export const Info = () => {
   const isLoading = useSubscribe('links');
