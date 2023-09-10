@@ -33,7 +33,7 @@
     "link:react": "cd examples/react && meteor npm link ../../npm-packages/meteor-vite",
 
     "start:vue": "meteor npm run build:package && (cd examples/vue && meteor npm run meteor-vite-internal:start)",
-    "start:svelte": "meteor npm run build:package && (cd examples/svelte && meteor npm run meteor-vite-internal:start)"
+    "start:svelte": "meteor npm run build:package && (cd examples/svelte && meteor npm run meteor-vite-internal:start)",
     "start:react": "meteor npm run build:package && (cd examples/react && meteor npm run meteor-vite-internal:start)"
   }
 }
