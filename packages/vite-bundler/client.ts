@@ -34,7 +34,7 @@ function onReady(config: RuntimeConfig) {
     
     // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
     DevConnectionLog.info('Refreshing client...');
-    window.location.reload();
+    setTimeout(() => window.location.reload(), 1000);
     return;
 }
 
@@ -53,7 +53,7 @@ function onChange(config: RuntimeConfig) {
     
     if (hasLoadedVite()) {
         DevConnectionLog.info('Attempting to refresh current Vite session to load new server config...')
-        window.location.reload();
+        setTimeout(() => window.location.reload(), 1_000);
         return;
     }
     
