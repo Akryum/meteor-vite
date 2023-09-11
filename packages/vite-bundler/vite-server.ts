@@ -5,7 +5,7 @@ import {
     getConfig, DevConnectionLog,
     MeteorViteConfig,
     setConfig,
-    ViteConnection, RuntimeConfig, ViteDevScript,
+    ViteConnection, ViteDevScripts,
 } from './loading/vite-connection-handler';
 import { createWorkerFork, getProjectPackageJson, isMeteorIPCMessage, meteorPackagePath } from './workers';
 
@@ -14,15 +14,7 @@ if (Meteor.isDevelopment) {
     
     WebAppInternals.registerBoilerplateDataCallback('meteor-vite', (request: HTTP.IncomingMessage, data: BoilerplateData) => {
         const config = getConfig();
-        data.dynamicBody = `${data.dynamicBody || ''}\n`;
-        
-        if (config.ready) {
-            data.dynamicBody += `${ViteDevScript(config)}`;
-            return;
-        }
-        
-        // Vite not ready yet, display splash screen and load Vite once it is ready.
-        data.dynamicBody += `${Assets.getText('loading/dev-server-splash.html')}`;
+        data.dynamicBody = `${data.dynamicBody || ''}\n${ViteDevScripts.stringTemplate(config)}`;
     });
     
     const viteServer = createWorkerFork({

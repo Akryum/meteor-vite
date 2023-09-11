@@ -4,29 +4,74 @@ import { WorkerResponseData } from '../../../npm-packages/meteor-vite/src/bin/wo
 
 export type RuntimeConfig = WorkerResponseData<'viteConfig'> & { ready: boolean, lastUpdate: number };
 export let MeteorViteConfig: Mongo.Collection<RuntimeConfig>;
-export const VITE_DEV_SCRIPT_ID = 'meteor-vite-script';
-export function ViteDevScript(config: RuntimeConfig) {
-    const url = `http://${config.host || 'localhost'}:${config.port}/${config.entryFile}`;
-    
-    // Return the script in plain text for the server to serve directly to the client, speeding things up a little.
-    if (Meteor.isServer) {
-        return `<script src="${url}" type="module" id="${VITE_DEV_SCRIPT_ID}"></script>`
+export const VITE_ENTRYPOINT_SCRIPT_ID = 'meteor-vite-entrypoint-script';
+export const VITE_CLIENT_SCRIPT_ID = 'meteor-vite-client';
+export const ViteDevScripts = new class ViteDevScripts {
+    public get urls() {
+        const config = getConfig();
+        const baseUrl = `http://${config.host || 'localhost'}:${config.port}`;
+        return {
+            baseUrl;
+            entrypointUrl: `${baseUrl}/${config.entryFile}`;
+            viteClientUrl: `${baseUrl}/@vite/client`;
+        }
     }
     
-    // If the script already exists on the page, throw an error to prevent adding more than one script.
-    const existingScript = document.getElementById(VITE_DEV_SCRIPT_ID);
-    if (existingScript) {
-        throw new Error('Vite script already exists in the current document');
+    public stringTemplate(config: RuntimeConfig) {
+        const { viteClientUrl, entrypointUrl } = this.urls;
+        const viteClient = `<script src="${viteClientUrl}" type="module" id="${VITE_CLIENT_SCRIPT_ID}"></script>`;
+        const viteEntrypoint = `<script src="${entrypointUrl}" type="module" id="${VITE_ENTRYPOINT_SCRIPT_ID}"></script>`;
+        
+        if (config.ready) {
+            return `${viteClient}\n${viteEntrypoint}`;
+        }
+        
+        return Assets.getText('loading/dev-server-splash.html') as string;
     }
     
-    // Otherwise create a new one so that it can be appended to the document.
-    const script = document.createElement('script');
-    script.id = VITE_DEV_SCRIPT_ID;
-    script.src = url;
-    script.type = 'module';
-    script.setAttribute('defer', 'true');
-    
-    return script;
+    public injectScriptsInDOM(config: RuntimeConfig) {
+        if (Meteor.isServer) {
+            throw new Error('This can only run on the client!');
+        }
+        if (!Meteor.isDevelopment) {
+            return;
+        }
+        
+        // If the scripts already exists on the page, throw an error to prevent adding more than one script.
+        const existingScript = document.getElementById(VITE_ENTRYPOINT_SCRIPT_ID) || document.getElementById(VITE_CLIENT_SCRIPT_ID);
+        if (existingScript) {
+            throw new Error('Vite script already exists in the current document');
+        }
+        
+        const TemporaryElements = {
+            splashScreen: document.getElementById('meteor-vite-splash-screen'),
+            styles: document.getElementById('meteor-vite-styles'),
+        }
+        
+        // Otherwise create a new set of nodes so they can be appended to the document.
+        const viteEntrypoint = document.createElement('script');
+        viteEntrypoint.id = VITE_ENTRYPOINT_SCRIPT_ID;
+        viteEntrypoint.src = this.urls.entrypointUrl;
+        viteEntrypoint.type = 'module';
+        viteEntrypoint.setAttribute('defer', 'true');
+        
+        const viteClient = document.createElement('script');
+        viteClient.id = VITE_CLIENT_SCRIPT_ID;
+        viteClient.src = this.urls.viteClientUrl;
+        viteClient.type = 'module';
+        
+        viteEntrypoint.onerror = (error) => {
+            DevConnectionLog.error('Vite entrypoint module failed to load! Will refresh page shortly...', error);
+            setTimeout(() => window.location.reload(), 15_000);
+        }
+        viteEntrypoint.onload = () => {
+            DevConnectionLog.info('Loaded Vite module dynamically! Hopefully all went well and your app is usable. 🤞');
+            TemporaryElements.splashScreen?.remove()
+            TemporaryElements.styles?.remove();
+        }
+        
+        document.body.prepend(viteEntrypoint, viteClient);
+    }
 }
 
 const runtimeConfig: RuntimeConfig = {

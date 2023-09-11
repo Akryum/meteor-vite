@@ -8,15 +8,12 @@ import {
     DevConnectionLog,
     RuntimeConfig,
     ViteConnection,
-    VITE_DEV_SCRIPT_ID, ViteDevScript,
+    VITE_ENTRYPOINT_SCRIPT_ID, ViteDevScripts,
 } from './loading/vite-connection-handler';
 
 let subscription: Meteor.SubscriptionHandle;
 let initialConfig: RuntimeConfig;
-const TemporaryElements = {
-    splashScreen: document.getElementById('meteor-vite-splash-screen');
-    styles: document.getElementById('meteor-vite-styles');
-}
+
 
 function watchConfig(config: RuntimeConfig) {
     if (initialConfig.host !== config.host) {
@@ -42,23 +39,7 @@ function onReady(config: RuntimeConfig) {
         return;
     }
     
-    const viteEntrypoint = ViteDevScript(config);
-    
-    if (typeof viteEntrypoint === 'string') {
-        throw new Error('Vite dev script yielded a string. Is this running on the server?');
-    }
-    
-    viteEntrypoint.onerror = (error) => {
-        DevConnectionLog.error('Vite entrypoint module failed to load! Will refresh page shortly...', error);
-        setTimeout(() => window.location.reload(), 15_000);
-    }
-    viteEntrypoint.onload = () => {
-        DevConnectionLog.info('Loaded Vite module dynamically! Hopefully all went well and your app is usable. 🤞');
-        TemporaryElements.splashScreen?.remove()
-        TemporaryElements.styles?.remove();
-    }
-    
-    document.body.prepend(viteEntrypoint);
+    ViteDevScripts.injectScriptsInDOM(config);
     return;
 }
 
@@ -85,7 +66,7 @@ function onChange(config: RuntimeConfig) {
 }
 
 function hasLoadedVite() {
-    return !!document.getElementById(VITE_DEV_SCRIPT_ID);
+    return !!document.getElementById(VITE_ENTRYPOINT_SCRIPT_ID);
 }
 
 Meteor.startup(() => {
