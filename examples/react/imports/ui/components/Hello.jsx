@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+const { useState } = require('react');
 
 export const Hello = () => {
   const [counter, setCounter] = useState(0);
