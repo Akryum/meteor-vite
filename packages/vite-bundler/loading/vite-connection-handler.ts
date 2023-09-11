@@ -51,4 +51,8 @@ export const DevConnectionLog = {
         `${logLabel} ${message}`,
         ...params,
     ),
+    error: (message: string, ...params: Parameters<typeof console.log>) => console.info(
+        `${logLabel} ${message}`,
+        ...params,
+    ),
 };
