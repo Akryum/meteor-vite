@@ -8,6 +8,10 @@ import { getConfig, DevConnectionLog, RuntimeConfig, ViteConnection } from './lo
 let subscription: Meteor.SubscriptionHandle;
 let initialConfig: RuntimeConfig;
 const VITE_ENTRYPOINT_ID = 'vite-entrypoint';
+const TemporaryElements = {
+    splashScreen: document.getElementById('meteor-vite-splash-screen');
+    styles: document.getElementById('meteor-vite-styles');
+}
 
 function watchConfig(config: RuntimeConfig) {
     if (initialConfig.host !== config.host) {
@@ -42,8 +46,9 @@ function onReady(config: RuntimeConfig) {
         setTimeout(() => window.location.reload(), 1000);
     }
     viteEntrypoint.onload = () => {
-        // todo: hide splash screen
         DevConnectionLog.info('Loaded Vite module dynamically! Hopefully all went well and your app is usable. 🤞');
+        TemporaryElements.splashScreen?.remove()
+        TemporaryElements.styles?.remove();
     }
     document.body.prepend(viteEntrypoint);
     return;
