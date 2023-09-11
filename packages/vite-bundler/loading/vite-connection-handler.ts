@@ -4,6 +4,30 @@ import { WorkerResponseData } from '../../../npm-packages/meteor-vite/src/bin/wo
 
 export type RuntimeConfig = WorkerResponseData<'viteConfig'> & { ready: boolean, lastUpdate: number };
 export let MeteorViteConfig: Mongo.Collection<RuntimeConfig>;
+export const VITE_DEV_SCRIPT_ID = 'meteor-vite-script';
+export function ViteDevScript(config: RuntimeConfig) {
+    const url = `http://${config.host || 'localhost'}:${config.port}/${config.entryFile}`;
+    
+    // Return the script in plain text for the server to serve directly to the client, speeding things up a little.
+    if (Meteor.isServer) {
+        return `<script src="${url}" type="module" id="${VITE_DEV_SCRIPT_ID}"></script>`
+    }
+    
+    // If the script already exists on the page, throw an error to prevent adding more than one script.
+    const existingScript = document.getElementById(VITE_DEV_SCRIPT_ID);
+    if (existingScript) {
+        throw new Error('Vite script already exists in the current document');
+    }
+    
+    // Otherwise create a new one so that it can be appended to the document.
+    const script = document.createElement('script');
+    script.id = VITE_DEV_SCRIPT_ID;
+    script.src = url;
+    script.type = 'module';
+    script.setAttribute('defer', 'true');
+    
+    return script;
+}
 
 const runtimeConfig: RuntimeConfig = {
     ready: false,
