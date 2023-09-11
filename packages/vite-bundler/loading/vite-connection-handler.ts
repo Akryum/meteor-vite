@@ -6,30 +6,30 @@ export type RuntimeConfig = WorkerResponseData<'viteConfig'> & { ready: boolean,
 export let MeteorViteConfig: Mongo.Collection<RuntimeConfig>;
 export const VITE_ENTRYPOINT_SCRIPT_ID = 'meteor-vite-entrypoint-script';
 export const VITE_CLIENT_SCRIPT_ID = 'meteor-vite-client';
-export const ViteDevScripts = new class ViteDevScripts {
-    public get urls() {
-        const config = getConfig();
+export class ViteDevScripts {
+    public readonly urls;
+    constructor(public readonly config: RuntimeConfig) {
         const baseUrl = `http://${config.host || 'localhost'}:${config.port}`;
-        return {
-            baseUrl;
-            entrypointUrl: `${baseUrl}/${config.entryFile}`;
-            viteClientUrl: `${baseUrl}/@vite/client`;
+        this.urls = {
+            baseUrl,
+            entrypointUrl: `${baseUrl}/${config.entryFile}`,
+            viteClientUrl: `${baseUrl}/@vite/client`,
         }
     }
     
-    public stringTemplate(config: RuntimeConfig) {
+    public stringTemplate() {
         const { viteClientUrl, entrypointUrl } = this.urls;
         const viteClient = `<script src="${viteClientUrl}" type="module" id="${VITE_CLIENT_SCRIPT_ID}"></script>`;
         const viteEntrypoint = `<script src="${entrypointUrl}" type="module" id="${VITE_ENTRYPOINT_SCRIPT_ID}"></script>`;
         
-        if (config.ready) {
+        if (this.config.ready) {
             return `${viteClient}\n${viteEntrypoint}`;
         }
         
         return Assets.getText('loading/dev-server-splash.html') as string;
     }
     
-    public injectScriptsInDOM(config: RuntimeConfig) {
+    public injectScriptsInDOM() {
         if (Meteor.isServer) {
             throw new Error('This can only run on the client!');
         }

@@ -39,7 +39,7 @@ function onReady(config: RuntimeConfig) {
         return;
     }
     
-    ViteDevScripts.injectScriptsInDOM(config);
+    new ViteDevScripts(config).injectScriptsInDOM();
     return;
 }
 

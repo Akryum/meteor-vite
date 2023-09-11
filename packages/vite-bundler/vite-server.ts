@@ -13,8 +13,8 @@ if (Meteor.isDevelopment) {
     DevConnectionLog.info('Starting Vite server...');
     
     WebAppInternals.registerBoilerplateDataCallback('meteor-vite', (request: HTTP.IncomingMessage, data: BoilerplateData) => {
-        const config = getConfig();
-        data.dynamicBody = `${data.dynamicBody || ''}\n${ViteDevScripts.stringTemplate(config)}`;
+        const scripts = new ViteDevScripts(getConfig());
+        data.dynamicBody = `${data.dynamicBody || ''}\n${scripts.stringTemplate()}`;
     });
     
     const viteServer = createWorkerFork({
