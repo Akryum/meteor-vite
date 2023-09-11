@@ -9,18 +9,6 @@ import {
 } from './loading/vite-connection-handler';
 import { createWorkerFork, getProjectPackageJson, isMeteorIPCMessage, meteorPackagePath } from './workers';
 
-function viteHtml({ host, port, entryFile }: RuntimeConfig) {
-    return `
-<script id="vite-entrypoint" defer type="module" src="http://${host}:${port}/${entryFile}"></script>
-<script>
-document.getElementById('vite-entrypoint').onerror = (error) => {
-    console.error('Vite entrypoint module failed to load! Refreshing page...', error);
-    window.location.reload();
-}
-</script>
-`
-}
-
 if (Meteor.isDevelopment) {
     DevConnectionLog.info('Starting Vite server...');
     
