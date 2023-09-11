@@ -7,6 +7,7 @@ import { getConfig, DevConnectionLog, RuntimeConfig, ViteConnection } from './lo
 
 let subscription: Meteor.SubscriptionHandle;
 let initialConfig: RuntimeConfig;
+let viteLoaded = false;
 
 function watchConfig(config: RuntimeConfig) {
     if (initialConfig.host !== config.host) {
@@ -32,9 +33,20 @@ function onReady(config: RuntimeConfig) {
         return;
     }
     
-    // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
-    DevConnectionLog.info('Refreshing client...');
-    setTimeout(() => window.location.reload(), 1000);
+    const viteEntrypoint = document.createElement('script');
+    viteEntrypoint.src = `http://${config.host}:${config.port}/${config.entryFile}`;
+    viteEntrypoint.id = 'vite-entrypoint';
+    viteEntrypoint.type = 'module';
+    viteEntrypoint.onerror = (error) => {
+        DevConnectionLog.error('Vite entrypoint module failed to load! Refreshing page...', error);
+        setTimeout(() => window.location.reload(), 1000);
+    }
+    viteEntrypoint.onload = () => {
+        // todo: hide splash screen
+        DevConnectionLog.info('Loaded Vite module dynamically! Hopefully all went well and your app is usable. 🤞');
+        viteLoaded = true;
+    }
+    document.body.prepend(viteEntrypoint);
     return;
 }
 
@@ -61,7 +73,7 @@ function onChange(config: RuntimeConfig) {
 }
 
 function hasLoadedVite() {
-    return !window.__METEOR_VITE_STARTUP__;
+    return viteLoaded;
 }
 
 Meteor.startup(() => {
