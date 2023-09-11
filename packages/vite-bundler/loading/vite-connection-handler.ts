@@ -71,12 +71,31 @@ if (Meteor.isDevelopment) {
 const logLabel = Meteor.isClient ? `[Meteor-Vite] ⚡ ` : '⚡  ';
 
 export const DevConnectionLog = {
-    info: (message: string, ...params: Parameters<typeof console.log>) => console.info(
-        `${logLabel} ${message}`,
-        ...params,
-    ),
-    error: (message: string, ...params: Parameters<typeof console.log>) => console.info(
-        `${logLabel} ${message}`,
-        ...params,
-    ),
+    _logToScreen(message: string) {
+        if (!Meteor.isClient) return;
+        const messageNode = document.createElement('div');
+        messageNode.innerText = message;
+        document.querySelector('.vite-status-text')?.prepend(messageNode);
+    },
+    info: (message: string, ...params: Parameters<typeof console.log>) => {
+        DevConnectionLog._logToScreen(` ⚡ ${message}`);
+        console.info(
+            `${logLabel} ${message}`,
+            ...params,
+        )
+    },
+    debug: (message: string, ...params: Parameters<typeof console.log>) => {
+        DevConnectionLog._logToScreen(` ⚡ ${message}`);
+        console.debug(
+            `${logLabel} ${message}`,
+            ...params,
+        )
+    },
+    error: (message: string, ...params: Parameters<typeof console.log>) => {
+        DevConnectionLog._logToScreen(` ⚡ ${message}`);
+        console.error(
+            `${logLabel} ${message}`,
+            ...params,
+        )
+    },
 };

@@ -100,7 +100,7 @@ Meteor.startup(() => {
             initialConfig = config;
         }
         
-        console.debug('Vite connection config changed', config);
+        DevConnectionLog.debug('Vite connection config changed', config);
         
         if (!initialConfig) {
             return;
