@@ -3,8 +3,23 @@ import { useFind, useSubscribe } from 'meteor/react-meteor-data';
 import { LinksCollection } from '../../api/links/links';
 
 export const Info = () => {
-  const isLoading = useSubscribe('links');
-  const links = useFind(() => LinksCollection.find());
+    try {
+
+      const isLoading = useSubscribe('links');
+      const links = useFind(() => LinksCollection.find());
+    } catch (error) {
+
+        return (
+            <div>
+                <h1>Exception while calling React Meteor Data</h1>
+                <p>
+                    Todo: Vite and Meteor's React versions appear to be slightly different.
+                    Importing React with CJS syntax seems to resolve the issue.
+                </p>
+                <pre>{ error.stack }</pre>
+            </div>
+        )
+    }
 
   if(isLoading()) {
     return <div>Loading...</div>;
