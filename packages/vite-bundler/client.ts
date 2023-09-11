@@ -7,7 +7,7 @@ import { getConfig, DevConnectionLog, RuntimeConfig, ViteConnection } from './lo
 
 let subscription: Meteor.SubscriptionHandle;
 let initialConfig: RuntimeConfig;
-let viteLoaded = false;
+const VITE_ENTRYPOINT_ID = 'vite-entrypoint';
 
 function watchConfig(config: RuntimeConfig) {
     if (initialConfig.host !== config.host) {
@@ -35,7 +35,7 @@ function onReady(config: RuntimeConfig) {
     
     const viteEntrypoint = document.createElement('script');
     viteEntrypoint.src = `http://${config.host}:${config.port}/${config.entryFile}`;
-    viteEntrypoint.id = 'vite-entrypoint';
+    viteEntrypoint.id = VITE_ENTRYPOINT_ID;
     viteEntrypoint.type = 'module';
     viteEntrypoint.onerror = (error) => {
         DevConnectionLog.error('Vite entrypoint module failed to load! Refreshing page...', error);
@@ -44,7 +44,6 @@ function onReady(config: RuntimeConfig) {
     viteEntrypoint.onload = () => {
         // todo: hide splash screen
         DevConnectionLog.info('Loaded Vite module dynamically! Hopefully all went well and your app is usable. 🤞');
-        viteLoaded = true;
     }
     document.body.prepend(viteEntrypoint);
     return;
@@ -73,7 +72,7 @@ function onChange(config: RuntimeConfig) {
 }
 
 function hasLoadedVite() {
-    return viteLoaded;
+    return !!document.getElementById(VITE_ENTRYPOINT_ID);
 }
 
 Meteor.startup(() => {
@@ -97,28 +96,36 @@ Meteor.startup(() => {
         watchConfig(getConfig());
     });
     
-    /**
-     * Failsafe to force a refresh of the server's runtime config.
-     */
     if (!hasLoadedVite()) {
-        const forceRefreshAfter = 5 * 1000 // 5 seconds
-        Meteor.setInterval(() => {
-            const lastUpdateMs = Date.now() - getConfig().lastUpdate;
-            if (lastUpdateMs < forceRefreshAfter) {
-                return;
-            }
-            Meteor.call(ViteConnection.methods.refreshConfig, (error?: Error, config?: RuntimeConfig) => {
-                if (error) {
-                    throw error;
-                }
-                if (!config) {
-                    console.error('Received no config from server!', { error, config })
-                }
-                watchConfig(config || getConfig());
-            })
-        }, 2500);
+        forceConfigRefresh();
     }
 });
+
+/**
+ * Failsafe to force a refresh of the server's runtime config.
+ */
+function forceConfigRefresh() {
+    const forceRefreshAfter = 5 * 1000 // 5 seconds
+    const interval = Meteor.setInterval(() => {
+        const lastUpdateMs = Date.now() - getConfig().lastUpdate;
+        if (lastUpdateMs < forceRefreshAfter) {
+            return;
+        }
+        if (hasLoadedVite()) {
+            Meteor.clearInterval(interval);
+            return;
+        }
+        Meteor.call(ViteConnection.methods.refreshConfig, (error?: Error, config?: RuntimeConfig) => {
+            if (error) {
+                throw error;
+            }
+            if (!config) {
+                console.error('Received no config from server!', { error, config })
+            }
+            watchConfig(config || getConfig());
+        })
+    }, 2500);
+}
 
 declare global {
     interface Window {
