@@ -49,8 +49,8 @@ function onReady(config: RuntimeConfig) {
     }
     
     viteEntrypoint.onerror = (error) => {
-        DevConnectionLog.error('Vite entrypoint module failed to load! Refreshing page...', error);
-        setTimeout(() => window.location.reload(), 1000);
+        DevConnectionLog.error('Vite entrypoint module failed to load! Will refresh page shortly...', error);
+        setTimeout(() => window.location.reload(), 15_000);
     }
     viteEntrypoint.onload = () => {
         DevConnectionLog.info('Loaded Vite module dynamically! Hopefully all went well and your app is usable. 🤞');

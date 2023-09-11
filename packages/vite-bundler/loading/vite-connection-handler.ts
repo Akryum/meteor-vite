@@ -92,6 +92,11 @@ export const DevConnectionLog = {
         )
     },
     error: (message: string, ...params: Parameters<typeof console.log>) => {
+        for (const param of params) {
+            if (param instanceof Error && param.stack) {
+                DevConnectionLog._logToScreen(param.stack);
+            }
+        }
         DevConnectionLog._logToScreen(` ⚡ ${message}`);
         console.error(
             `${logLabel} ${message}`,
