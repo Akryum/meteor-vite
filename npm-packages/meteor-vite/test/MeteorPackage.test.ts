@@ -1,4 +1,4 @@
-import { describe, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import MeteorPackage from '../src/meteor/package/MeteorPackage'
 import { TsModules } from './__mocks'
 
