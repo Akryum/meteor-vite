@@ -12,6 +12,7 @@ Package.registerBuildPlugin({
     'ecmascript@0.16.2',
     'caching-compiler@1.2.2',
     'babel-compiler@7.9.0',
+    'vite:build-plugins'
   ],
   sources: [
     'build.js',
@@ -27,8 +28,6 @@ Package.onUse(function(api) {
   api.use('isobuild:compiler-plugin@1.0.0')
   api.use('ecmascript')
   api.use('webapp@1.13.1')
+  api.use('vite:build-plugins');
   api.mainModule('server.js', 'server')
-  api.addAssets([
-    'worker-dev.mjs',
-  ], 'server')
 })
