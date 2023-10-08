@@ -1,6 +1,8 @@
 /**
  * Check if text casing is being handled as expected.
  */
+import { Meteor } from 'meteor/meteor'
+
 export const first = 'lowercase'
 export const FIRST = 'UPPERCASE'
 
@@ -21,8 +23,6 @@ export { Meteor as MyMeteor } from 'meteor/meteor'
 export * from 'meteor/tracker'
 
 export { Meteor as ReExportedMeteor } from 'meteor/meteor'
-
-import { Meteor } from 'meteor/meteor'
 
 export { NamedRelativeInteger } from './relative-module'
 

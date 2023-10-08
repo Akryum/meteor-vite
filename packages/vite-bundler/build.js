@@ -1,16 +1,19 @@
 import path from 'node:path'
 import { performance } from 'node:perf_hooks'
+import os from 'node:os'
 import fs from 'fs-extra'
 import { execaSync } from 'execa'
 import pc from 'picocolors'
 import { createWorkerFork, cwd } from './workers'
-import os from 'node:os'
 
-if (process.env.VITE_METEOR_DISABLED) return
-if (process.env.NODE_ENV !== 'production') return
+if (process.env.VITE_METEOR_DISABLED)
+  return
+if (process.env.NODE_ENV !== 'production')
+  return
 
 // Not in a project (publishing the package)
-if (!fs.existsSync(path.join(cwd, 'package.json'))) return
+if (!fs.existsSync(path.join(cwd, 'package.json')))
+  return
 
 const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'))
 const meteorMainModule = pkg.meteor?.mainModule?.client
@@ -20,11 +23,10 @@ const meteorMainModule = pkg.meteor?.mainModule?.client
 const replaceMeteorPackages = [
   { startsWith: 'standard-minifier', replaceWith: '' },
   { startsWith: 'refapp:meteor-typescript', replaceWith: 'typescript' },
-  ...pkg?.meteorVite?.replacePackages || []
+  ...pkg?.meteorVite?.replacePackages || [],
 ]
-if (!meteorMainModule) {
+if (!meteorMainModule)
   throw new Error('No meteor main module found, please add meteor.mainModule.client to your package.json')
-}
 
 // Temporary Meteor build
 
@@ -58,19 +60,19 @@ try {
     fs.copyFileSync(from, to)
   }
   // Symblink to `packages` folder
-  if (fs.existsSync(path.join(cwd, 'packages')) && !fs.existsSync(path.join(tempMeteorProject, 'packages'))) {
+  if (fs.existsSync(path.join(cwd, 'packages')) && !fs.existsSync(path.join(tempMeteorProject, 'packages')))
     fs.symlinkSync(path.join(cwd, 'packages'), path.join(tempMeteorProject, 'packages'))
-  }
+
   // Remove/replace conflicting Atmosphere packages
   {
     const file = path.join(tempMeteorProject, '.meteor', 'packages')
     let content = fs.readFileSync(file, 'utf8')
     for (const pack of replaceMeteorPackages) {
       const lines = content.split('\n')
-      content = lines.map(line => {
-        if (!line.startsWith(pack.startsWith)) {
+      content = lines.map((line) => {
+        if (!line.startsWith(pack.startsWith))
           return line
-        }
+
         return pack.replaceWith || ''
       }).join('\n')
     }
@@ -120,7 +122,7 @@ try {
   // Build with vite
   const { payload } = Promise.await(new Promise((resolve, reject) => {
     const worker = createWorkerFork({
-      buildResult: (result) => resolve(result) ,
+      buildResult: result => resolve(result),
     })
 
     worker.call({
@@ -140,9 +142,8 @@ try {
     console.log(pc.green(`⚡️ Build successful (${Math.round((endTime - startTime) * 100) / 100}ms)`))
 
     const entryAsset = payload.output.find(o => o.fileName === 'meteor-entry.js' && o.type === 'chunk')
-    if (!entryAsset) {
+    if (!entryAsset)
       throw new Error('No meteor-entry chunk found')
-    }
 
     // Add assets to Meteor
 
@@ -168,7 +169,8 @@ try {
           cacheDirectory: path.join(cwd, 'node_modules', '.babel-cache'),
         })
         fs.writeFileSync(to, transpiled.code, 'utf8')
-      } else {
+      }
+      else {
         fs.copyFileSync(from, to)
       }
     }
@@ -180,8 +182,8 @@ try {
     fs.writeFileSync(meteorEntry, patchedEntryContent, 'utf8')
 
     class Compiler {
-      processFilesForTarget (files) {
-        files.forEach(file => {
+      processFilesForTarget(files) {
+        files.forEach((file) => {
           switch (path.extname(file.getBasename())) {
             case '.js':
               file.addJavaScript({
@@ -204,7 +206,7 @@ try {
         })
       }
 
-      afterLink () {
+      afterLink() {
         fs.removeSync(viteOutSrcDir)
         fs.writeFileSync(meteorEntry, originalEntryContent, 'utf8')
       }
@@ -214,11 +216,12 @@ try {
       extensions: [],
       filenames: files.map(file => path.basename(file)),
     }, () => new Compiler())
-  } else {
+  }
+  else {
     throw new Error('Vite build failed')
   }
-
-} catch (e) {
+}
+catch (e) {
   throw e
 }
 
@@ -227,7 +230,8 @@ function getTempDir() {
     const tempDir = path.resolve(pkg?.meteorVite?.tempDir || os.tmpdir(), 'meteor-vite', pkg.name)
     fs.mkdirSync(tempDir, { recursive: true })
     return tempDir
-  } catch (error) {
+  }
+  catch (error) {
     console.warn(new Error(`⚡  Unable to set up temp directory for meteor-vite bundles. Will use node_modules instead`, { cause: error }))
     return path.resolve(cwd, 'node_modules', '.vite-meteor-temp')
   }

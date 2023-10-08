@@ -2,12 +2,12 @@ import './main.pcss'
 
 import { Meteor } from 'meteor/meteor'
 import { createApp } from 'vue'
+import { MEOWMEOW } from 'meteor/test:lazy'
+import { check } from 'meteor/check'
 import { WrapConsole } from '../api/logger'
 import { router } from './router'
 import { VueMeteor } from './v-meteor'
 import App from './App.vue'
-import { MEOWMEOW } from 'meteor/test:lazy'
-import { check } from 'meteor/check'
 import './tests/ts-modules.test'
 
 console.log('lazy meteor package:', MEOWMEOW)
@@ -18,7 +18,7 @@ Meteor.startup(() => {
   app.use(router)
   app.use(VueMeteor)
   app.mount('#app')
-  
+
   WrapConsole()
   Promise.all([
     import('./tests/ts-modules.test'),
@@ -28,6 +28,6 @@ Meteor.startup(() => {
     console.error('Error importing test module!', error)
     return []
   }).then((tests) => {
-    return tests.map((test) => test.default())
+    return tests.map(test => test.default())
   })
 })

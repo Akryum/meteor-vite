@@ -1,42 +1,36 @@
-import { StubValidationSettings } from '../../vite/MeteorViteConfig';
-import { StubValidatorOptions } from '../client/ValidateStub';
-import MeteorPackage from './MeteorPackage';
-import { PackageSubmodule } from './PackageSubmodule';
-import Serialize from './Serialize';
+import type { StubValidationSettings } from '../../vite/MeteorViteConfig'
+import type { StubValidatorOptions } from '../client/ValidateStub'
+import type MeteorPackage from './MeteorPackage'
+import type { PackageSubmodule } from './PackageSubmodule'
+import Serialize from './Serialize'
 
-export const METEOR_STUB_KEY = `m2`;
-export const PACKAGE_SCOPE_KEY = 'm';
-export const TEMPLATE_GLOBAL_KEY = 'g';
+export const METEOR_STUB_KEY = `m2`
+export const PACKAGE_SCOPE_KEY = 'm'
+export const TEMPLATE_GLOBAL_KEY = 'g'
 
 /**
  * Creates a stub for the provided Meteor package and requested submodule.
  * Used to bridge imports for Meteor code that Vite doesn't have access to, to the below template that acts as a
  * proxy between Vite and Meteor's modules.
  */
-export function stubTemplate({ requestId, submodule, meteorPackage, stubValidation: validationSettings }: {
-    submodule?: PackageSubmodule;
-    meteorPackage: MeteorPackage;
-    requestId: string;
-    stubValidation?: StubValidationSettings,
-}) {
-    const stubId = getStubId();
-    const packageId = meteorPackage.packageId;
-    const importPath = submodule?.fullImportPath || packageId;
-    const serialized = Serialize.parseModules({
-        packageId,
-        modules: submodule?.exports || [],
-        packageScope: meteorPackage.packageScopeExports,
-    });
-    const stubValidation = stubValidationTemplate({
-        packageId,
-        requestId,
-        settings: validationSettings,
-        exportKeys: serialized.exportedKeys
-    });
-    
-    
-    // language="js"
-    return`
+export function stubTemplate({ requestId, submodule, meteorPackage, stubValidation: validationSettings }: { submodule?: PackageSubmodule; meteorPackage: MeteorPackage; requestId: string; stubValidation?: StubValidationSettings }) {
+  const stubId = getStubId()
+  const packageId = meteorPackage.packageId
+  const importPath = submodule?.fullImportPath || packageId
+  const serialized = Serialize.parseModules({
+    packageId,
+    modules: submodule?.exports || [],
+    packageScope: meteorPackage.packageScopeExports,
+  })
+  const stubValidation = stubValidationTemplate({
+    packageId,
+    requestId,
+    settings: validationSettings,
+    exportKeys: serialized.exportedKeys,
+  })
+
+  // language="js"
+  return `
 // requestId: ${requestId}
 // packageId: ${packageId}
 ${stubValidation.importString}
@@ -71,17 +65,16 @@ ${serialized.module.bottom.join('\n')}
  */
 const REGEX_AUTO_IMPORT_BLOCK = /(?<startBlock>\*\*\/[\r\n\s]+)(?<imports>(?:.*[\r\n])*)(?<endBlock>[\s\r\n]*\/\*\* End of vite:bundler auto-imports \*\*\/)/
 
-export function viteAutoImportBlock({ content, id }: { content: string, id: string }) {
-    let { startBlock, imports, endBlock } = content.match(REGEX_AUTO_IMPORT_BLOCK)?.groups || { imports: '' };
-    
-    imports += `import '${id}';\n`;
-    imports = imports.trim();
-    
-    if (endBlock && startBlock) {
-        return content.replace(REGEX_AUTO_IMPORT_BLOCK, `${startBlock.trim()}\n${imports}\n${endBlock.trim()}`);
-    }
-    
-    return `/**
+export function viteAutoImportBlock({ content, id }: { content: string; id: string }) {
+  let { startBlock, imports, endBlock } = content.match(REGEX_AUTO_IMPORT_BLOCK)?.groups || { imports: '' }
+
+  imports += `import '${id}';\n`
+  imports = imports.trim()
+
+  if (endBlock && startBlock)
+    return content.replace(REGEX_AUTO_IMPORT_BLOCK, `${startBlock.trim()}\n${imports}\n${endBlock.trim()}`)
+
+  return `/**
  * These modules are automatically imported by vite:bundler.
  * You can commit these to your project or move them elsewhere if you'd like,
  * but they must be imported somewhere in your Meteor entrypoint file.
@@ -91,53 +84,48 @@ export function viteAutoImportBlock({ content, id }: { content: string, id: stri
 ${imports}
 /** End of vite:bundler auto-imports **/
 
-${content}`;
+${content}`
 }
 
-function stubValidationTemplate({ settings, requestId, exportKeys, packageId }: {
-    settings?: StubValidationSettings,
-    requestId: string;
-    exportKeys: string[];
-    packageId: string;
-}) {
-    if (settings?.disabled) {
-        return {
-            importString: '',
-            validateStub: '',
-        };
-    }
-    
-    if (settings?.ignorePackages?.includes(packageId)) {
-        return {
-            importString: '',
-            // language=js
-            validateStub: `console.debug("Stub validation disabled for '${packageId}'");`,
-        }
-    }
-    
-    const validatorOptions: StubValidatorOptions = {
-        requestId,
-        packageName: packageId,
-        exportKeys: exportKeys,
-        warnOnly: settings?.warnOnly,
-    }
-    
-    // language=js
-    const importString = `import { validateStub } from 'meteor-vite/client';`
-    // language=js
-    const validateStub = `validateStub(${METEOR_STUB_KEY}, ${JSON.stringify(validatorOptions)});`;
-    
+function stubValidationTemplate({ settings, requestId, exportKeys, packageId }: { settings?: StubValidationSettings; requestId: string; exportKeys: string[]; packageId: string }) {
+  if (settings?.disabled) {
     return {
-        importString,
-        validateStub,
+      importString: '',
+      validateStub: '',
     }
+  }
+
+  if (settings?.ignorePackages?.includes(packageId)) {
+    return {
+      importString: '',
+      // language=js
+      validateStub: `console.debug("Stub validation disabled for '${packageId}'");`,
+    }
+  }
+
+  const validatorOptions: StubValidatorOptions = {
+    requestId,
+    packageName: packageId,
+    exportKeys,
+    warnOnly: settings?.warnOnly,
+  }
+
+  // language=js
+  const importString = `import { validateStub } from 'meteor-vite/client';`
+  // language=js
+  const validateStub = `validateStub(${METEOR_STUB_KEY}, ${JSON.stringify(validatorOptions)});`
+
+  return {
+    importString,
+    validateStub,
+  }
 }
 
 /**
  * Unique ID for the next stub.
  * @type {number}
  */
-let nextStubId = 0;
+let nextStubId = 0
 function getStubId() {
-    return nextStubId++;
+  return nextStubId++
 }

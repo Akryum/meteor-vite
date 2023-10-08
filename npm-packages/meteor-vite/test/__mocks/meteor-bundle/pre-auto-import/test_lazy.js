@@ -9,5 +9,5 @@
 
 (function () {
 /* Exports */
-Package._define("test:lazy");
-})();
+  Package._define('test:lazy')
+})()

@@ -1,16 +1,16 @@
 const g = typeof window !== 'undefined' ? window : global
-export {Meteor as MyMeteor} from '/@id/__x00__meteor/meteor'
+export { Meteor as MyMeteor } from '/@id/__x00__meteor/meteor'
 export * from '/@id/__x00__meteor/tracker'
 
 let m2
 const require = Package.modules.meteorInstall({
-    '__vite_stub8.js': (require, exports, module) => {
-        m2 = require('meteor/test:modules')
-    },
+  '__vite_stub8.js': (require, exports, module) => {
+    m2 = require('meteor/test:modules')
+  },
 }, {
-    "extensions": [
-        ".js",
-    ]
+  extensions: [
+    '.js',
+  ],
 })
 require('/__vite_stub8.js')
 

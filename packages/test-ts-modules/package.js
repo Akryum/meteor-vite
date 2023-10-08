@@ -6,7 +6,7 @@ Package.describe({
   documentation: 'README.md',
 })
 
-Package.onUse(function(api) {
+Package.onUse((api) => {
   api.use('ecmascript')
   api.use('typescript')
   api.use('zodern:types')

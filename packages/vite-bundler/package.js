@@ -19,21 +19,20 @@ Package.registerBuildPlugin({
     'workers.ts',
   ],
   npmDependencies: {
-    execa: '6.1.0',
+    'execa': '6.1.0',
     'fs-extra': '10.1.0',
     'picocolors': '1.0.0',
   },
 })
 
-Package.onUse(function(api) {
+Package.onUse((api) => {
   api.use('isobuild:compiler-plugin@1.0.0')
   api.use('zodern:types')
   api.use('ecmascript')
-  api.use('zodern:types');
+  api.use('zodern:types')
   api.use('webapp@1.13.1')
   api.use('typescript@4.0.0')
-  api.addAssets(['loading/dev-server-splash.html'], 'server');
-  api.mainModule('client.ts', 'client');
+  api.addAssets(['loading/dev-server-splash.html'], 'server')
+  api.mainModule('client.ts', 'client')
   api.mainModule('vite-server.ts', 'server')
 })
-

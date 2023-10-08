@@ -1,4 +1,4 @@
-name: 'Tests'
+name: Tests
 on:
   push:
   pull_request:
@@ -10,16 +10,14 @@ env:
 
 jobs:
   build-vue-example:
-    name: 'meteor-vite package'
+    name: meteor-vite package
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout'
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: 'Setup Node'
+      - name: Setup Node
         uses: actions/setup-node@v3
-      - name: 'Install dependencies'
+      - name: Install dependencies
         run: cd "$NPM_PACKAGE_PATH" && npm i
-      - name: 'Run tests'
+      - name: Run tests
         run: cd "$NPM_PACKAGE_PATH" && npm test
-
-

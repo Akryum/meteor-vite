@@ -1,1 +1,1 @@
-export const IAmUndefined = undefined;
+export const IAmUndefined = undefined

@@ -66,6 +66,7 @@ Create a Vite configuration file (`vite.config.js`) in your project root:
 
 ```js
 import { defineConfig } from 'vite'
+
 // Example with Vue
 import vue from '@vitejs/plugin-vue'
 

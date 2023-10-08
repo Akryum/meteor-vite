@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor'
-import { describe, it, expect } from 'ts-minitest'
+import { describe, expect, it } from 'ts-minitest'
 
 export default () => describe('Meteor Core Packages', () => {
   it('can explicitly import Meteor', () => {
