@@ -5,5 +5,6 @@ module.exports = antfu({
     'examples/output/',
     '**/.meteor',
     '**/.npm',
+    'npm-packages/meteor-vite/test/__mocks',
   ],
 })
