@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+  },
+  "include": [
+    "../../examples/vue/.meteor/local/build/programs/server/assets/packages/**/*"
+    "./**/*"
+  ],
+}

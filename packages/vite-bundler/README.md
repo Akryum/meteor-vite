@@ -95,3 +95,24 @@ export default defineConfig({
 ```
 
 You can then write your code from this entry point and it will be handled by Vite! ⚡️
+
+## Lazy Loaded Meteor Packages
+Meteor-Vite will automatically detect lazy loaded Meteor packages and import them into your Meteor client's entrypoint.
+This is necessary to ensure that the Vite bundler has access to your Meteor packages.
+
+The imported files can safely be committed to your project repository. If you remove the associated package in the 
+future, simply remove the import statement.
+
+Our detection for these packages is fairly primitive, so it's best to keep the imports in the Meteor client 
+entrypoint as specified in the `meteor.mainModule.client` field of your `package.json` file.
+```json5
+{
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.ts", // Lazy loaded packages are checked for and added here.
+      "server": "server/main.ts"
+    }
+  }
+}
+```
+
