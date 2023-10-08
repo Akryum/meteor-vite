@@ -27,7 +27,7 @@
     })
     const ExplicitRelativePath = 'this should be imported as "meteor/test:ts-modules/explicit-relative-path"'
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  },"index.ts": function module(require, exports, module) {
+  }, "index.ts": function module(require, exports, module) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                                         //
     // packages/test_ts-modules/index.ts                                                                       //
@@ -80,7 +80,7 @@
       Meteor.version
     }.call(this, module))
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  },"export-star-from.ts": function module(require, exports, module) {
+  }, "export-star-from.ts": function module(require, exports, module) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                                         //
     // packages/test_ts-modules/export-star-from.ts                                                            //
@@ -98,8 +98,7 @@
       key: 'value',
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  },
-"re-exports-index.ts": function module(require, exports, module) {
+  },"re-exports-index.ts": function module(require, exports, module) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                                         //
     // packages/test_ts-modules/re-exports-index.ts                                                            //
@@ -111,7 +110,7 @@
       NamedReExport: 'NamedReExport',
     }, 0)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  },"re-exports-source.ts": function module(require, exports, module) {
+  }, "re-exports-source.ts": function module(require, exports, module) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                                         //
     // packages/test_ts-modules/re-exports-source.ts                                                           //
@@ -125,7 +124,7 @@
     const DefaultReExport = 'DefaultReExport'
     const NamedReExport = 'NamedReExport'
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  },"relative-module.ts": function module(require, exports, module) {
+  }, "relative-module.ts": function module(require, exports, module) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                                         //
     // packages/test_ts-modules/relative-module.ts                                                             //
@@ -137,7 +136,7 @@
     })
     const NamedRelativeInteger = 1
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  },"subdirectory": { 'module-in-subdirectory.ts': function module(require, exports, module) {
+  }, "subdirectory": { 'module-in-subdirectory.ts': function module(require, exports, module) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                                         //
     // packages/test_ts-modules/subdirectory/module-in-subdirectory.ts                                         //

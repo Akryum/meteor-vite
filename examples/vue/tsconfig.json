@@ -30,12 +30,12 @@
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": false,
     "noImplicitAny": true,
-    "noEmit": true,
 
     "noImplicitReturns": false,
     /* Additional Checks */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
 

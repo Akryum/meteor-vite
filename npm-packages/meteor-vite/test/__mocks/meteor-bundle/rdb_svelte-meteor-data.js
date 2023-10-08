@@ -59,7 +59,7 @@
 
     // Import this last, since it overwrites the built-in Tracker.autorun
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-  },"autorun.js": function module(require, exports, module) {
+  }, "autorun.js": function module(require, exports, module) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                               //
     // packages/rdb_svelte-meteor-data/autorun.js                                                    //
@@ -186,7 +186,7 @@
       }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-  },"cursor.js": function module(require, exports, module) {
+  }, "cursor.js": function module(require, exports, module) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                               //
     // packages/rdb_svelte-meteor-data/cursor.js                                                     //
@@ -229,8 +229,7 @@
       return handle.stop.bind(this)
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-  },
-"reactive-var.js": function module(require, exports, module) {
+  },"reactive-var.js": function module(require, exports, module) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                               //
     // packages/rdb_svelte-meteor-data/reactive-var.js                                               //
@@ -261,7 +260,7 @@
       }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-  },"subscribe.js": function module(require, exports, module) {
+  }, "subscribe.js": function module(require, exports, module) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                               //
     // packages/rdb_svelte-meteor-data/subscribe.js                                                  //
@@ -325,8 +324,7 @@
       return subscription
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-  },
-"use-session.js": function module(require, exports, module) {
+  },"use-session.js": function module(require, exports, module) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                               //
     // packages/rdb_svelte-meteor-data/use-session.js                                                //
@@ -379,7 +377,7 @@
     }
     ;
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-  },"use-tracker.js": function module(require, exports, module) {
+  }, "use-tracker.js": function module(require, exports, module) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                               //
     // packages/rdb_svelte-meteor-data/use-tracker.js                                                //

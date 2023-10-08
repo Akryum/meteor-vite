@@ -54,7 +54,7 @@
     module.exportDefault(foo)
     Meteor.version
     ///////////////////////////////////////////////////////////////////////
-  },"other.js": function module(require, exports, module) {
+  }, "other.js": function module(require, exports, module) {
     ///////////////////////////////////////////////////////////////////////
     //                                                                   //
     // packages/test_modules/other.js                                    //
@@ -71,7 +71,7 @@
     module.exportDefault(defaultExport)
     const other = 'other'
     ///////////////////////////////////////////////////////////////////////
-  },"sub-other.js": function module(require, exports, module) {
+  }, "sub-other.js": function module(require, exports, module) {
     ///////////////////////////////////////////////////////////////////////
     //                                                                   //
     // packages/test_modules/sub-other.js                                //
