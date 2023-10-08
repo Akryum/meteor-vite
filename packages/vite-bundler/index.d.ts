@@ -1,5 +1,3 @@
-import { UserConfig } from 'vite';
-
 declare module 'vite' {
   interface UserConfig {
     /**
@@ -11,3 +9,4 @@ declare module 'vite' {
   }
 }
 
+export {}
