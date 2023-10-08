@@ -28,4 +28,4 @@ export { NamedRelativeInteger } from './relative-module'
 
 export * from './export-star-from'
 
-Meteor.version
+console.log(Meteor.version)

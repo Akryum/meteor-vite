@@ -3,7 +3,12 @@ import { Mongo } from 'meteor/mongo'
 import type { WorkerResponseData } from '../../../npm-packages/meteor-vite/src/bin/worker'
 
 export type RuntimeConfig = WorkerResponseData<'viteConfig'> & { ready: boolean }
-export let MeteorViteConfig: Mongo.Collection<RuntimeConfig>
+
+let MeteorViteConfig: Mongo.Collection<RuntimeConfig>
+
+export function getMeteorViteConfigCollection() {
+  return MeteorViteConfig
+}
 
 export const ViteConnection = {
   publication: 'meteor:vite' as const,

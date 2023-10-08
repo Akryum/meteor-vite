@@ -9,6 +9,10 @@ import { ViteConnection, getConfig } from './loading/vite-connection-handler'
 let subscription: Meteor.SubscriptionHandle
 let initialConfig: RuntimeConfig
 
+const log = {
+  info: (message: string, ...params: Parameters<typeof console.log>) => console.info(`[Meteor-Vite] ⚡ ${message}`, ...params),
+}
+
 function watchConfig(config: RuntimeConfig) {
   if (initialConfig.host !== config.host)
     return onChange(config)
@@ -76,10 +80,6 @@ Meteor.startup(() => {
     watchConfig(getConfig())
   })
 })
-
-const log = {
-  info: (message: string, ...params: Parameters<typeof console.log>) => console.info(`[Meteor-Vite] ⚡ ${message}`, ...params),
-}
 
 declare global {
   interface Window {

@@ -1,8 +1,8 @@
 import util from 'node:util'
-import { Mongo } from 'meteor/mongo'
-import { Meteor } from 'meteor/meteor'
-import safeJson from 'safe-json-stringify'
 import Chalk from 'chalk'
+import { Meteor } from 'meteor/meteor'
+import { Mongo } from 'meteor/mongo'
+import safeJson from 'safe-json-stringify'
 
 const chalk = new Chalk.Instance({ level: 3 })
 
@@ -59,6 +59,12 @@ export const Logger: typeof console = new Proxy(console, {
   },
 })
 
+type LogLevel = typeof loggableLevels[number]
+const loggableLevels = ['log', 'info', 'warn', 'error'] as const
+function isLogMethod(level: LogLevel | string, value: any): value is typeof console[LogLevel] {
+  return loggableLevels.includes(level as LogLevel)
+}
+
 export function WrapConsole() {
   if (!Meteor.isClient)
     throw new Error('wrapConsole() can only be called on the client')
@@ -68,10 +74,4 @@ export function WrapConsole() {
       value: Logger[level],
     })
   }
-}
-
-type LogLevel = typeof loggableLevels[number]
-const loggableLevels = ['log', 'info', 'warn', 'error'] as const
-function isLogMethod(level: LogLevel | string, value: any): value is typeof console[LogLevel] {
-  return loggableLevels.includes(level as LogLevel)
 }

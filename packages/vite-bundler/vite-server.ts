@@ -1,7 +1,7 @@
 import type HTTP from 'node:http'
 import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
-import { MeteorViteConfig, ViteConnection, getConfig, setConfig } from './loading/vite-connection-handler'
+import { ViteConnection, getConfig, getMeteorViteConfigCollection, setConfig } from './loading/vite-connection-handler'
 import { createWorkerFork } from './workers'
 
 if (Meteor.isDevelopment) {
@@ -26,7 +26,7 @@ if (Meteor.isDevelopment) {
   })
 
   const viteServer = createWorkerFork({
-    viteConfig(config) {
+    viteConfig(config: any) {
       const ready = !!(config.entryFile && config.port)
       setConfig({ ...config, ready })
       if (ready)
@@ -40,7 +40,7 @@ if (Meteor.isDevelopment) {
   })
 
   Meteor.publish(ViteConnection.publication, () => {
-    return MeteorViteConfig.find(ViteConnection.configSelector)
+    return getMeteorViteConfigCollection()?.find(ViteConnection.configSelector)
   })
 
   /**

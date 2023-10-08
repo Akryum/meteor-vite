@@ -74,7 +74,7 @@ export class MeteorViteError extends Error implements ErrorMetadata {
     await this.formatLog()
 
     const moduleId = this.context?.id.replace('meteor/', '') || this.package?.packageId
-    const moduleString = moduleId && pc.yellow(`\n⚡   <${moduleId}>`) || ''
+    const moduleString = moduleId ? pc.yellow(`\n⚡   <${moduleId}>`) : ''
     this.name = `\n\n${this.titleDivider({
             title: `[${this.constructor.name}]`,
             divider: '_',

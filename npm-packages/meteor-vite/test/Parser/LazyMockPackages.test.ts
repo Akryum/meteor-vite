@@ -4,7 +4,7 @@ import { LazyLoadedPackage } from '../__mocks'
 
 describe('lazy-loaded packages', () => {
   describe('before being auto-imported', async () => {
-    Object.entries(LazyLoadedPackage.packages).forEach(([key, lazyMock]) => {
+    Object.entries(LazyLoadedPackage.packages).forEach(([_key, lazyMock]) => {
       describe(lazyMock.packageName, async () => {
         const { result: parserResult } = await parseMeteorPackage(lazyMock)
 

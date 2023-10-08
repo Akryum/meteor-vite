@@ -7,7 +7,7 @@ import Path from 'node:path'
 import CreateIPCInterface from './IPC/interface'
 
 export default CreateIPCInterface({
-  'tsup.watchMeteorVite': async function (reply) {
+  'tsup.watchMeteorVite': async function (_reply) {
     const npmPackagePath = Path.join(process.cwd(), '/node_modules/meteor-vite/') // to the meteor-vite npm package
     const tsupPath = Path.join(npmPackagePath, '/node_modules/.bin/tsup-node') // tsup to 2 node_modules dirs down.
 
@@ -28,7 +28,6 @@ export default CreateIPCInterface({
         return
 
       process.exit(1)
-      throw new Error('TSUp watcher exited unexpectedly!')
     })
   },
 })

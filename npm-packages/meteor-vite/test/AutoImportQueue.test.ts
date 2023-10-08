@@ -7,7 +7,7 @@ describe('package auto-imports', async () => {
   describe('with existing, unrelated content', async () => {
     it('can add imports', async (context) => {
       const importString = 'meteor/test:can-add-imports'
-      const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
+      const { meteorEntrypoint, readContent } = await AutoImportMock.useEntrypoint({
         testName: context.task.name,
         entrypoint: 'withUnrelatedImports',
       })
@@ -45,7 +45,7 @@ describe('package auto-imports', async () => {
       const matchRegex = /meteor\/test:duplicate-import/
       const importStrings = [importString, importString]
 
-      const { meteorEntrypoint, template, readContent } = await AutoImportMock.useEntrypoint({
+      const { meteorEntrypoint, readContent } = await AutoImportMock.useEntrypoint({
         testName: context.task.name,
         entrypoint: 'withUnrelatedImports',
       })

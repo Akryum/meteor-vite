@@ -30,7 +30,7 @@ export default class MeteorPackage implements ParsedPackage {
 
     const entries = Object.entries(this.modules)
     const file = entries.find(
-      ([fileName, modules]) => isSameModulePath({
+      ([fileName, _modules]) => isSameModulePath({
         filepathA: importPath,
         filepathB: fileName,
         compareExtensions: false,
@@ -50,9 +50,9 @@ export default class MeteorPackage implements ParsedPackage {
       return
 
     const [
-      node_modules,
-      meteor,
-      packageName,
+      _node_modules,
+      _meteor,
+      _packageName,
       ...filePath
     ] = this.mainModulePath.replace(/^\/+/g, '').split('/')
 

@@ -35,6 +35,8 @@ export default CreateIPCInterface({
 
     viteConfig = await resolveConfig({}, 'serve')
 
+    let listening = false
+
     if (!server) {
       server = await createServer({
         plugins: [
@@ -57,7 +59,6 @@ export default CreateIPCInterface({
       })
     }
 
-    let listening = false
     await server.listen()
     sendViteConfig(server.config)
     listening = true

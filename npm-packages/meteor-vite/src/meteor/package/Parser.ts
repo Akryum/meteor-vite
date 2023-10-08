@@ -75,7 +75,7 @@ export async function parseMeteorPackage({ fileContent, filePath }: ParseOptions
 }
 
 function parseSource(code: string) {
-  return new Promise<ParsedPackage>((resolve, reject) => {
+  return new Promise<ParsedPackage>((resolve) => {
     const source = parse(code)
     const result: ParsedPackage = {
       name: '',
@@ -119,6 +119,18 @@ function readMainModulePath(node: Node) {
 
   // node_modules/meteor/<author>:<packageName>/<mainModule>
   return node.init.arguments[0].value
+}
+
+const propParser = {
+  getKey(property: ObjectMethod | ObjectProperty) {
+    if (property.key.type === 'Identifier')
+      return property.key.name
+
+    if (property.key.type === 'StringLiteral')
+      return property.key.value
+
+    throw new ModuleExportsError('Unsupported property key type!', property)
+  },
 }
 
 function parsePackageScope(node: Node) {
@@ -349,18 +361,6 @@ class PackageModule {
     // todo: test for default exports with `export default { foo: 'bar' }`
     return [{ type: 'export-default', name: args[0].name } satisfies ModuleExport]
   }
-}
-
-const propParser = {
-  getKey(property: ObjectMethod | ObjectProperty) {
-    if (property.key.type === 'Identifier')
-      return property.key.name
-
-    if (property.key.type === 'StringLiteral')
-      return property.key.value
-
-    throw new ModuleExportsError('Unsupported property key type!', property)
-  },
 }
 
 function formatExports({ expression, packageName, id }: { expression: ObjectExpression; packageName?: StringLiteral; id?: NumericLiteral }) {

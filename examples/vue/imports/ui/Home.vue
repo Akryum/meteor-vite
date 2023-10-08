@@ -9,5 +9,7 @@ console.log('(vite) meteor/test:modules type', typeof testModules)
 </script>
 
 <template>
-  <h1 class="text-3xl">Home</h1>
+  <h1 class="text-3xl">
+    Home
+  </h1>
 </template>

@@ -22,4 +22,4 @@ export * from 'meteor/tracker'
 
 export { default as ReExportedDefault, other, subOther } from './other'
 
-Meteor.version
+console.log(Meteor.version)

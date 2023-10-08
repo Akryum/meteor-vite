@@ -1,6 +1,6 @@
 import { execSync, spawn } from 'node:child_process'
-import Path from 'node:path'
 import FS from 'node:fs/promises'
+import Path from 'node:path'
 
 // Assuming this is launched from the repository root for now.
 const repoPath = process.cwd()
@@ -16,7 +16,7 @@ async function applyVersion() {
   const { releases } = await FS.readFile('changeset-status.json', 'utf-8')
     .then(content => JSON.parse(content))
 
-  const release = releases.find(({ name }) => meteorPackage.releaseName)
+  const release = releases.find(({ name }) => name === meteorPackage.releaseName)
 
   if (!release) {
     console.log('⚠️  No pending releases found for %s', meteorPackage.releaseName)
@@ -67,7 +67,7 @@ function shell(command, options) {
 }
 
 (async () => {
-  const [binPath, modulePath, action] = process.argv
+  const [, , action] = process.argv
 
   if (action === 'publish') {
     await publish()

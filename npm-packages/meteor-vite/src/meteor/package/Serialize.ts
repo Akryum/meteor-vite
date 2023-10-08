@@ -15,7 +15,7 @@ export default new class Serialize {
       if (module.name?.trim() === '*' && !module.as)
         return `export * from '${from}';`
 
-      return `export { ${module.name} ${module.as && `as ${module.as} ` || ''}} from '${from}';`
+      return `export { ${module.name} ${module.as ? `as ${module.as} ` : ''}} from '${from}';`
     }
 
     if (module.type === 'export-default' || (module.type === 'export' && module.name === 'default'))
@@ -143,7 +143,7 @@ class ConflictingExportKeys extends MeteorViteError {
   }
 
   protected async formatLog() {
-    const { key, packageScope, moduleExports } = this.meta.conflict
+    const { packageScope, moduleExports } = this.meta.conflict
     this.addSection('Package Exports', packageScope)
     this.addSection('Module Exports', moduleExports)
   }
