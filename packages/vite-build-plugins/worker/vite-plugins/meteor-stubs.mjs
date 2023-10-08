@@ -315,8 +315,6 @@ async function checkManifest({ id, sourceName, projectJson, importPath }) {
   }
 }
 
-
-
 function viteAutoImportBlock({ content, id}) {
   const importRegex = /(?<startBlock>\*\*\/[\r\n\s]+)(?<imports>.*[\r\n])(?<endBlock>[\s\r\n]*\/\*\* End of vite:bundler auto-imports \*\*\/)/
   let { startBlock, imports, endBlock } = content.match(importRegex)?.groups || { imports: '' }

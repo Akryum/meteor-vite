@@ -8,8 +8,8 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: [
-        'ts-minitest',
-    ]
+      'ts-minitest',
+    ],
   },
 
   meteor: {
