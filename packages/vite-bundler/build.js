@@ -232,3 +232,17 @@ function getTempDir() {
     return path.resolve(cwd, 'node_modules', '.vite-meteor-temp')
   }
 }
+
+function prepareWorkerFiles(workerDir) {
+  const entries = Object.entries(ViteBuildPlugins.paths).map(([name, relativePath]) => {
+    const absolutePath = path.join(workerDir, relativePath)
+    const source = ViteBuildPlugins.sources[name]
+
+    fs.ensureDirSync(path.dirname(absolutePath))
+    fs.writeFileSync(absolutePath, source, 'utf8')
+
+    return [name, absolutePath]
+  })
+
+  return Object.fromEntries(entries)
+}
