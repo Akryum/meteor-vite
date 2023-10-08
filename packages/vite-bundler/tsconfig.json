@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "typeRoots": [
+      "../../examples/vue/node_modules/@types",
+      "../../examples/vue/node_modules",
+      "../../npm-packages"
+    ],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "preserveSymlinks": true,
+    "strict": true,
+    "baseUrl": "../../examples/vue/",
+    "paths": {
+      "meteor/*": [
+        "../../examples/vue/node_modules/@types/meteor/*",
+        "../../examples/vue/.meteor/local/types/packages.d.ts",
+        ".npm/plugin/vite/node_modules/@types"
+      ]
+    },
+    "skipLibCheck": true
+  }
+}

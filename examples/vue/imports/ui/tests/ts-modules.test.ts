@@ -61,4 +61,3 @@ export default () => describe('TypeScript Atmosphere package exports', () => {
     expect(NamedReExport).toBe('NamedReExport')
   })
 })
-

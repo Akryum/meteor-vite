@@ -1,0 +1,52 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+      - release
+
+env:
+  METEOR_SESSION_FILE_PATH: /opt/meteor/.meteor_session.json
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Repo'
+        uses: actions/checkout@v3
+
+      - name: 'Setup Node.js'
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: 'Prepare Meteor Session'
+        run: |
+          mkdir -p $(dirname "$METEOR_SESSION_FILE_PATH")
+          echo '${{ secrets.METEOR_SESSION }}' > "$METEOR_SESSION_FILE_PATH"
+
+      - name: 'Configure Git'
+        run: | 
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 'Setup Meteor'
+        uses: meteorengineer/setup-meteor@v1
+        with:
+          meteor-release: '2.10.0'
+
+      - name: 'Install Dependencies'
+        run: meteor npm run install:workspace
+
+      - name: 'Create Release'
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: meteor npm run version
+          publish: meteor npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          METEOR_SESSION_FILE: ${{ env.METEOR_SESSION_FILE_PATH }}

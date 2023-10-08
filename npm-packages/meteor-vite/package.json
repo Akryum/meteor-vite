@@ -1,0 +1,54 @@
+{
+  "name": "meteor-vite",
+  "version": "1.2.1",
+  "description": "",
+  "files": [
+    "dist"
+  ],
+  "main": "",
+  "exports": {
+    "./plugin": "./dist/vite/index.mjs",
+    "./client": "./dist/meteor/client/index.mjs"
+  },
+  "scripts": {
+    "start": "ts-node-dev src/bin/debug/watch-mocks.ts",
+    "watch": "tsup --watch",
+    "build": "rm -rf ./dist && tsup-node",
+    "prepare": "npm run build",
+    "test": "vitest"
+  },
+  "tsup": [
+    {
+      "entry": [
+        "./src/bin/worker/index.ts",
+        "./src/meteor/client/index.ts"
+      ],
+      "outDir": "dist",
+      "format": "esm",
+      "sourcemap": true
+    }
+  ],
+  "keywords": [],
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/Akryum/meteor-vite/issues"
+  },
+  "homepage": "https://github.com/Akryum/meteor-vite#readme",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/parser": "^7.22.5",
+    "@babel/traverse": "^7.22.5",
+    "p-limit": "^3.1.0",
+    "picocolors": "^1.0.0"
+  },
+  "devDependencies": {
+    "@babel/types": "^7.22.5",
+    "@sveltejs/vite-plugin-svelte": "^2.4.2",
+    "@types/node": "^20.3.3",
+    "ts-node-dev": "^2.0.0",
+    "tsup": "^7.1.0",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.3",
+    "vitest": "^0.32.2"
+  }
+}

@@ -1,12 +1,1 @@
-declare module 'vite' {
-  interface UserConfig {
-    /**
-     * Meteor configuration
-     */
-    meteor?: {
-      clientEntry: string
-    }
-  }
-}
-
-export {}
+export * from './loading/vite-connection-handler'

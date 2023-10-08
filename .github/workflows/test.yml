@@ -1,0 +1,25 @@
+name: 'Tests'
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+env:
+  NPM_PACKAGE_PATH: ./npm-packages/meteor-vite
+
+jobs:
+  build-vue-example:
+    name: 'meteor-vite package'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: 'Setup Node'
+        uses: actions/setup-node@v3
+      - name: 'Install dependencies'
+        run: cd "$NPM_PACKAGE_PATH" && npm i
+      - name: 'Run tests'
+        run: cd "$NPM_PACKAGE_PATH" && npm test
+
+

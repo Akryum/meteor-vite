@@ -1,0 +1,25 @@
+{
+  "changesets": [
+    {
+      "releases": [
+        {
+          "name": "meteor-vite",
+          "type": "patch"
+        }
+      ],
+      "summary": "Update parser to eagerly parse and export all available exports for a given Meteor package",
+      "id": "violet-sheep-lay"
+    }
+  ],
+  "releases": [
+    {
+      "name": "meteor-vite",
+      "type": "patch",
+      "oldVersion": "1.2.0",
+      "changesets": [
+        "violet-sheep-lay"
+      ],
+      "newVersion": "1.2.1"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 Package.describe({
   name: 'vite:bundler',
-  version: '0.1.10',
+  version: '1.2.1',
   summary: 'Integrate the Vite.js bundler with Meteor',
   git: 'https://github.com/Akryum/meteor-vite',
   documentation: 'README.md',
@@ -12,10 +12,11 @@ Package.registerBuildPlugin({
     'ecmascript@0.16.2',
     'caching-compiler@1.2.2',
     'babel-compiler@7.9.0',
-    'vite:build-plugins'
+    'typescript@4.0.0',
   ],
   sources: [
     'build.js',
+    'workers.ts',
   ],
   npmDependencies: {
     execa: '6.1.0',
@@ -28,7 +29,11 @@ Package.onUse(function(api) {
   api.use('isobuild:compiler-plugin@1.0.0')
   api.use('zodern:types')
   api.use('ecmascript')
+  api.use('zodern:types');
   api.use('webapp@1.13.1')
-  api.use('vite:build-plugins');
-  api.mainModule('server.js', 'server')
+  api.use('typescript@4.0.0')
+  api.addAssets(['loading/dev-server-splash.html'], 'server');
+  api.mainModule('client.ts', 'client');
+  api.mainModule('vite-server.ts', 'server')
 })
+

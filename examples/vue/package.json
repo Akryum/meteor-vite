@@ -1,19 +1,25 @@
 {
-  "name": "meteor-vite",
+  "name": "vue-example",
   "private": true,
   "scripts": {
-    "dev": "meteor run",
-    "build": "meteor build ../output/vue --directory",
+    "dev": "meteor npm run dev:build",
+    "dev:build": "meteor npm run build:dependencies && cross-env BUILD_METEOR_VITE_DEPENDENCY='true' meteor npm run dev:start",
+    "dev:start": "meteor run --settings settings.json",
+    "build": "meteor npm run build:dependencies && meteor npm run build:meteor",
     "start": "(cd ../output/vue/bundle && (cd programs/server && meteor npm install) && PORT=4040 ROOT_URL=http://localhost:4040 MONGO_URL=mongodb://127.0.0.1:3001/meteor meteor node main.js)",
     "test-build": "rm -rf ../output/vue && meteor npm run build && concurrently \"meteor npm run dev\" \"meteor npm run start\"",
     "test": "meteor test --once --driver-package meteortesting:mocha",
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
-    "visualize": "meteor --production --extra-packages bundle-visualizer"
+    "visualize": "meteor --production --extra-packages bundle-visualizer",
+    "build:dependencies": "(cd ./node_modules/meteor-vite && meteor npm run build)",
+    "build:meteor": "meteor build ../output/vue --directory",
+    "postinstall": "npm run build:dependencies"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.13",
     "chalk": "^4.1.2",
     "meteor-node-stubs": "^1.2.5",
+    "meteor-vite": "file:../../npm-packages/meteor-vite",
     "safe-json-stringify": "^1.2.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6"
@@ -25,10 +31,11 @@
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.12",
     "concurrently": "^7.5.0",
+    "cross-env": "^7.0.3",
     "tailwindcss": "^3.2.1",
     "ts-minitest": "^1.0.0",
     "typescript": "^4.6.3",
-    "vite": "^4.1.0"
+    "vite": "^4.1.5"
   },
   "meteor": {
     "mainModule": {
