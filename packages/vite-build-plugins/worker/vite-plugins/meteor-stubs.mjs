@@ -217,13 +217,6 @@ function parseModules(content, packageId) {
 
 class MeteorViteError extends Error {}
 
-function createDebugLogger(packageName, currentFile) {
-  if (currentFile.includes(packageName)) {
-    return (...args) => console.info(`[${packageName}]`, ...args)
-  }
-  return (...args) => null
-}
-
 async function getSourceText({ meteorPackagePath, id, projectJson }) {
   let {
     /**
