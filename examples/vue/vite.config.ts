@@ -1,3 +1,5 @@
+/// <reference types="./packages/vite-bundler/index.d.ts" />
+
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { MeteorViteConfig } from '../../npm-packages/meteor-vite';
@@ -8,8 +10,8 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: [
-        'ts-minitest',
-    ]
+      'ts-minitest',
+    ],
   },
 
   meteor: {

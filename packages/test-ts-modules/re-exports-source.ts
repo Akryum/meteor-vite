@@ -1,2 +1,2 @@
-export const DefaultReExport = 'DefaultReExport';
-export const NamedReExport = 'NamedReExport';
+export const DefaultReExport = 'DefaultReExport'
+export const NamedReExport = 'NamedReExport'

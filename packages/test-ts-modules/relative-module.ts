@@ -1,1 +1,1 @@
-export const NamedRelativeInteger = 1;
+export const NamedRelativeInteger = 1

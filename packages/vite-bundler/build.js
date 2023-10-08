@@ -3,8 +3,8 @@ import { performance } from 'node:perf_hooks'
 import fs from 'fs-extra'
 import { execaSync } from 'execa'
 import pc from 'picocolors'
-import { createWorkerFork, cwd } from './workers';
-import os from 'node:os';
+import { createWorkerFork, cwd } from './workers'
+import os from 'node:os'
 
 if (process.env.VITE_METEOR_DISABLED) return
 if (process.env.NODE_ENV !== 'production') return
@@ -40,10 +40,10 @@ const filesToCopy = [
   meteorMainModule,
 ]
 
-const tempDir = getTempDir();
+const tempDir = getTempDir()
 const tempMeteorProject = path.resolve(tempDir, 'meteor')
 const tempMeteorOutDir = path.join(tempDir, 'bundle', 'meteor')
-const viteOutDir = path.join(tempDir, 'bundle', 'vite');
+const viteOutDir = path.join(tempDir, 'bundle', 'vite')
 
 try {
   // Temporary Meteor build
@@ -69,9 +69,9 @@ try {
       const lines = content.split('\n')
       content = lines.map(line => {
         if (!line.startsWith(pack.startsWith)) {
-          return line;
+          return line
         }
-        return pack.replaceWith || '';
+        return pack.replaceWith || ''
       }).join('\n')
     }
     fs.writeFileSync(file, content)
@@ -121,7 +121,7 @@ try {
   const { payload } = Promise.await(new Promise((resolve, reject) => {
     const worker = createWorkerFork({
       buildResult: (result) => resolve(result) ,
-    });
+    })
 
     worker.call({
       method: 'buildForProduction',
@@ -224,11 +224,11 @@ try {
 
 function getTempDir() {
   try {
-    const tempDir = path.resolve(pkg?.meteorVite?.tempDir || os.tmpdir(), 'meteor-vite', pkg.name);
-    fs.mkdirSync(tempDir, { recursive: true });
-    return tempDir;
+    const tempDir = path.resolve(pkg?.meteorVite?.tempDir || os.tmpdir(), 'meteor-vite', pkg.name)
+    fs.mkdirSync(tempDir, { recursive: true })
+    return tempDir
   } catch (error) {
-    console.warn(new Error(`⚡  Unable to set up temp directory for meteor-vite bundles. Will use node_modules instead`, { cause: error }));
-    return path.resolve(cwd, 'node_modules', '.vite-meteor-temp');
+    console.warn(new Error(`⚡  Unable to set up temp directory for meteor-vite bundles. Will use node_modules instead`, { cause: error }))
+    return path.resolve(cwd, 'node_modules', '.vite-meteor-temp')
   }
 }
