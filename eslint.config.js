@@ -4,5 +4,6 @@ module.exports = antfu({
   ignores: [
     'examples/output/',
     '.meteor',
+    '.npm',
   ],
 })
