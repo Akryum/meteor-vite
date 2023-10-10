@@ -17,9 +17,9 @@ export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/work
 export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
   if (!FS.existsSync(workerPath)) {
     throw new MeteorViteError([
-                `Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package.`,
-                `Install it by running the following command:`,
-                `$  ${pc.yellow('npm i -D meteor-vite')}`,
+      `Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package.`,
+      `Install it by running the following command:`,
+      `$  ${pc.yellow('npm i -D meteor-vite')}`,
     ])
   }
 
