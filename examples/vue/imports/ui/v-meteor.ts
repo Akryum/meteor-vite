@@ -1,6 +1,7 @@
 import { Tracker } from 'meteor/tracker'
 import { Meteor } from 'meteor/meteor'
-import { App, computed, ComputedRef, getCurrentInstance, markRaw, onUnmounted, reactive, ref, watch, watchEffect } from 'vue'
+import type { App, ComputedRef } from 'vue'
+import { computed, getCurrentInstance, markRaw, onUnmounted, reactive, ref, watch, watchEffect } from 'vue'
 
 export const config = {
   subscribe: Meteor.subscribe,
@@ -14,7 +15,7 @@ export interface AutorunEffect<TResult> extends Stoppable {
   result: ComputedRef<TResult>
 }
 
-function autorun<TResult = unknown> (callback: () => TResult): AutorunEffect<TResult> {
+function autorun<TResult = unknown>(callback: () => TResult): AutorunEffect<TResult> {
   const result = ref<TResult>()
   const stop = watchEffect((onInvalidate) => {
     const computation = Tracker.autorun(() => {
@@ -35,19 +36,18 @@ export interface ReactiveMeteorSubscription extends Stoppable {
   ready: ComputedRef<boolean>
 }
 
-function subscribe (payload: string | (() => [name: string, ...args: any[]]), ...args: any[]): ReactiveMeteorSubscription {
-  if (typeof payload === 'string') {
+function subscribe(payload: string | (() => [name: string, ...args: any[]]), ...args: any[]): ReactiveMeteorSubscription {
+  if (typeof payload === 'string')
     return simpleSubscribe(payload, ...args)
-  } else {
+  else
     return watchSubscribe(payload)
-  }
 }
 
-function simpleSubscribe (name: string, ...args: any[]): ReactiveMeteorSubscription {
+function simpleSubscribe(name: string, ...args: any[]): ReactiveMeteorSubscription {
   const sub = config.subscribe(name, ...args)
   const ready = autorun(() => sub.ready())
 
-  function stop (): void {
+  function stop(): void {
     ready.stop()
     sub.stop()
   }
@@ -62,7 +62,7 @@ function simpleSubscribe (name: string, ...args: any[]): ReactiveMeteorSubscript
   }
 }
 
-function watchSubscribe (callback: () => [name: string, ...args: any[]]): ReactiveMeteorSubscription {
+function watchSubscribe(callback: () => [name: string, ...args: any[]]): ReactiveMeteorSubscription {
   const ready = ref(false)
   const stop = watch(callback, (value, oldValue, onInvalidate) => {
     const sub = config.subscribe(...value)
@@ -86,11 +86,11 @@ function watchSubscribe (callback: () => [name: string, ...args: any[]]): Reacti
   }
 }
 
-function makeComposable <
+function makeComposable<
   TName extends string = string,
   TReturn extends Stoppable = Stoppable,
-  TFn extends (...args: any[]) => TReturn = (...args: any[]) => TReturn
-> (name: TName, fn: TFn): () => {
+  TFn extends (...args: any[]) => TReturn = (...args: any[]) => TReturn,
+>(name: TName, fn: TFn): () => {
   [K in TName]: TFn
 } {
   return () => {
@@ -117,14 +117,13 @@ function makeComposable <
 export const useAutorun = makeComposable<'autorun', ReturnType<typeof autorun>, typeof autorun>('autorun', autorun)
 export const useSubscribe = makeComposable<'subscribe', ReturnType<typeof subscribe>, typeof subscribe>('subscribe', subscribe)
 
-function makeSetupOnlyFunction <
-  TFn extends (...args: any[]) => any
-> (fn: TFn): TFn {
+function makeSetupOnlyFunction<
+  TFn extends (...args: any[]) => any,
+>(fn: TFn): TFn {
   return ((...args) => {
     if (process.env.NODE_ENV !== 'production') {
-      if (!getCurrentInstance()) {
+      if (!getCurrentInstance())
         console.warn(`'${fn.name}()' should only be used in setup() inside components to clean up correctly. If you need to call '${fn.name}' later outside of the setup context, use 'use${fn.name[0].toUpperCase()}${fn.name.slice(1)}()' instead.`)
-      }
     }
     return fn(...args)
   }) as TFn
@@ -139,41 +138,42 @@ export {
 }
 
 export function call<
-  TResult = any
-> (methodName: string, ...args: any[]): Promise<TResult> {
+  TResult = any,
+>(methodName: string, ...args: any[]): Promise<TResult> {
   return new Promise<TResult>((resolve, reject) => {
     Meteor.call(methodName, ...args, (err: Error, res: TResult) => {
-      if (err) {
+      if (err)
         reject(err)
-      } else {
+      else
         resolve(res)
-      }
     })
   })
 }
 
 export type MethodResultCallback<TResult = any> = (error: Error | undefined, result: TResult | undefined) => unknown
 
-export function useMethod <TArgs extends any[] = any[], TResult = any> (name: string) {
+export function useMethod<TArgs extends any[] = any[], TResult = any>(name: string) {
   const pending = ref(false)
   const error = ref<Error>()
   const result = ref<TResult>()
   const callbacks: MethodResultCallback<TResult>[] = []
 
-  async function _call (...args: TArgs) {
+  async function _call(...args: TArgs) {
     pending.value = true
     error.value = undefined
     try {
       result.value = await call(name, ...args)
-    } catch (e) {
+    }
+    catch (e) {
       error.value = e as Error
-    } finally {
+    }
+    finally {
       pending.value = false
       callbacks.forEach(callback => callback(error.value, result.value))
     }
   }
 
-  function onResult (callback: MethodResultCallback<TResult>) {
+  function onResult(callback: MethodResultCallback<TResult>) {
     callbacks.push(callback)
   }
 
@@ -186,19 +186,21 @@ export function useMethod <TArgs extends any[] = any[], TResult = any> (name: st
 }
 
 export const VueMeteor = {
-  install (app: App) {
+  install(app: App) {
     app.mixin({
-      beforeCreate () {
+      beforeCreate() {
         if (this.$options.meteor) {
           const subReady = reactive<Record<string, boolean>>({})
 
           if (this.$options.meteor.$subscribe) {
             for (const key in this.$options.meteor.$subscribe) {
               const value = this.$options.meteor.$subscribe[key]
-              const { ready } = typeof value === 'function' ? subscribe(() => {
-                const result = value.call(this)
-                return [key, ...result]
-              }) : subscribe(key, ...value)
+              const { ready } = typeof value === 'function'
+                ? subscribe(() => {
+                  const result = value.call(this)
+                  return [key, ...result]
+                })
+                : subscribe(key, ...value)
               // @ts-expect-error unwrapping computed
               subReady[key] = ready
             }
@@ -212,7 +214,8 @@ export const VueMeteor = {
           this.$options.methods.$subscribe = $subscribe
 
           for (const key in this.$options.meteor) {
-            if (key.startsWith('$')) continue
+            if (key.startsWith('$'))
+              continue
             const fn = this.$options.meteor[key]
             const { result } = autorun(fn)
             this.$options.computed[key] = () => result.value

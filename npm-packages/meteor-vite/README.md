@@ -2,7 +2,7 @@
 Handles the creation of stubs for Meteor's Atmosphere packages to enable Vite to be compatible with Meteor.
 
 This package is not intended to be used by itself as it is a dependency of the
-[`vite:bundler`](https://github.com/JorgenVatle/meteor-vite#readme) Atmosphere package.
+[`vite:bundler`](https://github.com/Akryum/meteor-vite#readme) Atmosphere package.
 
 ## Contribution notes
 #### Testing changes
