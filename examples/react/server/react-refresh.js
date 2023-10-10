@@ -1,12 +1,12 @@
 import { Meteor } from 'meteor/meteor'
 import { WebAppInternals } from 'meteor/webapp'
-import { getConfig } from 'meteor/jorgenvatle:vite-bundler/loading/vite-connection-handler'
+import { getConfig } from 'meteor/vite:bundler/loading/vite-connection-handler'
 
 /**
  * Inject React Refresh snippet into HTML served by Meteor in development mode.
  * Without this snippet, React HMR will not work with Meteor-Vite.
  *
- * {@link https://github.com/JorgenVatle/meteor-vite/issues/29}
+ * {@link https://github.com/Akryum/meteor-vite/issues/29}
  * {@link https://github.com/vitejs/vite-plugin-react/issues/11#discussion_r430879201}
  */
 if (Meteor.isDevelopment) {

@@ -71,11 +71,11 @@ export function viteAutoImportBlock({ content, id }: { content: string; id: stri
     return content.replace(REGEX_AUTO_IMPORT_BLOCK, `${startBlock.trim()}\n${imports}\n${endBlock.trim()}`)
 
   return `/**
- * These modules are automatically imported by jorgenvatle:vite-bundler.
+ * These modules are automatically imported by vite:bundler.
  * You can commit these to your project or move them elsewhere if you'd like,
  * but they must be imported somewhere in your Meteor entrypoint file.
  *
- * More info: https://github.com/JorgenVatle/meteor-vite#lazy-loaded-meteor-packages
+ * More info: https://github.com/Akryum/meteor-vite#lazy-loaded-meteor-packages
 **/
 ${imports}
 /** End of vite-bundler auto-imports **/
