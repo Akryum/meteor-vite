@@ -96,10 +96,10 @@ export function getProjectPackageJson(): ProjectJson {
 
   if (!FS.existsSync(path)) {
     throw new MeteorViteError([
-            `Unable to locate package.json for your project in ${pc.yellow(path)}`,
-            `Make sure you run Meteor commands from the root of your project directory.`,
-            `Alternatively, you can supply a superficial CWD for Meteor-Vite to use:`,
-            `$  cross-env METEOR_VITE_CWD="./projects/my-meteor-project/" meteor run`,
+      `Unable to locate package.json for your project in ${pc.yellow(path)}`,
+      `Make sure you run Meteor commands from the root of your project directory.`,
+      `Alternatively, you can supply a superficial CWD for Meteor-Vite to use:`,
+      `$  cross-env METEOR_VITE_CWD="./projects/my-meteor-project/" meteor run`,
     ])
   }
 
