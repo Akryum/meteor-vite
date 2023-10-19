@@ -4,11 +4,24 @@ import { LinksCollection } from '../../api/links/links';
 
 export const Info = () => {
     try {
-
       const isLoading = useSubscribe('links');
       const links = useFind(() => LinksCollection.find());
-    } catch (error) {
+        if(isLoading()) {
+            return <div>Loading...</div>;
+        }
 
+        return (
+            <div>
+                <h2>Learn Meteor!</h2>
+                <ul>{links.map(
+                    link => <li key={link._id}>
+                        <a href={link.url} target="_blank">{link.title}</a>
+                    </li>
+                )}</ul>
+            </div>
+        );
+
+    } catch (error) {
         return (
             <div>
                 <h1>Exception while calling React Meteor Data</h1>
@@ -20,19 +33,4 @@ export const Info = () => {
             </div>
         )
     }
-
-  if(isLoading()) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div>
-      <h2>Learn Meteor!</h2>
-      <ul>{links.map(
-        link => <li key={link._id}>
-          <a href={link.url} target="_blank">{link.title}</a>
-        </li>
-      )}</ul>
-    </div>
-  );
 };
