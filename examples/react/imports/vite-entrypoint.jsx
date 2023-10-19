@@ -1,5 +1,5 @@
 import React from 'react';
-const { createRoot } = require('react-dom/client');
+import { createRoot } from 'react-dom/client';
 import { Meteor } from 'meteor/meteor';
 import { App } from './ui/App';
 

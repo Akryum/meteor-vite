@@ -6,5 +6,4 @@
  * More info: https://github.com/JorgenVatle/meteor-vite#lazy-loaded-meteor-packages
 **/
 import 'meteor/react-meteor-data';
-import 'react-dom/client';
 /** End of vite-bundler auto-imports **/
