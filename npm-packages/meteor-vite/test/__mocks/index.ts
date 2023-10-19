@@ -147,6 +147,14 @@ export const RdbSvelteMeteorData = prepareMock({
         'use-tracker.js': [
             { type: 'export-default', }
         ],
+        'subscribe.js': [
+            { type: 'global-binding', name: 'current_component', from: 'svelte/internal', id: 0 },
+        ],
+        'autorun.js': [
+            { type: 'global-binding', name: 'current_component', from: 'svelte/internal', id: 0 },
+            { type: 'global-binding', name: 'schedule_update', from: 'svelte/internal', id: 0 },
+            { type: 'global-binding', name: 'dirty_components', from: 'svelte/internal', id: 0 },
+        ]
     },
     packageScopeExports: {
     
