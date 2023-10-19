@@ -2,14 +2,21 @@
   "name": "meteor-vite",
   "version": "1.3.2",
   "description": "",
-  "files": [
-    "dist"
-  ],
-  "main": "",
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://github.com/Akryum/meteor-vite#readme",
+  "bugs": {
+    "url": "https://github.com/Akryum/meteor-vite/issues"
+  },
+  "keywords": [],
   "exports": {
     "./plugin": "./dist/vite/index.mjs",
     "./client": "./dist/meteor/client/index.mjs"
   },
+  "main": "",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "start": "ts-node-dev src/bin/debug/watch-mocks.ts",
     "watch": "tsup --watch",
@@ -28,13 +35,6 @@
       "sourcemap": true
     }
   ],
-  "keywords": [],
-  "author": "",
-  "bugs": {
-    "url": "https://github.com/JorgenVatle/meteor-vite/issues"
-  },
-  "homepage": "https://github.com/JorgenVatle/meteor-vite#readme",
-  "license": "ISC",
   "dependencies": {
     "@babel/parser": "^7.22.5",
     "@babel/traverse": "^7.22.5",

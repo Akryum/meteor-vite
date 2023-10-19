@@ -1,1 +1,1 @@
-export { validateStub } from './ValidateStub';
+export { validateStub } from './ValidateStub'

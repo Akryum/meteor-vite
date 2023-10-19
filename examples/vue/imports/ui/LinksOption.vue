@@ -8,7 +8,7 @@ export default defineComponent({
       links: [],
     },
 
-    links () {
+    links() {
       return LinksCollection.find({}).fetch()
     },
   },
@@ -17,7 +17,9 @@ export default defineComponent({
 
 <template>
   <div class="flex flex-col gap-4">
-    <h1 class="text-2xl">Learn Meteor!</h1>
+    <h1 class="text-2xl">
+      Learn Meteor!
+    </h1>
     <ul>
       <li
         v-for="link of links"
@@ -37,4 +39,3 @@ h1 {
   color: #35495e;
 }
 </style>
-  

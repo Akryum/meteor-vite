@@ -1,1 +1,1 @@
-export const WhereAmI = 'I am in a subdirectory!';
+export const WhereAmI = 'I am in a subdirectory!'

@@ -6,9 +6,9 @@ Package.describe({
   documentation: 'README.md',
 })
 
-Package.onUse(function(api) {
+Package.onUse((api) => {
   api.use('ecmascript')
   api.use('zodern:types')
   api.use('typescript')
-  api.mainModule('index.ts', ['client', 'server'], { lazy: true });
+  api.mainModule('index.ts', ['client', 'server'], { lazy: true })
 })

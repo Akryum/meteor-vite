@@ -1,21 +1,21 @@
-import { Meteor } from 'meteor/meteor';
-import { LinksCollection } from '/imports/api/links';
+import { Meteor } from 'meteor/meteor'
+import { LinksCollection } from '/imports/api/links'
 
 async function insertLink({ title, url }) {
-  await LinksCollection.insertAsync({ title, url, createdAt: new Date() });
+  await LinksCollection.insertAsync({ title, url, createdAt: new Date() })
 }
 
-Meteor.publish('links.all', function publishLinksAll() {
-  return LinksCollection.find();
+Meteor.publish('links.all', () => {
+  return LinksCollection.find()
 })
 
 Meteor.methods({
-  async 'links.reverse-title'(linkId) {
-    const { title } = await LinksCollection.findOneAsync(linkId);
+  'links.reverse-title': async function (linkId) {
+    const { title } = await LinksCollection.findOneAsync(linkId)
     await LinksCollection.updateAsync(linkId, {
-      $set: { title: title.split('').reverse().join('') }
-    });
-  }
+      $set: { title: title.split('').reverse().join('') },
+    })
+  },
 })
 
 Meteor.startup(async () => {
@@ -24,21 +24,21 @@ Meteor.startup(async () => {
     await insertLink({
       title: 'Do the Tutorial',
       url: 'https://svelte-tutorial.meteor.com/',
-    });
+    })
 
     await insertLink({
       title: 'Follow the Guide',
       url: 'https://guide.meteor.com',
-    });
+    })
 
     await insertLink({
       title: 'Read the Docs',
       url: 'https://docs.meteor.com',
-    });
+    })
 
     await insertLink({
       title: 'Discussions',
       url: 'https://forums.meteor.com',
-    });
+    })
   }
-});
+})

@@ -1,4 +1,4 @@
-name: 'Build for production'
+name: Build for production
 on:
   workflow_call:
     inputs:
@@ -8,22 +8,22 @@ on:
 
 jobs:
   build:
-    name: 'Build'
+    name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: 'Checkout'
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: 'Setup Meteor'
+      - name: Setup Meteor
         uses: meteorengineer/setup-meteor@v1
         with:
           meteor-release: '2.12'
 
-      - name: 'Install dependencies'
+      - name: Install dependencies
         run: meteor npm run install:${{ inputs.name }}
 
-      - name: 'Link meteor-vite package'
+      - name: Link meteor-vite package
         run: meteor npm run link:${{ inputs.name }}
 
-      - name: 'Build for production'
+      - name: Build for production
         run: meteor npm run build:${{ inputs.name }}
