@@ -1,5 +1,5 @@
-import { RollupOutput } from 'rollup';
-import { build, resolveConfig } from 'vite';
+import { RollupOutput, RollupWatcher } from 'rollup';
+import { build, InlineConfig, resolveConfig } from 'vite';
 import { MeteorViteConfig } from '../../vite/MeteorViteConfig';
 import { MeteorStubs } from '../../vite';
 import MeteorVitePackage from '../../../package.json';
@@ -25,28 +25,31 @@ type Replies = IPCReply<{
     }
 }>
 
-export default CreateIPCInterface({
-    async buildForProduction(
-        reply: Replies,
-        buildConfig: BuildOptions
-    ) {
-        const { viteOutDir, meteor, packageJson } = buildConfig;
-        
-        Object.entries(buildConfig).forEach(([key, value]) => {
-            if (!value) {
-                throw new Error(`Vite: Worker missing required build argument "${key}"!`)
-            }
-        })
-        
-        const viteConfig: MeteorViteConfig = await resolveConfig({
-            configFile: packageJson?.meteor?.viteConfig
-        }, 'build');
-        
-        if (!viteConfig.meteor?.clientEntry) {
-            throw new Error(`You need to specify an entrypoint in your Vite config! See: ${MeteorVitePackage.homepage}`);
+type ParsedConfig = {
+    viteConfig: MeteorViteConfig;
+    inlineBuildConfig: InlineConfig;
+}
+
+async function prepareConfig(buildConfig: BuildOptions): Promise<ParsedConfig> {
+    const { viteOutDir, meteor, packageJson } = buildConfig;
+
+    Object.entries(buildConfig).forEach(([key, value]) => {
+        if (!value) {
+            throw new Error(`Vite: Worker missing required build argument "${key}"!`)
         }
-        
-        const results = await build({
+    })
+
+    const viteConfig: MeteorViteConfig = await resolveConfig({
+        configFile: buildConfig.packageJson?.meteor?.viteConfig
+    }, 'build');
+
+    if (!viteConfig.meteor?.clientEntry) {
+        throw new Error(`You need to specify an entrypoint in your Vite config! See: ${MeteorVitePackage.homepage}`);
+    }
+
+    return {
+        viteConfig,
+        inlineBuildConfig: {
             build: {
                 lib: {
                     entry: viteConfig?.meteor?.clientEntry,
@@ -68,7 +71,31 @@ export default CreateIPCInterface({
                     packageJson,
                 }),
             ],
-        }).catch((error) => {
+        }
+    }
+}
+
+function validateOutput(rollupResult?: RollupOutput | RollupWatcher | void): asserts rollupResult is RollupOutput {
+    if (!rollupResult) {
+        throw new Error('Received no result from Rollup!');
+    }
+
+    if ('output' in rollupResult) {
+        return;
+    }
+
+    const message = 'Unexpected rollup result!';
+    console.error(message, rollupResult);
+    throw new Error(message);
+}
+
+export default CreateIPCInterface({
+    async buildForProduction(
+        reply: Replies,
+        buildConfig: BuildOptions
+    ) {
+        const { viteConfig, inlineBuildConfig } = await prepareConfig(buildConfig);
+        const results = await build(inlineBuildConfig).catch((error) => {
             reply({
                 kind: 'buildResult',
                 data: {
@@ -77,23 +104,11 @@ export default CreateIPCInterface({
                     },
                 }
             })
-            throw error;
         });
-        
+
         const result = Array.isArray(results) ? results[0] : results;
-        
-        function validateOutput(rollupResult: typeof result): asserts rollupResult is RollupOutput {
-            if ('output' in rollupResult) {
-                return;
-            }
-            
-            const message = 'Unexpected rollup result!';
-            console.error(message, rollupResult);
-            throw new Error(message);
-        }
-        
         validateOutput(result);
-        
+
         // Result payload
         reply({
             kind: 'buildResult',
