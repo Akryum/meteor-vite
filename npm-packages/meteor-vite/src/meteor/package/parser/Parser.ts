@@ -195,8 +195,8 @@ class MeteorInstall {
         const packageModules = packageName.value.properties;
 
         const meteorPackage = new this({
-            packageId: `${meteor.key.value}/${packageName.key.value}`,
-            name: packageName.key.value,
+            packageId: `${propParser.getKey(meteor)}/${propParser.getKey(packageName)}`,
+            name: propParser.getKey(packageName),
         });
 
         meteorPackage.traverseModules(packageModules, '');
