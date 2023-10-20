@@ -185,13 +185,8 @@ class MeteorInstall {
     }
     
     public static parse(requireDeclaration: Node) {
-        if (!this.isRequireDeclaration(requireDeclaration)) {
-            return;
-        }
-        
-        if (!this.isMeteorInstall(requireDeclaration.init)) {
-            return;
-        }
+        if (!this.isRequireDeclaration(requireDeclaration)) return;
+        if (!this.isMeteorInstall(requireDeclaration.init)) return;
         
         const modules = requireDeclaration.init.arguments[0];
         const node_modules = modules.properties[0];
