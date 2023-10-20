@@ -6,29 +6,43 @@ import MeteorVitePackage from '../../../package.json';
 import { PluginSettings, ProjectJson } from '../../vite/plugin/MeteorStubs';
 import CreateIPCInterface, { IPCReply } from './IPC/interface';
 
-interface BuildOptions {
-    viteOutDir: string;
-    meteor: PluginSettings['meteor'];
-    packageJson: ProjectJson;
-}
+export default CreateIPCInterface({
+    async buildForProduction(
+        reply: Replies,
+        buildConfig: BuildOptions
+    ) {
+        const { viteConfig, inlineBuildConfig } = await prepareConfig(buildConfig);
+        const results = await build(inlineBuildConfig).catch((error) => {
+            reply({
+                kind: 'buildResult',
+                data: {
+                    payload: {
+                        success: false
+                    },
+                }
+            })
+        });
 
-type Replies = IPCReply<{
-    kind: 'buildResult',
-    data: {
-        payload: {
-            success: true;
-            meteorViteConfig: any,
-            output?: {name?: string, type: string, fileName: string}[]
-        } | {
-            success: false;
-        };
+        const result = Array.isArray(results) ? results[0] : results;
+        validateOutput(result);
+
+        // Result payload
+        reply({
+            kind: 'buildResult',
+            data: {
+                payload: {
+                    success: true,
+                    meteorViteConfig: viteConfig.meteor,
+                    output: result.output.map(o => ({
+                        name: o.name,
+                        type: o.type,
+                        fileName: o.fileName,
+                    })),
+                },
+            }
+        })
     }
-}>
-
-type ParsedConfig = {
-    viteConfig: MeteorViteConfig;
-    inlineBuildConfig: InlineConfig;
-}
+})
 
 async function prepareConfig(buildConfig: BuildOptions): Promise<ParsedConfig> {
     const { viteOutDir, meteor, packageJson } = buildConfig;
@@ -89,44 +103,28 @@ function validateOutput(rollupResult?: RollupOutput | RollupWatcher | void): ass
     throw new Error(message);
 }
 
-export default CreateIPCInterface({
-    async buildForProduction(
-        reply: Replies,
-        buildConfig: BuildOptions
-    ) {
-        const { viteConfig, inlineBuildConfig } = await prepareConfig(buildConfig);
-        const results = await build(inlineBuildConfig).catch((error) => {
-            reply({
-                kind: 'buildResult',
-                data: {
-                    payload: {
-                        success: false
-                    },
-                }
-            })
-        });
+interface BuildOptions {
+    viteOutDir: string;
+    meteor: PluginSettings['meteor'];
+    packageJson: ProjectJson;
+}
 
-        const result = Array.isArray(results) ? results[0] : results;
-        validateOutput(result);
-
-        // Result payload
-        reply({
-            kind: 'buildResult',
-            data: {
-                payload: {
-                    success: true,
-                    meteorViteConfig: viteConfig.meteor,
-                    output: result.output.map(o => ({
-                        name: o.name,
-                        type: o.type,
-                        fileName: o.fileName,
-                    })),
-                },
-            }
-        })
+type Replies = IPCReply<{
+    kind: 'buildResult',
+    data: {
+        payload: {
+                     success: true;
+                     meteorViteConfig: any,
+                     output?: {name?: string, type: string, fileName: string}[]
+                 } | {
+                     success: false;
+                 };
     }
-})
+}>
 
-
+type ParsedConfig = {
+    viteConfig: MeteorViteConfig;
+    inlineBuildConfig: InlineConfig;
+}
 
 
