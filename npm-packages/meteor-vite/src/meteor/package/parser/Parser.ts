@@ -1,11 +1,11 @@
 import { parse } from '@babel/parser';
 import {
-    CallExpression, ExpressionStatement,
+    CallExpression, Expression, ExpressionStatement,
     FunctionExpression, Identifier, is, MemberExpression,
     Node, NumericLiteral,
     ObjectExpression, ObjectMethod,
     ObjectProperty, shallowEqual, StringLiteral,
-    traverse,
+    traverse, VariableDeclarator,
 } from '@babel/types';
 import FS from 'fs/promises';
 import { inspect } from 'util';
@@ -16,8 +16,8 @@ import {
     MeteorPackageProperty,
     ModuleMethod,
     ModuleMethodName,
-    MeteorInstallObject
-} from "./ParserTypes";
+    MeteorInstallObject, MeteorInstallCallExpression,
+} from './ParserTypes';
 
 interface ParseOptions {
     /**
@@ -183,21 +183,18 @@ class MeteorInstall {
         this.packageId = packageId;
         this.name = name;
     }
-
+    
     public static parse(requireDeclaration: Node) {
-        // Validate that this is a top-level require() declaration.
-        if (requireDeclaration.type !== 'VariableDeclarator') return;
-        if (requireDeclaration.id.type !== 'Identifier') return;
-        if (requireDeclaration.id.name !== 'require') return;
-        const node = requireDeclaration.init;
+        if (!this.isRequireDeclaration(requireDeclaration)) {
+            return;
+        }
         
-        // Type assertions to ensure we have a meteorInstall() call expression.
-        if (!node) return;
-        if (node.type !== 'CallExpression') return;
-        if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
+        if (!this.isMeteorInstall(requireDeclaration.init)) {
+            return;
+        }
         
-        const packageConfig = node.arguments[0] as MeteorInstallObject;
-        const node_modules = packageConfig.properties[0];
+        const modules = requireDeclaration.init.arguments[0];
+        const node_modules = modules.properties[0];
         const meteor = node_modules.value.properties[0];
         const packageName = meteor.value.properties[0];
         const packageModules = packageName.value.properties;
@@ -210,6 +207,22 @@ class MeteorInstall {
         meteorPackage.traverseModules(packageModules, '');
 
         return meteorPackage;
+    }
+    
+    protected static isRequireDeclaration(node: Node): node is VariableDeclarator {
+        if (node.type !== 'VariableDeclarator') return false;
+        if (node.id.type !== 'Identifier') return false;
+        if (node.id.name !== 'require') return false;
+        
+        return true;
+    }
+    
+    protected static isMeteorInstall(expression?: Expression | null): expression is MeteorInstallCallExpression {
+        if (!expression) return false;
+        if (expression.type !== 'CallExpression') return false;
+        if (!is('Identifier', expression.callee, { name: 'meteorInstall' })) return false;
+        
+        return true;
     }
 
     public traverseModules(properties: MeteorPackageProperty[], parentPath: string) {
@@ -231,6 +244,7 @@ class MeteorInstall {
             this.modules[path] = module.exports;
         })
     }
+    
 }
 
 /**

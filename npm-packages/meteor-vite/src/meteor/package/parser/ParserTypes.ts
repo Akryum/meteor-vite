@@ -151,3 +151,9 @@ export type MeteorInstallObject = KnownObjectExpression<{
         }>
     }>]
 }>
+
+/**
+ * A call expression for the `meteorInstall()` function.
+ * We're using this to nicely cast types for meteorInstall() nodes.
+ */
+export type MeteorInstallCallExpression = Omit<CallExpression, 'arguments'> & { arguments: [MeteorInstallObject] }
