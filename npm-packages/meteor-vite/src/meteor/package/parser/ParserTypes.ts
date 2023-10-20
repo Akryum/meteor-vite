@@ -1,12 +1,14 @@
 import {
+    ArrayExpression,
+    AssignmentExpression,
     CallExpression,
     FunctionExpression,
     Identifier,
     MemberExpression, NumericLiteral,
     ObjectExpression,
     ObjectProperty,
-    StringLiteral
-} from "@babel/types";
+    StringLiteral,
+} from '@babel/types';
 
 type KnownObjectProperty<TValue extends Pick<ObjectProperty, 'key' | 'value'>> = Omit<ObjectProperty, 'key' | 'value'> & TValue;
 type KnownObjectExpression<TValue extends Pick<ObjectExpression, 'properties'>> = Omit<ObjectExpression, 'properties'> & TValue;
@@ -74,12 +76,27 @@ export namespace ModuleMethod {
     export type Export = ModuleMethodCall<'export', [
         ObjectExpression, // todo: Narrow this type further for keys and values (key Identifier/StringLiteral, etc.)
     ]>
+    
+    /**
+     * Meteor's `module.runSetters()` method.
+     * Todo: Add further documentation
+     *
+     * @example Bundle result
+     * let current_component;
+     * function set_current_component(component) {
+     *   module.runSetters(current_component = component, ["current_component"]);
+     * }
+     */
+    export type RunSetters = ModuleMethodCall<'runSetters', [
+        AssignmentExpression, // todo: Verify whether this is the correct type to use here.
+        ArrayExpression, // Todo: Narrow down expected array element types. (type: [string])
+    ]>
 
     export type MethodMap = {
         export: Export;
         link: Link;
         exportDefault: ExportDefault;
-        runSetters: unknown;
+        runSetters: RunSetters;
         runModuleSetters: unknown,
     }
 
