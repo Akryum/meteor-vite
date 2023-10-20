@@ -24,7 +24,7 @@ type ModuleMethodCall<
 }
 type KnownStringLiteral<Value extends string> = Omit<StringLiteral, 'value'> & { value: Value };
 type KnownIdentifier<Name extends string> = Omit<Identifier, 'name'> & { name: Name };
-type KnownIdentifierOrLiteral<Value extends string> = KnownStringLiteral<Value> | KnownIdentifier<Value>;
+type KnownObjectKey<Value extends string> = KnownStringLiteral<Value> | KnownIdentifier<Value>;
 
 export namespace ModuleMethod {
     /**
@@ -138,13 +138,13 @@ export type ModuleMethodName = typeof KnownModuleMethodNames[number];
  */
 export type MeteorInstallObject = KnownObjectExpression<{
     properties: [KnownObjectProperty<{
-        key: StringLiteral & { value: 'node_modules' }
+        key: KnownObjectKey<'node_modules'>
         value: KnownObjectExpression<{
             properties: [KnownObjectProperty<{
-                key: StringLiteral & { value: 'meteor' },
+                key: KnownObjectKey<'meteor'>,
                 value: KnownObjectExpression<{
                     properties: [KnownObjectProperty<{
-                        key: StringLiteral, // Package name
+                        key: KnownObjectKey<string>, // Package name
                         value: KnownObjectExpression<{
                             properties: MeteorPackageProperty[]
                         }>
