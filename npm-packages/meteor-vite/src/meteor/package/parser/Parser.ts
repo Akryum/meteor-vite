@@ -184,9 +184,18 @@ class MeteorInstall {
         this.name = name;
     }
 
-    public static parse(node: Node) {
+    public static parse(requireDeclaration: Node) {
+        // Validate that this is a top-level require() declaration.
+        if (requireDeclaration.type !== 'VariableDeclarator') return;
+        if (requireDeclaration.id.type !== 'Identifier') return;
+        if (requireDeclaration.id.name !== 'require') return;
+        const node = requireDeclaration.init;
+        
+        // Type assertions to ensure we have a meteorInstall() call expression.
+        if (!node) return;
         if (node.type !== 'CallExpression') return;
         if (!is('Identifier', node.callee, { name: 'meteorInstall' })) return;
+        
         const packageConfig = node.arguments[0] as MeteorInstallObject;
         const node_modules = packageConfig.properties[0];
         const meteor = node_modules.value.properties[0];
