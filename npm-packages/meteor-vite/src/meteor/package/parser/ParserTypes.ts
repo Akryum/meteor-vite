@@ -22,6 +22,9 @@ type ModuleMethodCall<
     }
     arguments: Arguments
 }
+type KnownStringLiteral<Value extends string> = Omit<StringLiteral, 'value'> & { value: Value };
+type KnownIdentifier<Name extends string> = Omit<Identifier, 'name'> & { name: Name };
+type KnownIdentifierOrLiteral<Value extends string> = KnownStringLiteral<Value> | KnownIdentifier<Value>;
 
 export namespace ModuleMethod {
     /**
