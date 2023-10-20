@@ -64,7 +64,7 @@ if (Meteor.isDevelopment) {
      * Builds the 'meteor-vite' npm package where the worker and Vite server is kept.
      * Primarily to ease the testing process for the Vite plugin.
      */
-    if (process.env.BUILD_METEOR_VITE_DEPENDENCY === 'true') {
+    if (process.env.METEOR_VITE_TSUP_BUILD_WATCHER === 'true') {
         const packageBuilder = createWorkerFork({});
         packageBuilder.call({
             method: 'tsup.watchMeteorVite',
