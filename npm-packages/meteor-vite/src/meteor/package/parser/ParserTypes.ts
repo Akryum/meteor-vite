@@ -79,6 +79,8 @@ export namespace ModuleMethod {
         export: Export;
         link: Link;
         exportDefault: ExportDefault;
+        runSetters: unknown;
+        runModuleSetters: unknown,
     }
 
     /**
