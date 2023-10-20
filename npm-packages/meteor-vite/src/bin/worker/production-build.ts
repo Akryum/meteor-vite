@@ -21,6 +21,7 @@ export default CreateIPCInterface({
                     },
                 }
             })
+            throw error;
         });
 
         const result = Array.isArray(results) ? results[0] : results;
@@ -89,7 +90,7 @@ async function prepareConfig(buildConfig: BuildOptions): Promise<ParsedConfig> {
     }
 }
 
-function validateOutput(rollupResult?: RollupOutput | RollupWatcher | void): asserts rollupResult is RollupOutput {
+function validateOutput(rollupResult?: RollupOutput | RollupWatcher): asserts rollupResult is RollupOutput {
     if (!rollupResult) {
         throw new Error('Received no result from Rollup!');
     }
