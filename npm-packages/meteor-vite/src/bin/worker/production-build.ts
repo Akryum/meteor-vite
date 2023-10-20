@@ -48,6 +48,7 @@ export default CreateIPCInterface({
 
 async function prepareConfig(buildConfig: BuildOptions): Promise<ParsedConfig> {
     const { viteOutDir, meteor, packageJson } = buildConfig;
+    const configFile = buildConfig.packageJson?.meteor?.viteConfig;
 
     Object.entries(buildConfig).forEach(([key, value]) => {
         if (!value) {
@@ -55,9 +56,7 @@ async function prepareConfig(buildConfig: BuildOptions): Promise<ParsedConfig> {
         }
     })
 
-    const viteConfig: MeteorViteConfig = await resolveConfig({
-        configFile: buildConfig.packageJson?.meteor?.viteConfig
-    }, 'build');
+    const viteConfig: MeteorViteConfig = await resolveConfig({ configFile }, 'build');
 
     if (!viteConfig.meteor?.clientEntry) {
         throw new Error(`You need to specify an entrypoint in your Vite config! See: ${MeteorVitePackage.homepage}`);
@@ -66,6 +65,7 @@ async function prepareConfig(buildConfig: BuildOptions): Promise<ParsedConfig> {
     return {
         viteConfig,
         inlineBuildConfig: {
+            configFile,
             build: {
                 lib: {
                     entry: viteConfig?.meteor?.clientEntry,
