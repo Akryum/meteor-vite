@@ -16,9 +16,11 @@ type Replies = IPCReply<{
     kind: 'buildResult',
     data: {
         payload: {
-            success: boolean,
+            success: true;
             meteorViteConfig: any,
             output?: {name?: string, type: string, fileName: string}[]
+        } | {
+            success: false;
         };
     }
 }>
@@ -66,6 +68,16 @@ export default CreateIPCInterface({
                     packageJson,
                 }),
             ],
+        }).catch((error) => {
+            reply({
+                kind: 'buildResult',
+                data: {
+                    payload: {
+                        success: false
+                    },
+                }
+            })
+            throw error;
         });
         
         const result = Array.isArray(results) ? results[0] : results;
