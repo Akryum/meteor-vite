@@ -91,13 +91,20 @@ export namespace ModuleMethod {
         AssignmentExpression, // todo: Verify whether this is the correct type to use here.
         ArrayExpression, // Todo: Narrow down expected array element types. (type: [string])
     ]>
+    
+    /**
+     * Meteor's `module.runModuleSetters()` method.
+     * Todo: Document use of this method.
+     * Todo: Add expected argument types.
+     */
+    export type RunModuleSetters = ModuleMethodCall<'runModuleSetters', []>
 
     export type MethodMap = {
         export: Export;
         link: Link;
         exportDefault: ExportDefault;
         runSetters: RunSetters;
-        runModuleSetters: unknown,
+        runModuleSetters: RunModuleSetters,
     }
 
     /**
@@ -122,8 +129,8 @@ export type ModuleMethodName = typeof KnownModuleMethodNames[number];
  * First argument of Meteor's `meteorInstall()` function for its packages.
  * This is an internal method that isn't used by package authors.
  *
- * @example start of the meteorInstall call {@link https://github.com/JorgenVatle/meteor-vite/blob/85120ec60beccca956c65880e94bce99b338f24e/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 see mock example}
- * var require = meteorInstall({"node_modules":{"meteor":{"rdb:svelte-meteor-data":{"index.js":function module(require,exports,module){
+ * @example start of the meteorInstall call
+ *     {@link https://github.com/JorgenVatle/meteor-vite/blob/85120ec60beccca956c65880e94bce99b338f24e/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 see mock example} var require = meteorInstall({"node_modules":{"meteor":{"rdb:svelte-meteor-data":{"index.js":function module(require,exports,module){
  * // ... build package code starts here
  */
 export type MeteorInstallObject = KnownObjectExpression<{
