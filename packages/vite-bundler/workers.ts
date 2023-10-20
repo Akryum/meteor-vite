@@ -47,11 +47,6 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     
     ['exit', 'SIGINT', 'SIGHUP', 'SIGTERM'].forEach(event => {
         process.once(event, () => {
-            child.send({
-                method: 'vite.stopDevServer',
-                params: [],
-            } satisfies Omit<WorkerMethod, 'replies'>);
-
             child.kill()
         })
     });
