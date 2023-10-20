@@ -11,8 +11,28 @@ export default CreateIPCInterface({
         reply: Replies,
         buildConfig: BuildOptions
     ) {
-        const { viteConfig, inlineBuildConfig } = await prepareConfig(buildConfig);
-        const results = await build(inlineBuildConfig).catch((error) => {
+        try {
+            const { viteConfig, inlineBuildConfig } = await prepareConfig(buildConfig);
+            const results = await build(inlineBuildConfig);
+            const result = Array.isArray(results) ? results[0] : results;
+            validateOutput(result);
+
+            // Result payload
+            reply({
+                kind: 'buildResult',
+                data: {
+                    payload: {
+                        success: true,
+                        meteorViteConfig: viteConfig.meteor,
+                        output: result.output.map(o => ({
+                            name: o.name,
+                            type: o.type,
+                            fileName: o.fileName,
+                        })),
+                    },
+                }
+            })
+        } catch (error) {
             reply({
                 kind: 'buildResult',
                 data: {
@@ -22,26 +42,7 @@ export default CreateIPCInterface({
                 }
             })
             throw error;
-        });
-
-        const result = Array.isArray(results) ? results[0] : results;
-        validateOutput(result);
-
-        // Result payload
-        reply({
-            kind: 'buildResult',
-            data: {
-                payload: {
-                    success: true,
-                    meteorViteConfig: viteConfig.meteor,
-                    output: result.output.map(o => ({
-                        name: o.name,
-                        type: o.type,
-                        fileName: o.fileName,
-                    })),
-                },
-            }
-        })
+        }
     }
 })
 
