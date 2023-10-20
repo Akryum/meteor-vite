@@ -212,7 +212,7 @@ class MeteorInstall {
         return true;
     }
     
-    protected static isMeteorInstall(expression?: Expression | null): expression is MeteorInstallCallExpression {
+    protected static isMeteorInstall(expression?: Node | null): expression is MeteorInstallCallExpression {
         if (!expression) return false;
         if (expression.type !== 'CallExpression') return false;
         if (!is('Identifier', expression.callee, { name: 'meteorInstall' })) return false;
