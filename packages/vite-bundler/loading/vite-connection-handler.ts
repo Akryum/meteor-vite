@@ -125,13 +125,13 @@ export const ViteConnection = {
   configSelector: { _id: 'viteConfig' },
 }
 
-let MeteorViteConfigCollection: Mongo.Collection<RuntimeConfig>
+export let MeteorViteConfig: Mongo.Collection<RuntimeConfig>
 
 if (Meteor.isDevelopment)
-  MeteorViteConfigCollection = new Mongo.Collection(ViteConnection.publication)
+  MeteorViteConfig = new Mongo.Collection(ViteConnection.publication)
 
 export function getConfig() {
-  const viteConfig = MeteorViteConfigCollection.findOne(ViteConnection.configSelector)
+  const viteConfig = MeteorViteConfig.findOne(ViteConnection.configSelector)
   const config = viteConfig || runtimeConfig
   return {
     ...config,
@@ -144,11 +144,11 @@ export function setConfig<TConfig extends Partial<RuntimeConfig>>(config: TConfi
 
   if (runtimeConfig.port && runtimeConfig.host && runtimeConfig.entryFile)
     runtimeConfig.ready = true
-
-  MeteorViteConfigCollection.upsert(ViteConnection.configSelector, runtimeConfig)
+  
+  MeteorViteConfig.upsert(ViteConnection.configSelector, runtimeConfig)
   return runtimeConfig
 }
 
 export function publishConfig() {
-  return MeteorViteConfigCollection.find(ViteConnection.configSelector)
+  return MeteorViteConfig.find(ViteConnection.configSelector)
 }
