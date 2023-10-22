@@ -80,7 +80,7 @@ export default CreateIPCInterface({
         })
       })
     }
-    
+
     await server.listen()
     sendViteConfig(replyInterface)
     listening = true
