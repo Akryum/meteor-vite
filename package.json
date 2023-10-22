@@ -6,13 +6,6 @@
     "packages/vite-bundler",
     "npm-packages/meteor-vite"
   ],
-  "dependencies": {
-    "@changesets/cli": "^2.26.2"
-  },
-  "devDependencies": {
-    "@antfu/eslint-config": "^1.0.0-beta.22",
-    "eslint": "^8.51.0"
-  },
   "scripts": {
     "version:vite-bundler": "meteor node .bin/release-meteor-package.mjs version",
     "publish:vite-bundler": "meteor node .bin/release-meteor-package.mjs publish",
@@ -42,5 +35,12 @@
     "start:vue": "npm run example start vue",
     "start:svelte": "npm run example start svelte",
     "start:react": "npm run example start react"
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.26.2"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^1.0.0-beta.22",
+    "eslint": "^8.51.0"
   }
 }

@@ -11,33 +11,35 @@ function useMeteorBundle({
   /**
    * @type {{npmPackage: string, chunkPath: string}[]}
    */
-  const detectedChunks = [];
+  const detectedChunks = []
   return {
     name: 'output-gen',
     enforce: 'pre',
     resolveId(id, importer, options) {
-      if (!importer) return;
+      if (!importer)
+        return
 
-      const npmPackage = npmPackages.find((name) => importer.includes(`/${name}.js?`));
-      if (!npmPackage) return;
+      const npmPackage = npmPackages.find(name => importer.includes(`/${name}.js?`))
+      if (!npmPackage)
+        return
 
       const chunk = {
         npmPackage,
         chunkPath: id.replace(/^.\//, ''),
-      };
+      }
 
-      detectedChunks.push(chunk);
-      console.log({ id, importer, options, chunk });
+      detectedChunks.push(chunk)
+      console.log({ id, importer, options, chunk })
     },
     transform(code, id) {
-      if (!detectedChunks.length) {
-        return;
-      }
-      const chunk = detectedChunks.find(({ chunkPath }) => id.includes(`.vite/deps/${chunkPath}`));
-      if (!chunk) {
-        return;
-      }
-      console.log({ transformId: id, chunk });
+      if (!detectedChunks.length)
+        return
+
+      const chunk = detectedChunks.find(({ chunkPath }) => id.includes(`.vite/deps/${chunkPath}`))
+      if (!chunk)
+        return
+
+      console.log({ transformId: id, chunk })
       const exportKey = `require_${chunk.npmPackage.replace(/\//g, '_')}`
       return `
       var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -55,10 +57,10 @@ function useMeteorBundle({
 
 export default defineConfig({
   plugins: [
-      react(),
-      useMeteorBundle({
-        npmPackages: ['react']
-      }),
+    react(),
+    useMeteorBundle({
+      npmPackages: ['react'],
+    }),
   ],
 
   meteor: {
