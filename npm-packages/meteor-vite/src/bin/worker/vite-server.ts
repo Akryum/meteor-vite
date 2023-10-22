@@ -23,7 +23,7 @@ type Replies = IPCReply<{
   }
 } | {
   kind: 'refreshNeeded'
-  data: {}
+  data: unknown
 }>
 
 interface DevServerOptions {
