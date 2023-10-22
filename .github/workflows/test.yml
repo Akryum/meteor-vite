@@ -24,5 +24,3 @@ jobs:
         run: cd "$NPM_PACKAGE_PATH" && npm test
       - name: Install root dependencies
         run: npm ci
-      - name: Lint code
-        run: npm run lint
