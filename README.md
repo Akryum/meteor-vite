@@ -24,7 +24,7 @@ Use [Vite](https://vitejs.dev) in your Meteor app! ⚡️
 ## Installation
 
 ```sh
-meteor add jorgenvatle:vite-bundler && meteor npm i -D vite meteor-vite
+meteor add vite:bundler && meteor npm i -D vite meteor-vite
 ```
 
 You can also install any vite plugin, for example `@vitejs/plugin-vue`:
@@ -71,6 +71,7 @@ Create a Vite configuration file (`vite.config.js`) in your project root:
 
 ```js
 import { defineConfig } from 'vite'
+
 // Example with Vue
 import vue from '@vitejs/plugin-vue'
 
@@ -134,17 +135,18 @@ package by excluding it in your Meteor settings.json file;
 ```ts
 // vite.config.ts
 
-import type { MeteorViteConfig } from 'meteor-vite';
+import type { MeteorViteConfig } from 'meteor-vite'
+
 export default defineConfig({
   // ...
-  
+
   meteor: {
     clientEntry: 'imports/ui/main.ts',
     stubValidation: {
       /**
        * list of packages to ignore export validation for.
        */
-      ignorePackages: ["ostrio:cookies"],
+      ignorePackages: ['ostrio:cookies'],
 
       /**
        * Will only emit warnings in the console instead of throwing an exception that may prevent the client app
@@ -169,6 +171,6 @@ The Vite integration comes with two dependencies that work together to enable co
   - [View changelog](/npm-packages/meteor-vite/CHANGELOG.md)
   - [View on npm](https://www.npmjs.com/package/meteor-vite)
 
-- [`jorgenvatle:vite-bundler`](/packages/vite-bundler/) - Meteor build plugin for launching Vite workers and compiling production bundles from Vite and Meteor.
+- [`vite-bundler`](/packages/vite-bundler/) - Meteor build plugin for launching Vite workers and compiling production bundles from Vite and Meteor.
   - [View changelog](/packages/vite-bundler/CHANGELOG.md) 
-  - [View on Atmosphere](https://atmospherejs.com/jorgenvatle/vite-bundler)
+  - [View on Atmosphere](https://atmospherejs.com/vite/bundler)

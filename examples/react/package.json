@@ -2,10 +2,11 @@
   "name": "meteor-vite-react",
   "private": true,
   "scripts": {
-    "start": "meteor run",
+    "env": "cross-env-shell METEOR_PACKAGE_DIRS=../../packages",
+    "start": "npm run env meteor run",
     "test": "meteor test --once --driver-package meteortesting:mocha",
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
-    "visualize": "meteor --production --extra-packages bundle-visualizer",
+    "visualize": "npm run env meteor --production --extra-packages bundle-visualizer",
     "meteor-vite-internal:setup-env": "cross-env-shell METEOR_PACKAGE_DIRS=\"../../packages/\" BUILD_METEOR_VITE_DEPENDENCY='true'",
     "meteor-vite-internal:start": "npm run meteor-vite-internal:setup-env meteor npm start",
     "meteor-vite-internal:build": "npm run meteor-vite-internal:setup-env meteor npm run build"

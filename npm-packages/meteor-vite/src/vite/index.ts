@@ -1,1 +1,1 @@
-export { MeteorStubs } from './plugin/MeteorStubs';
+export { MeteorStubs } from './plugin/MeteorStubs'

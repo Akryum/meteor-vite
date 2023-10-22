@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { subscribe, autorun, useMethod } from './v-meteor'
+import { autorun, subscribe, useMethod } from './v-meteor'
 import { LinksCollection } from '/imports/api/links'
 
 // Subscription
@@ -13,6 +13,11 @@ const links = autorun(() => LinksCollection.find({}).fetch()).result
 
 // Method
 
+const insertLinkForm = reactive({
+  title: '',
+  url: '',
+})
+
 const insertLinkMethod = useMethod<[url: string, link: string]>('links.insert')
 insertLinkMethod.onResult((err) => {
   if (!err) {
@@ -22,12 +27,7 @@ insertLinkMethod.onResult((err) => {
   }
 })
 
-const insertLinkForm = reactive({
-  title: '',
-  url: '',
-})
-
-async function insertLink () {
+async function insertLink() {
   await insertLinkMethod.call(insertLinkForm.title, insertLinkForm.url)
   console.log('done')
 }
@@ -35,21 +35,23 @@ async function insertLink () {
 
 <template>
   <div class="flex flex-col gap-4">
-    <h1 class="text-2xl">Learn Meteor!</h1>
+    <h1 class="text-2xl">
+      Learn Meteor!
+    </h1>
 
-    <form @submit.prevent="insertLink()" class="flex gap-4">
+    <form class="flex gap-4" @submit.prevent="insertLink()">
       <input
-        type="text"
         v-model="insertLinkForm.title"
+        type="text"
         placeholder="Title"
         class="border border-gray-300 p-2 rounded"
-      />
+      >
       <input
-        type="text"
         v-model="insertLinkForm.url"
+        type="text"
         placeholder="URL"
         class="border border-gray-300 p-2 rounded"
-      />
+      >
       <button
         type="submit"
         :disabled="insertLinkMethod.pending.value"

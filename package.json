@@ -9,7 +9,10 @@
   "dependencies": {
     "@changesets/cli": "^2.26.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@antfu/eslint-config": "^1.0.0-beta.22",
+    "eslint": "^8.51.0"
+  },
   "scripts": {
     "version:vite-bundler": "meteor node .bin/release-meteor-package.mjs version",
     "publish:vite-bundler": "meteor node .bin/release-meteor-package.mjs publish",
@@ -17,6 +20,9 @@
 
     "version": "npm run version:vite-bundler && changeset version",
     "release": "npm run publish:vite-bundler && changeset publish",
+
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
 
     "install:svelte": "cd examples/svelte && meteor npm install",
     "install:vue": "cd examples/vue && meteor npm install",

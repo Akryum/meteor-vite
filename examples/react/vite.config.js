@@ -1,5 +1,5 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 /**
  * @param npmPackages {string[]}
@@ -62,6 +62,6 @@ export default defineConfig({
   ],
 
   meteor: {
-    clientEntry: "imports/vite-entrypoint.jsx",
+    clientEntry: 'imports/vite-entrypoint.jsx',
   },
-});
+})

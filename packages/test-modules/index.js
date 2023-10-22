@@ -1,6 +1,8 @@
+import { Meteor } from 'meteor/meteor'
+
 export const A = 'A'
 
-export function foo () {
+export function foo() {
   return 'bar'
 }
 
@@ -20,6 +22,4 @@ export * from 'meteor/tracker'
 
 export { default as ReExportedDefault, other, subOther } from './other'
 
-import { Meteor } from 'meteor/meteor'
-
-Meteor.version
+console.log(Meteor.version)

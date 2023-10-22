@@ -48,20 +48,20 @@ export namespace ModuleMethod {
         id: NumericLiteral
     ] | [importPath: StringLiteral]>;
 
-    /**
-     * Meteor's `module.exportDefault()` method - seems to only be used for modules that are lazy-loaded?
-     * {@link https://github.com/JorgenVatle/meteor-vite/blob/71a1ed5b84439c02f5592bef1d4cf3ae565fa879/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L42}
-     *
-     * @example Package source
-     * export default namedFunction() {
-     *     return 'foo';
-     * }
-     * @example Bundle result
-     * module1.exportDefault(namedFunction);
-     */
-    export type ExportDefault = ModuleMethodCall<'exportDefault', [
-        CallExpression['arguments'][number], // Can be anything, see ts_modules mock for example
-    ]>
+  /**
+   * Meteor's `module.exportDefault()` method - seems to only be used for modules that are lazy-loaded?
+   * {@link https://github.com/Akryum/meteor-vite/blob/71a1ed5b84439c02f5592bef1d4cf3ae565fa879/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L42}
+   *
+   * @example Package source
+   * export default namedFunction() {
+   *     return 'foo';
+   * }
+   * @example Bundle result
+   * module1.exportDefault(namedFunction);
+   */
+  export type ExportDefault = ModuleMethodCall<'exportDefault', [
+    CallExpression['arguments'][number], // Can be anything, see ts_modules mock for example
+  ]>
 
     /**
      * Meteor's `module.export({ ... })` method. This is essentially ES exports
@@ -132,8 +132,8 @@ export type ModuleMethodName = typeof KnownModuleMethodNames[number];
  * First argument of Meteor's `meteorInstall()` function for its packages.
  * This is an internal method that isn't used by package authors.
  *
- * @example start of the meteorInstall call
- *     {@link https://github.com/JorgenVatle/meteor-vite/blob/85120ec60beccca956c65880e94bce99b338f24e/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 see mock example} var require = meteorInstall({"node_modules":{"meteor":{"rdb:svelte-meteor-data":{"index.js":function module(require,exports,module){
+ * @example start of the meteorInstall call {@link https://github.com/Akryum/meteor-vite/blob/85120ec60beccca956c65880e94bce99b338f24e/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 see mock example}
+ * var require = meteorInstall({"node_modules":{"meteor":{"rdb:svelte-meteor-data":{"index.js":function module(require,exports,module){
  * // ... build package code starts here
  */
 export type MeteorInstallObject = KnownObjectExpression<{
