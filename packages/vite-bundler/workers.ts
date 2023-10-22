@@ -8,6 +8,10 @@ import type { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin
 import type { MeteorIPCMessage } from '../../npm-packages/meteor-vite/src/meteor/MeteorEvents'
 import type { ProjectJson } from '../../npm-packages/meteor-vite/src/vite/plugin/MeteorStubs'
 
+export const cwd = process.env.METEOR_VITE_CWD ?? guessCwd()
+export const meteorPackagePath = guessMeteorPackagePath()
+export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/worker/index.mjs')
+
 // Use a worker to skip reify and Fibers
 // Use a child process instead of worker to avoid WASM/archived threads error
 export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
@@ -92,9 +96,6 @@ class MeteorViteError extends Error {
   }
 }
 
-export const cwd = process.env.METEOR_VITE_CWD ?? guessCwd()
-export const meteorPackagePath = guessMeteorPackagePath()
-export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/worker/index.mjs')
 export function getProjectPackageJson(): ProjectJson {
   const path = Path.join(cwd, 'package.json')
 
