@@ -373,7 +373,7 @@ class PackageModule {
     else if (args[0].type === 'ConditionalExpression')
       name = 'CONDITIONAL_EXPORT_DEFAULT'
     else
-      new ModuleExportsError('Unexpected default export value!', args[0])
+      throw new ModuleExportsError('Unexpected default export value!', args[0])
 
     // todo: test for default exports with `export default { foo: 'bar' }`
     return [{ type: 'export-default', name } satisfies ModuleExportData]
