@@ -8,6 +8,7 @@ import type {
   ObjectMethod,
   ObjectProperty,
   StringLiteral,
+  VariableDeclarator,
 } from '@babel/types'
 import {
   is,
@@ -16,7 +17,7 @@ import {
 import Logger from '../../../Logger'
 import { MeteorViteError } from '../../../vite/error/MeteorViteError'
 import type {
-  MeteorInstallObject,
+  MeteorInstallCallExpression,
   MeteorPackageProperty,
   ModuleMethod,
   ModuleMethodName,
@@ -204,25 +205,48 @@ class MeteorInstall {
     this.name = name
   }
 
-  public static parse(node: Node) {
-    if (node.type !== 'CallExpression')
+  public static parse(requireDeclaration: Node) {
+    if (!this.isRequireDeclaration(requireDeclaration))
       return
-    if (!is('Identifier', node.callee, { name: 'meteorInstall' }))
+    if (!this.isMeteorInstall(requireDeclaration.init))
       return
-    const packageConfig = node.arguments[0] as MeteorInstallObject
-    const node_modules = packageConfig.properties[0]
+
+    const modules = requireDeclaration.init.arguments[0]
+    const node_modules = modules.properties[0]
     const meteor = node_modules.value.properties[0]
     const packageName = meteor.value.properties[0]
     const packageModules = packageName.value.properties
 
     const meteorPackage = new this({
-      packageId: `${meteor.key.value}/${packageName.key.value}`,
-      name: packageName.key.value,
+      packageId: `${propParser.getKey(meteor)}/${propParser.getKey(packageName)}`,
+      name: propParser.getKey(packageName),
     })
 
     meteorPackage.traverseModules(packageModules, '')
 
     return meteorPackage
+  }
+
+  protected static isRequireDeclaration(node: Node): node is VariableDeclarator {
+    if (node.type !== 'VariableDeclarator')
+      return false
+    if (node.id.type !== 'Identifier')
+      return false
+    if (node.id.name !== 'require')
+      return false
+
+    return true
+  }
+
+  protected static isMeteorInstall(expression?: Node | null): expression is MeteorInstallCallExpression {
+    if (!expression)
+      return false
+    if (expression.type !== 'CallExpression')
+      return false
+    if (!is('Identifier', expression.callee, { name: 'meteorInstall' }))
+      return false
+
+    return true
   }
 
   public traverseModules(properties: MeteorPackageProperty[], parentPath: string) {

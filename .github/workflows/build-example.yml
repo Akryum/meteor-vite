@@ -22,3 +22,9 @@ jobs:
     uses: ./.github/workflows/_reuse_.build.yml
     with:
       name: svelte
+
+  react:
+    name: React
+    uses: ./.github/workflows/_reuse_.build.yml
+    with:
+      name: react

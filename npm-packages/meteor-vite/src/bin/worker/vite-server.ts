@@ -23,9 +23,7 @@ type Replies = IPCReply<{
   }
 } | {
   kind: 'refreshNeeded'
-  data: {
-    [key: string]: never
-  }
+  data: unknown
 }>
 
 interface DevServerOptions {
@@ -44,11 +42,10 @@ export default CreateIPCInterface({
 
   // todo: Add reply for triggering a server restart
   'vite.startDevServer': async function (replyInterface: Replies, { packageJson, globalMeteorPackagesDir }: DevServerOptions) {
+    let listening = false
     viteConfig = await resolveConfig({
       configFile: packageJson?.meteor?.viteConfig,
     }, 'serve')
-
-    let listening = false
 
     if (!server) {
       server = await createServer({
@@ -87,6 +84,19 @@ export default CreateIPCInterface({
     await server.listen()
     sendViteConfig(replyInterface)
     listening = true
+  },
+
+  'vite.stopDevServer': async function () {
+    if (!server)
+      return
+    try {
+      console.log('Shutting down vite server...')
+      await server.close()
+      console.log('Vite server shut down successfully!')
+    }
+    catch (error) {
+      console.error('Failed to shut down Vite server:', error)
+    }
   },
 })
 

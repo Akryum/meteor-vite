@@ -17,9 +17,9 @@ export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/work
 export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
   if (!FS.existsSync(workerPath)) {
     throw new MeteorViteError([
-      `Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package.`,
-      `Install it by running the following command:`,
-      `$  ${pc.yellow('npm i -D meteor-vite')}`,
+                `Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package.`,
+                `Install it by running the following command:`,
+                `$  ${pc.yellow('npm i -D meteor-vite')}`,
     ])
   }
 
@@ -51,6 +51,11 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
 
   ['exit', 'SIGINT', 'SIGHUP', 'SIGTERM'].forEach((event) => {
     process.once(event, () => {
+      child.send({
+        method: 'vite.stopDevServer',
+        params: [],
+      } satisfies Omit<WorkerMethod, 'replies'>)
+
       child.kill()
     })
   })
@@ -63,9 +68,7 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
   }
 }
 
-export function isMeteorIPCMessage<
-  _Topic extends MeteorIPCMessage['topic'],
->(message: unknown): message is MeteorIPCMessage {
+export function isMeteorIPCMessage(message: unknown): message is MeteorIPCMessage {
   if (!message || typeof message !== 'object')
     return false
 
@@ -96,10 +99,10 @@ export function getProjectPackageJson(): ProjectJson {
 
   if (!FS.existsSync(path)) {
     throw new MeteorViteError([
-      `Unable to locate package.json for your project in ${pc.yellow(path)}`,
-      `Make sure you run Meteor commands from the root of your project directory.`,
-      `Alternatively, you can supply a superficial CWD for Meteor-Vite to use:`,
-      `$  cross-env METEOR_VITE_CWD="./projects/my-meteor-project/" meteor run`,
+            `Unable to locate package.json for your project in ${pc.yellow(path)}`,
+            `Make sure you run Meteor commands from the root of your project directory.`,
+            `Alternatively, you can supply a superficial CWD for Meteor-Vite to use:`,
+            `$  cross-env METEOR_VITE_CWD="./projects/my-meteor-project/" meteor run`,
     ])
   }
 

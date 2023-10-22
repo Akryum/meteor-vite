@@ -1,4 +1,6 @@
 import type {
+  ArrayExpression,
+  AssignmentExpression,
   CallExpression,
   FunctionExpression,
   Identifier,
@@ -21,6 +23,9 @@ type ModuleMethodCall<
   }
   arguments: Arguments
 }
+type KnownStringLiteral<Value extends string> = Omit<StringLiteral, 'value'> & { value: Value }
+type KnownIdentifier<Name extends string> = Omit<Identifier, 'name'> & { name: Name }
+type KnownObjectKey<Value extends string> = KnownStringLiteral<Value> | KnownIdentifier<Value>
 
 export namespace ModuleMethod {
   /**
@@ -76,10 +81,34 @@ export namespace ModuleMethod {
     ObjectExpression, // todo: Narrow this type further for keys and values (key Identifier/StringLiteral, etc.)
   ]>
 
+  /**
+   * Meteor's `module.runSetters()` method.
+   * Todo: Add further documentation
+   *
+   * @example Bundle result
+   * let current_component;
+   * function set_current_component(component) {
+   *   module.runSetters(current_component = component, ["current_component"]);
+   * }
+   */
+  export type RunSetters = ModuleMethodCall<'runSetters', [
+    AssignmentExpression, // todo: Verify whether this is the correct type to use here.
+    ArrayExpression, // Todo: Narrow down expected array element types. (type: [string])
+  ]>
+
+  /**
+   * Meteor's `module.runModuleSetters()` method.
+   * Todo: Document use of this method.
+   * Todo: Add expected argument types.
+   */
+  export type RunModuleSetters = ModuleMethodCall<'runModuleSetters', []>
+
   export interface MethodMap {
     export: Export
     link: Link
     exportDefault: ExportDefault
+    runSetters: RunSetters
+    runModuleSetters: RunModuleSetters
   }
 
   /**
@@ -110,13 +139,13 @@ export type ModuleMethodName = typeof KnownModuleMethodNames[number]
  */
 export type MeteorInstallObject = KnownObjectExpression<{
   properties: [KnownObjectProperty<{
-    key: StringLiteral & { value: 'node_modules' }
+    key: KnownObjectKey<'node_modules'>
     value: KnownObjectExpression<{
       properties: [KnownObjectProperty<{
-        key: StringLiteral & { value: 'meteor' }
+        key: KnownObjectKey<'meteor'>
         value: KnownObjectExpression<{
           properties: [KnownObjectProperty<{
-            key: StringLiteral // Package name
+            key: KnownObjectKey<string> // Package name
             value: KnownObjectExpression<{
               properties: MeteorPackageProperty[]
             }>
@@ -126,3 +155,9 @@ export type MeteorInstallObject = KnownObjectExpression<{
     }>
   }>]
 }>
+
+/**
+ * A call expression for the `meteorInstall()` function.
+ * We're using this to nicely cast types for meteorInstall() nodes.
+ */
+export type MeteorInstallCallExpression = Omit<CallExpression, 'arguments'> & { arguments: [MeteorInstallObject] }
