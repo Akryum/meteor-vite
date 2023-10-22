@@ -125,6 +125,7 @@ export const ViteConnection = {
   configSelector: { _id: 'viteConfig' },
 }
 
+// eslint-disable-next-line import/no-mutable-exports
 export let MeteorViteConfig: Mongo.Collection<RuntimeConfig>
 
 if (Meteor.isDevelopment)
@@ -144,7 +145,7 @@ export function setConfig<TConfig extends Partial<RuntimeConfig>>(config: TConfi
 
   if (runtimeConfig.port && runtimeConfig.host && runtimeConfig.entryFile)
     runtimeConfig.ready = true
-  
+
   MeteorViteConfig.upsert(ViteConnection.configSelector, runtimeConfig)
   return runtimeConfig
 }
