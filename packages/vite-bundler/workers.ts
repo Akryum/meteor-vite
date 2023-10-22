@@ -68,9 +68,7 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
   }
 }
 
-export function isMeteorIPCMessage<
-    Topic extends MeteorIPCMessage['topic'],
->(message: unknown): message is MeteorIPCMessage {
+export function isMeteorIPCMessage(message: unknown): message is MeteorIPCMessage {
   if (!message || typeof message !== 'object')
     return false
 
