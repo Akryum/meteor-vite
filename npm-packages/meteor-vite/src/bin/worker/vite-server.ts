@@ -42,6 +42,7 @@ export default CreateIPCInterface({
 
   // todo: Add reply for triggering a server restart
   'vite.startDevServer': async function (replyInterface: Replies, { packageJson, globalMeteorPackagesDir }: DevServerOptions) {
+    let listening = false
     viteConfig = await resolveConfig({
       configFile: packageJson?.meteor?.viteConfig,
     }, 'serve')
@@ -79,8 +80,7 @@ export default CreateIPCInterface({
         })
       })
     }
-
-    let listening = false
+    
     await server.listen()
     sendViteConfig(replyInterface)
     listening = true
