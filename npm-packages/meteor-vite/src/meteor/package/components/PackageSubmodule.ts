@@ -1,5 +1,6 @@
+import type { ModuleExportData } from '../parser/Parser'
 import type MeteorPackage from './MeteorPackage'
-import type { ModuleExport } from './Parser'
+import ModuleExport from './ModuleExport'
 
 export class PackageSubmodule {
   /**
@@ -32,9 +33,9 @@ export class PackageSubmodule {
   };
 
   constructor({ meteorPackage, modulePath, exports }: PackageSubmoduleOptions) {
-    this.exports = exports
     this.modulePath = modulePath
     this.meteorPackage = meteorPackage
+    this.exports = exports.map(data => new ModuleExport({ data, parentModule: this }))
   }
 }
 
@@ -44,7 +45,7 @@ interface PackageSubmoduleOptions {
    * @example
    * export const foo = '...'
    */
-  exports: ModuleExport[]
+  exports: ModuleExportData[]
 
   /**
    * Path relative to the current package to the module containing the these exports.

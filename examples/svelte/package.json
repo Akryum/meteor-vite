@@ -2,14 +2,15 @@
   "name": "svelte-example",
   "private": true,
   "scripts": {
-    "start": "meteor npm run build:dependencies && meteor run",
+    "env": "cross-env-shell METEOR_PACKAGE_DIRS=../../packages",
+    "start": "npm run env meteor run",
     "test": "meteor test --once --driver-package meteortesting:mocha",
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
-    "visualize": "meteor --production --extra-packages bundle-visualizer",
-    "postinstall": "npm run build:dependencies",
-    "build": "meteor npm run build:dependencies && meteor npm run build:meteor",
-    "build:dependencies": "(cd ./node_modules/meteor-vite && meteor npm run build)",
-    "build:meteor": "meteor build ../output/svelte --directory"
+    "visualize": "npm run env meteor --production --extra-packages bundle-visualizer",
+    "build": "npm run env meteor build ../output/svelte --directory",
+    "meteor-vite-internal:setup-env": "cross-env-shell METEOR_PACKAGE_DIRS=\"../../packages/\" BUILD_METEOR_VITE_DEPENDENCY='true'",
+    "meteor-vite-internal:start": "npm run meteor-vite-internal:setup-env meteor npm start",
+    "meteor-vite-internal:build": "npm run meteor-vite-internal:setup-env meteor npm run build"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.6",
@@ -19,7 +20,8 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.4.2",
     "@tsconfig/svelte": "^5.0.0",
-    "meteor-vite": "file:../../npm-packages/meteor-vite",
+    "cross-env": "^7.0.3",
+    "meteor-vite": "1.*",
     "svelte-check": "^3.4.6",
     "svelte-preprocess": "^5.0.4",
     "typescript": "^5.1.6",
@@ -30,6 +32,7 @@
       "client": "client/main.ts",
       "server": "server/main.ts"
     },
+    "viteConfig": ".vite.config.mts",
     "testModule": "tests/main.js"
   }
 }

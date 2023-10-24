@@ -1,5 +1,5 @@
 import { Check, TestLazy, TsModules } from '../../../test/__mocks'
-import MeteorPackage from '../../meteor/package/MeteorPackage'
+import MeteorPackage from '../../meteor/package/components/MeteorPackage'
 import { MeteorViteError } from '../../vite/error/MeteorViteError'
 import ViteServer from './vite-server';
 

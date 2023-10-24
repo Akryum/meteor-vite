@@ -1,6 +1,6 @@
 import { execSync, spawn } from 'node:child_process'
-import FS from 'node:fs/promises'
 import Path from 'node:path'
+import FS from 'node:fs/promises'
 
 // Assuming this is launched from the repository root for now.
 const repoPath = process.cwd()
@@ -67,7 +67,7 @@ function shell(command, options) {
 }
 
 (async () => {
-  const [, , action] = process.argv
+  const [_binPath, _modulePath, action] = process.argv
 
   if (action === 'publish') {
     await publish()
@@ -89,5 +89,5 @@ function shell(command, options) {
   if (stderr)
     console.error(stderr.toString())
 
-  console.error(error)
+  process.exit(1)
 })

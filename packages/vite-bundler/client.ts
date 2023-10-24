@@ -3,15 +3,19 @@
 
 import { Meteor } from 'meteor/meteor'
 import { Tracker } from 'meteor/tracker'
-import type { RuntimeConfig } from './loading/vite-connection-handler'
-import { ViteConnection, getConfig } from './loading/vite-connection-handler'
+import type {
+  RuntimeConfig,
+} from './loading/vite-connection-handler'
+import {
+  DevConnectionLog,
+  VITE_ENTRYPOINT_SCRIPT_ID,
+  ViteConnection,
+  ViteDevScripts,
+  getConfig,
+} from './loading/vite-connection-handler'
 
 let subscription: Meteor.SubscriptionHandle
 let initialConfig: RuntimeConfig
-
-const log = {
-  info: (message: string, ...params: Parameters<typeof console.log>) => console.info(`[Meteor-Vite] ⚡ ${message}`, ...params),
-}
 
 function watchConfig(config: RuntimeConfig) {
   if (initialConfig.host !== config.host)
@@ -29,17 +33,15 @@ function watchConfig(config: RuntimeConfig) {
 
 function onReady(config: RuntimeConfig) {
   if (hasLoadedVite()) {
-    log.info('Vite has already been loaded. Waiting on changes before refreshing.', { config })
+    DevConnectionLog.info('Vite has already been loaded. Waiting on changes before refreshing.', { config })
     return
   }
 
-  // Todo: Load assets in the background before reloading to avoid staring at a blank screen for a while
-  log.info('Refreshing client...')
-  window.location.reload()
+  new ViteDevScripts(config).injectScriptsInDOM()
 }
 
 function onChange(config: RuntimeConfig) {
-  log.info(
+  DevConnectionLog.info(
     'Meteor-Vite dev server details changed from %s to %s',
     buildConnectionUri(initialConfig),
     buildConnectionUri(config),
@@ -47,13 +49,13 @@ function onChange(config: RuntimeConfig) {
   )
 
   if (!config.ready) {
-    log.info('Meteor-Vite dev server not ready yet. Waiting on server to become ready...')
+    DevConnectionLog.info('Meteor-Vite dev server not ready yet. Waiting on server to become ready...')
     return
   }
 
   if (hasLoadedVite()) {
-    log.info('Attempting to refresh current Vite session to load new server config...')
-    window.location.reload()
+    DevConnectionLog.info('Attempting to refresh current Vite session to load new server config...')
+    setTimeout(() => window.location.reload(), 1_000)
     return
   }
 
@@ -61,7 +63,7 @@ function onChange(config: RuntimeConfig) {
 }
 
 function hasLoadedVite() {
-  return !window.__METEOR_VITE_STARTUP__
+  return !!document.getElementById(VITE_ENTRYPOINT_SCRIPT_ID)
 }
 
 Meteor.startup(() => {
@@ -74,12 +76,43 @@ Meteor.startup(() => {
     if (!initialConfig && subscription.ready())
       initialConfig = config
 
+    DevConnectionLog.debug('Vite connection config changed', config)
+
     if (!initialConfig)
       return
 
     watchConfig(getConfig())
   })
+
+  if (!hasLoadedVite())
+    forceConfigRefresh()
 })
+
+/**
+ * Failsafe to force a refresh of the server's runtime config.
+ */
+function forceConfigRefresh() {
+  const forceRefreshAfter = 5 * 1000 // 5 seconds
+  const interval = Meteor.setInterval(() => {
+    const lastUpdateMs = Date.now() - getConfig().lastUpdate
+    if (lastUpdateMs < forceRefreshAfter)
+      return
+
+    if (hasLoadedVite()) {
+      Meteor.clearInterval(interval)
+      return
+    }
+    Meteor.call(ViteConnection.methods.refreshConfig, (error?: Error, config?: RuntimeConfig) => {
+      if (error)
+        throw error
+
+      if (!config)
+        console.error('Received no config from server!', { error, config })
+
+      watchConfig(config || getConfig())
+    })
+  }, 2500)
+}
 
 declare global {
   interface Window {

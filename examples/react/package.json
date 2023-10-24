@@ -1,0 +1,33 @@
+{
+  "name": "meteor-vite-react",
+  "private": true,
+  "scripts": {
+    "env": "cross-env-shell METEOR_PACKAGE_DIRS=../../packages",
+    "start": "npm run env meteor run",
+    "test": "meteor test --once --driver-package meteortesting:mocha",
+    "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
+    "visualize": "npm run env meteor --production --extra-packages bundle-visualizer",
+    "meteor-vite-internal:setup-env": "cross-env-shell METEOR_PACKAGE_DIRS=\"../../packages/\" BUILD_METEOR_VITE_DEPENDENCY='true'",
+    "meteor-vite-internal:start": "npm run meteor-vite-internal:setup-env meteor npm start",
+    "meteor-vite-internal:build": "npm run meteor-vite-internal:setup-env meteor npm run build"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.20.7",
+    "@vitejs/plugin-react": "^4.0.4",
+    "meteor-node-stubs": "^1.2.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.js",
+      "server": "server/main.js"
+    },
+    "testModule": "tests/main.js"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "meteor-vite": "^1.3.2",
+    "vite": "^4.4.9"
+  }
+}

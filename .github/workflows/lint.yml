@@ -1,0 +1,24 @@
+name: Lint
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+      - release
+
+env:
+  NPM_PACKAGE_PATH: ./npm-packages/meteor-vite
+
+jobs:
+  lint:
+    name: Lint repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+      - name: Install root dependencies
+        run: npm ci
+      - name: Lint code
+        run: npm run lint

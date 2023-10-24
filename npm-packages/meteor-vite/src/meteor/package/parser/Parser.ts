@@ -8,15 +8,16 @@ import type {
   ObjectMethod,
   ObjectProperty,
   StringLiteral,
+  VariableDeclarator,
 } from '@babel/types'
 import {
   is,
   traverse,
 } from '@babel/types'
-import Logger from '../../Logger'
-import { MeteorViteError } from '../../vite/error/MeteorViteError'
+import Logger from '../../../Logger'
+import { MeteorViteError } from '../../../vite/error/MeteorViteError'
 import type {
-  MeteorInstallObject,
+  MeteorInstallCallExpression,
   MeteorPackageProperty,
   ModuleMethod,
   ModuleMethodName,
@@ -192,7 +193,7 @@ function parsePackageScope(node: Node) {
  * Parser for a build Meteor package's meteorInstall() call.
  * Traverses through all the entries in the passed object to build up a map of each file exposed by the package
  * as well as tracking exports (module.export, module.exportDefault) and re-exports (module.link).
- * {@link https://github.com/JorgenVatle/meteor-vite/blob/8b0a7a5f5f95d78661793e8b4bc7f266c1081ed9/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 example of meteorInstall() }
+ * {@link https://github.com/Akryum/meteor-vite/blob/8b0a7a5f5f95d78661793e8b4bc7f266c1081ed9/npm-packages/meteor-vite/test/__mocks/meteor-bundle/rdb_svelte-meteor-data.js#L25 example of meteorInstall() }
  */
 class MeteorInstall {
   public readonly modules: ModuleList = {}
@@ -204,25 +205,48 @@ class MeteorInstall {
     this.name = name
   }
 
-  public static parse(node: Node) {
-    if (node.type !== 'CallExpression')
+  public static parse(requireDeclaration: Node) {
+    if (!this.isRequireDeclaration(requireDeclaration))
       return
-    if (!is('Identifier', node.callee, { name: 'meteorInstall' }))
+    if (!this.isMeteorInstall(requireDeclaration.init))
       return
-    const packageConfig = node.arguments[0] as MeteorInstallObject
-    const node_modules = packageConfig.properties[0]
+
+    const modules = requireDeclaration.init.arguments[0]
+    const node_modules = modules.properties[0]
     const meteor = node_modules.value.properties[0]
     const packageName = meteor.value.properties[0]
     const packageModules = packageName.value.properties
 
     const meteorPackage = new this({
-      packageId: `${meteor.key.value}/${packageName.key.value}`,
-      name: packageName.key.value,
+      packageId: `${propParser.getKey(meteor)}/${propParser.getKey(packageName)}`,
+      name: propParser.getKey(packageName),
     })
 
     meteorPackage.traverseModules(packageModules, '')
 
     return meteorPackage
+  }
+
+  protected static isRequireDeclaration(node: Node): node is VariableDeclarator {
+    if (node.type !== 'VariableDeclarator')
+      return false
+    if (node.id.type !== 'Identifier')
+      return false
+    if (node.id.name !== 'require')
+      return false
+
+    return true
+  }
+
+  protected static isMeteorInstall(expression?: Node | null): expression is MeteorInstallCallExpression {
+    if (!expression)
+      return false
+    if (expression.type !== 'CallExpression')
+      return false
+    if (!is('Identifier', expression.callee, { name: 'meteorInstall' }))
+      return false
+
+    return true
   }
 
   public traverseModules(properties: MeteorPackageProperty[], parentPath: string) {
@@ -249,10 +273,10 @@ class MeteorInstall {
  * It essentially represents a single file and its associated exports within a given Meteor package.
  * E.g. `index.js` or `cookie-store.js`.
  *
- * {@link https://github.com/JorgenVatle/meteor-vite/blob/78a451fa311989d10cbb061bb929d8feb795ea2c/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L20 `explicit-relative-path.ts`} would count as a module here.
+ * {@link https://github.com/Akryum/meteor-vite/blob/78a451fa311989d10cbb061bb929d8feb795ea2c/npm-packages/meteor-vite/test/__mocks/meteor-bundle/test_ts-modules.js#L20 `explicit-relative-path.ts`} would count as a module here.
  */
 class PackageModule {
-  public readonly exports: ModuleExport[] = []
+  public readonly exports: ModuleExportData[] = []
   // Todo: Accept module metadata from callee to provide more insightful error messages
   constructor() {}
 
@@ -355,11 +379,16 @@ class PackageModule {
    */
   protected parseExportDefault(node: ModuleMethod.WithoutArgs<'exportDefault'>) {
     const args = node.arguments
-    if (args[0].type !== 'Identifier')
+    let name = 'default'
+    if (args[0].type === 'Identifier')
+      name = args[0].name
+    else if (args[0].type === 'ConditionalExpression')
+      name = 'CONDITIONAL_EXPORT_DEFAULT'
+    else
       throw new ModuleExportsError('Unexpected default export value!', args[0])
 
     // todo: test for default exports with `export default { foo: 'bar' }`
-    return [{ type: 'export-default', name: args[0].name } satisfies ModuleExport]
+    return [{ type: 'export-default', name } satisfies ModuleExportData]
   }
 }
 
@@ -367,7 +396,7 @@ function formatExports({ expression, packageName, id }: { expression: ObjectExpr
   return expression.properties.map((property) => {
     if (property.type === 'SpreadElement')
       throw new ModuleExportsError('Unexpected property type!', property)
-    const result: ModuleExport = {
+    const result: ModuleExportData = {
       name: propParser.getKey(property),
       type: 'export',
       ...id && { id: id.value },
@@ -433,8 +462,8 @@ class ModuleExportsError extends ParserError {
  * {@link https://docs.meteor.com/api/packagejs.html#PackageAPI-export}
  */
 export type PackageScopeExports = Record<string, string[]>
-export type ModuleList = { [key in string]: ModuleExport[] }
-export interface ModuleExport {
+export type ModuleList = { [key in string]: ModuleExportData[] }
+export interface ModuleExportData {
   /**
    * "Name" of the object to be exported.
    * @example ts

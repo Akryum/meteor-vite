@@ -1,5 +1,36 @@
 # meteor-vite
 
+## 1.3.2
+
+### Patch Changes
+
+- d883954: Read Isopack metadata from global Meteor package cache
+
+  Fixes #26
+
+## 1.3.1
+
+### Patch Changes
+
+- 835dbd5: Fix package re-exports being re-exported once more within the Meteor stub template
+
+## 1.3.0
+
+### Minor Changes
+
+- 9bcd19f: - Update MeteorStubs plugin error handler to emit errors when a Meteor client entrypoint isn't specified
+  - Wrap MeteorStubs plugin around plugin setup helper function to catch and format exceptions whenever possible
+
+## 1.2.2
+
+### Patch Changes
+
+- 3367848: Update internal communication between the Vite server worker and Meteor.
+
+  Add fallback method for clients waiting on Vite server configuration from Meteor.
+
+  Allow Vite config files to be stored outside of the project's root directory through package.json configuration. Details should be added to the README.
+
 ## 1.2.1
 
 ### Patch Changes

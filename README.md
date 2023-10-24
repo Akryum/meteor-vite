@@ -8,18 +8,18 @@ Use [Vite](https://vitejs.dev) in your Meteor app! ⚡️
 - [x] Build
 - [x] Importing non-core Meteor packages
 - [x] Lazy meteor packages
-- [ ] Reify support
+- [x] Reify support
   - [x] Named exports
   - [x] Default exports
   - [x] Re-exports (named + wildcard)
-  - [ ] Re-exports via intermediary variable (not tested)
+  - [x] Re-exports via intermediary variable
 - [x] Code-splitting/Dynamic imports
 - [ ] SSR (not tested)
 - [ ] Starter/demo templates
   - [x] [Vue 3](/examples/vue) 
     - [Live demo](https://vite-and-vue3.meteorapp.com/)
   - [x] [Svelte](/examples/svelte)
-  - [ ] React
+  - [x] [React](/examples/react)
 
 ## Installation
 
@@ -35,7 +35,7 @@ meteor npm i -D @vitejs/plugin-vue
 
 Make sure to have an import client entry (`meteor.mainModule.client`) in your `package.json`:
 
-```json
+```json5
 {
   "name": "my-app",
   "private": true,
@@ -59,6 +59,7 @@ Make sure to have an import client entry (`meteor.mainModule.client`) in your `p
       "client": "client/main.ts",
       "server": "server/main.ts"
     },
+    // "viteConfig": "", // If you want your Vite config to live in another directory (e.g. .tools/vite.config.js), specify that here.
     "testModule": "tests/main.js"
   }
 }
@@ -162,3 +163,14 @@ export default defineConfig({
   } satisfies MeteorViteConfig['meteor'],
 })
 ```
+
+## Package Details
+The Vite integration comes with two dependencies that work together to enable compatibility between Meteor and Vite.
+
+- [`meteor-vite`](/npm-packages/meteor-vite/) - Internal Vite plugin and server worker parsing and formatting Meteor packages for Vite.
+  - [View changelog](/npm-packages/meteor-vite/CHANGELOG.md)
+  - [View on npm](https://www.npmjs.com/package/meteor-vite)
+
+- [`vite-bundler`](/packages/vite-bundler/) - Meteor build plugin for launching Vite workers and compiling production bundles from Vite and Meteor.
+  - [View changelog](/packages/vite-bundler/CHANGELOG.md) 
+  - [View on Atmosphere](https://atmospherejs.com/vite/bundler)

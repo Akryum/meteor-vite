@@ -1,21 +1,19 @@
-import os from 'node:os'
 import path from 'node:path'
 import { performance } from 'node:perf_hooks'
+import os from 'node:os'
 import fs from 'fs-extra'
 import { execaSync } from 'execa'
 import pc from 'picocolors'
-import { createWorkerFork, cwd } from './workers'
+import { createWorkerFork, cwd, getProjectPackageJson, meteorPackagePath } from './workers'
 
-if (process.env.VITE_METEOR_DISABLED)
-  return
 if (process.env.NODE_ENV !== 'production')
   return
 
 // Not in a project (publishing the package)
-if (!fs.existsSync(path.join(cwd, 'package.json')))
+if (process.env.VITE_METEOR_DISABLED)
   return
 
-const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8'))
+const pkg = getProjectPackageJson()
 const meteorMainModule = pkg.meteor?.mainModule?.client
 
 // Meteor packages to omit or replace the temporary build.
@@ -28,6 +26,11 @@ const replaceMeteorPackages = [
 if (!meteorMainModule)
   throw new Error('No meteor main module found, please add meteor.mainModule.client to your package.json')
 
+const tempDir = getTempDir()
+const tempMeteorProject = path.resolve(tempDir, 'meteor')
+const tempMeteorOutDir = path.join(tempDir, 'bundle', 'meteor')
+const viteOutDir = path.join(tempDir, 'bundle', 'vite')
+
 // Temporary Meteor build
 
 const filesToCopy = [
@@ -38,19 +41,24 @@ const filesToCopy = [
   path.join('.meteor', 'release'),
   path.join('.meteor', 'versions'),
   'package.json',
-  'tsconfig.json',
   meteorMainModule,
 ]
 
-const tempDir = getTempDir()
-const tempMeteorProject = path.resolve(tempDir, 'meteor')
-const tempMeteorOutDir = path.join(tempDir, 'bundle', 'meteor')
-const viteOutDir = path.join(tempDir, 'bundle', 'vite')
+const optionalFiles = [
+  'tsconfig.json',
+]
 
 // Temporary Meteor build
 
 console.log(pc.blue('⚡️ Building packages to make them available to export analyzer...'))
 let startTime = performance.now()
+
+// Check for project files that may be important if available
+for (const file of optionalFiles) {
+  if (fs.existsSync(path.join(cwd, file)))
+    filesToCopy.push(file)
+}
+
 // Copy files from `.meteor`
 for (const file of filesToCopy) {
   const from = path.join(cwd, file)
@@ -58,6 +66,7 @@ for (const file of filesToCopy) {
   fs.ensureDirSync(path.dirname(to))
   fs.copyFileSync(from, to)
 }
+
 // Symblink to `packages` folder
 if (fs.existsSync(path.join(cwd, 'packages')) && !fs.existsSync(path.join(tempMeteorProject, 'packages')))
   fs.symlinkSync(path.join(cwd, 'packages'), path.join(tempMeteorProject, 'packages'))
@@ -128,9 +137,11 @@ const { payload } = Promise.await(new Promise((resolve) => {
     method: 'buildForProduction',
     params: [{
       viteOutDir,
+      packageJson: pkg,
       meteor: {
         packagePath: path.join(tempMeteorOutDir, 'bundle', 'programs', 'web.browser', 'packages'),
         isopackPath: path.join(tempMeteorProject, '.meteor', 'local', 'isopacks'),
+        globalMeteorPackagesDir: meteorPackagePath,
       },
     }],
   })

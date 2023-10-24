@@ -7,13 +7,34 @@
     "npm-packages/meteor-vite"
   ],
   "scripts": {
-    "install:workspace": "npm install && cd npm-packages/meteor-vite && meteor npm install",
     "version:vite-bundler": "meteor node .bin/release-meteor-package.mjs version",
     "publish:vite-bundler": "meteor node .bin/release-meteor-package.mjs publish",
+    "example": ".bin/example-app.sh",
+
     "version": "npm run version:vite-bundler && changeset version",
     "release": "npm run publish:vite-bundler && changeset publish",
+
     "lint": "eslint .",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+
+    "install:svelte": "cd examples/svelte && meteor npm install",
+    "install:vue": "cd examples/vue && meteor npm install",
+    "install:react": "cd examples/react && meteor npm install",
+    "install:package": "cd npm-packages/meteor-vite && meteor npm install",
+
+    "build:package": "cd npm-packages/meteor-vite && meteor npm run build",
+    "build:vue": "npm run example build vue",
+    "build:react": "npm run example build react",
+    "build:svelte": "npm run example build svelte",
+
+    "link:package": "meteor npm run link:vue && meteor npm run link:svelte",
+    "link:vue": "npm run example link vue",
+    "link:svelte": "npm run example link svelte",
+    "link:react": "npm run example link react",
+
+    "start:vue": "npm run example start vue",
+    "start:svelte": "npm run example start svelte",
+    "start:react": "npm run example start react"
   },
   "dependencies": {
     "@changesets/cli": "^2.26.2"

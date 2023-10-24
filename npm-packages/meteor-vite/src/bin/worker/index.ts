@@ -50,7 +50,7 @@ export type WorkerMethod = { [key in keyof IPCMethods]: [name: key, method: IPCM
 export type WorkerResponse = WorkerReplies[keyof IPCMethods][1]
 type WorkerReplies = {
   [key in keyof IPCMethods]: IPCMethods[key] extends (reply: IPCReply<infer Reply>, ...params: any) => any
-    ? Reply extends { readonly kind: string; data: any }
+    ? Reply extends { readonly kind: string; data: object }
       ? [Reply['kind'], Reply]
       : never
     : never;

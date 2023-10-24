@@ -2,19 +2,16 @@
   import { Meteor } from "meteor/meteor";
   import { LinksCollection } from '../api/links';
 
-  /**
-   * Meteor tracker for Svelte
-   * {@link https://github.com/rdb/svelte-meteor-data}
-   */
-  import { useTracker } from 'meteor/rdb:svelte-meteor-data';
-
   let counter = 0;
   const addToCounter = () => {
     counter += 1;
   }
 
-  const ready = useTracker(() => Meteor.subscribe('links.all'))
   $: links = LinksCollection.find({});
+
+  const reverseTitle = (linkId) => {
+    Meteor.call('links.reverse-title', linkId)
+  }
 </script>
 
 
@@ -25,15 +22,18 @@
   <p>You've pressed the button {counter} times.</p>
 
   <h2>Learn Meteor!</h2>
-  {#if $ready}
+  {#await Meteor.subscribe('links.all')}
+    <div>Waiting on links...</div>
+  {:then}
     <ul>
       {#each $links as link (link._id)}
-        <li><a href={link.url} target="_blank" rel="noreferrer">{link.title}</a></li>
+        <li>
+          <a href={link.url} target="_blank" rel="noreferrer">{link.title}</a>
+          <button on:click={() => { reverseTitle(link._id) }}>Reverse</button>
+        </li>
       {/each}
     </ul>
-  {:else}
-    <div>Waiting on links...</div>
-  {/if}
+  {/await}
 
   <h2>Typescript ready</h2>
   <p>Just add lang="ts" to .svelte components.</p>

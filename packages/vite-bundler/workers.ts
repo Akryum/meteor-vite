@@ -1,27 +1,27 @@
 import { fork } from 'node:child_process'
-import FS from 'node:fs'
 import Path from 'node:path'
+import FS from 'node:fs'
 import { Meteor } from 'meteor/meteor'
+import pc from 'picocolors'
 import type { WorkerMethod, WorkerResponse } from '../../npm-packages/meteor-vite'
 import type { WorkerResponseHooks } from '../../npm-packages/meteor-vite/src/bin/worker'
+import type { MeteorIPCMessage } from '../../npm-packages/meteor-vite/src/meteor/MeteorEvents'
+import type { ProjectJson } from '../../npm-packages/meteor-vite/src/vite/plugin/MeteorStubs'
 
-export const cwd = guessCwd()
+export const cwd = process.env.METEOR_VITE_CWD ?? guessCwd()
+export const meteorPackagePath = guessMeteorPackagePath()
 export const workerPath = Path.join(cwd, 'node_modules/meteor-vite/dist/bin/worker/index.mjs')
-
-function guessCwd() {
-  let cwd = process.env.PWD ?? process.cwd()
-  const index = cwd.indexOf('.meteor')
-  if (index !== -1)
-    cwd = cwd.substring(0, index)
-
-  return cwd
-}
 
 // Use a worker to skip reify and Fibers
 // Use a child process instead of worker to avoid WASM/archived threads error
 export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
-  if (!FS.existsSync(workerPath))
-    throw new Error(`Worker entrypoint doesn't exist! You may need to run "$ npm run build" in the '/npm-packages/meteor-vite' directory`)
+  if (!FS.existsSync(workerPath)) {
+    throw new MeteorViteError([
+                `Unable to locate Meteor-Vite workers! Make sure you've installed the 'meteor-vite' npm package.`,
+                `Install it by running the following command:`,
+                `$  ${pc.yellow('npm i -D meteor-vite')}`,
+    ])
+  }
 
   const child = fork(workerPath, ['--enable-source-maps'], {
     stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
@@ -51,6 +51,11 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
 
   ['exit', 'SIGINT', 'SIGHUP', 'SIGTERM'].forEach((event) => {
     process.once(event, () => {
+      child.send({
+        method: 'vite.stopDevServer',
+        params: [],
+      } satisfies Omit<WorkerMethod, 'replies'>)
+
       child.kill()
     })
   })
@@ -61,4 +66,66 @@ export function createWorkerFork(hooks: Partial<WorkerResponseHooks>) {
     },
     child,
   }
+}
+
+export function isMeteorIPCMessage(message: unknown): message is MeteorIPCMessage {
+  if (!message || typeof message !== 'object')
+    return false
+
+  if (!('type' in message) || !('topic' in message))
+    return false
+
+  if (message?.type !== 'METEOR_IPC_MESSAGE')
+    return false
+
+  if (typeof message.topic !== 'string')
+    return false
+
+  return true
+}
+
+class MeteorViteError extends Error {
+  constructor(message: string[] | string) {
+    if (!Array.isArray(message))
+      message = [message]
+
+    super(`\n⚡  ${message.join('\n L ')}`)
+    this.name = this.constructor.name
+  }
+}
+
+export function getProjectPackageJson(): ProjectJson {
+  const path = Path.join(cwd, 'package.json')
+
+  if (!FS.existsSync(path)) {
+    throw new MeteorViteError([
+            `Unable to locate package.json for your project in ${pc.yellow(path)}`,
+            `Make sure you run Meteor commands from the root of your project directory.`,
+            `Alternatively, you can supply a superficial CWD for Meteor-Vite to use:`,
+            `$  cross-env METEOR_VITE_CWD="./projects/my-meteor-project/" meteor run`,
+    ])
+  }
+
+  return JSON.parse(FS.readFileSync(path, 'utf-8'))
+}
+function guessCwd() {
+  let cwd = process.env.PWD ?? process.cwd()
+  const index = cwd.indexOf('.meteor')
+  if (index !== -1)
+    cwd = cwd.substring(0, index)
+
+  return cwd
+}
+function guessMeteorPackagePath() {
+  const [root, ...parts] = process.argv0.split(/[\/\\]/)
+  let packagePath = root || '/'
+
+  parts.forEach((part) => {
+    if (packagePath.includes('/.meteor/packages/meteor-tool'))
+      return
+
+    packagePath = Path.posix.join(packagePath, part)
+  })
+
+  return Path.join(packagePath, '../')
 }

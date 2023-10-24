@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import MeteorPackage from '../src/meteor/package/MeteorPackage'
+import MeteorPackage from '../src/meteor/package/components/MeteorPackage'
 import { METEOR_STUB_KEY, PACKAGE_SCOPE_KEY, stubTemplate } from '../src/meteor/package/StubTemplate'
 
 describe('stubTemplate', () => {
@@ -21,7 +21,7 @@ describe('stubTemplate', () => {
     const template = stubTemplate({
       requestId: '',
       meteorPackage,
-      submodule: meteorPackage.getModule({ importPath: 'defaultExport.js' }),
+      importPath: 'defaultExport.js',
     })
 
     expect(template).toContain(`export default ${METEOR_STUB_KEY}.default`)
@@ -31,7 +31,7 @@ describe('stubTemplate', () => {
     const template = stubTemplate({
       requestId: '',
       meteorPackage,
-      submodule: meteorPackage.getModule({ importPath: 'defaultExport.js' }),
+      importPath: 'defaultExport.js',
     })
     expect(template).not.toContain(`const ${PACKAGE_SCOPE_KEY}`)
     expect(template).not.toContain(`${PACKAGE_SCOPE_KEY}.Package`)

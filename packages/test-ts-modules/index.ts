@@ -28,4 +28,6 @@ export { NamedRelativeInteger } from './relative-module'
 
 export * from './export-star-from'
 
+export { WhereAmI as WhereIsTheSubmodule } from './subdirectory/module-in-subdirectory'
+
 console.log(Meteor.version)

@@ -16,9 +16,6 @@
       "meteor/*": [
         "node_modules/@types/meteor/*",
         ".meteor/local/types/packages.d.ts"
-      ],
-      "meteor/vite:bundler": [
-        "packages/vite-bundler/index.d.ts"
       ]
     },
     "resolveJsonModule": true,
